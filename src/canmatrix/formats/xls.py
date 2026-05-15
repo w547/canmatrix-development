@@ -328,7 +328,7 @@ def read_additional_signal_attributes(signal, attribute_name, attribute_value):
         return
     if attribute_name.replace("signal.", "") in vars(signal):
         command_str = attribute_name + "="
-        command_str += repr(attribute_value)
+        command_str += str(attribute_value)
         if len(str(attribute_value)) > 0:
             exec(command_str)
     else:
@@ -453,7 +453,7 @@ def load(file, **options):
                 if "frame" in additional_inputs[additional_index]:
                     command_str = additional_inputs[additional_index].replace("frame", "new_frame")
                     command_str += "="
-                    command_str += repr(sh.cell(row_num, additional_index).value)
+                    command_str += str(sh.cell(row_num, additional_index).value)
                     exec(command_str)
 
         # new signal detected
@@ -464,21 +464,18 @@ def load(file, **options):
             start_byte = int(sh.cell(row_num, index['startbyte']).value)
             start_bit = int(sh.cell(row_num, index['startbit']).value)
             signal_name = sh.cell(row_num, index['signalName']).value.strip()
-            signal_comment = (sh.cell(
-                row_num, index['signalComment']).value or "").strip()
+            signal_comment = sh.cell(
+                row_num, index['signalComment']).value.strip()
             signal_length = int(sh.cell(row_num, index['signalLength']).value)
             signal_default = sh.cell(row_num, index['signalDefault']).value
             signal_sna = sh.cell(row_num, index['signalSNA']).value
             multiplex = None  # type: typing.Union[str, int, None]
-            if signal_comment is not None and signal_comment.startswith('Mode Signal:'):
+            if signal_comment.startswith('Mode Signal:'):
                 multiplex = 'Multiplexor'
                 signal_comment = signal_comment[12:]
-            elif signal_comment is not None and signal_comment.startswith('Mode '):
-                try:
-                    mux, signal_comment = signal_comment[4:].split(':', 1)
-                    multiplex = int(mux.strip())
-                except (ValueError, IndexError):
-                    pass
+            elif signal_comment.startswith('Mode '):
+                mux, signal_comment = signal_comment[4:].split(':', 1)
+                multiplex = int(mux.strip())
 
             if index.get("byteorder", False):
                 signal_byte_order = sh.cell(row_num, index['byteorder']).value

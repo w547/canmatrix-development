@@ -25,14 +25,14 @@ import canmatrix.log
 
 
 def _detect_file_encoding(filepath, max_bytes=65536):
-    """Auto-detect file encoding. Tries utf-8 -> gb18030 -> gbk -> gb2312 -> iso-8859-1.
+    """Auto-detect file encoding. Tries utf-8 → gb2312 → iso-8859-1.
     
     Reads up to max_bytes to test decoding. Returns the first encoding
     that successfully decodes the entire test chunk without errors.
     """
     with open(filepath, 'rb') as f:
         data = f.read(max_bytes)
-    for enc in ('utf-8', 'gb18030', 'gbk', 'gb2312', 'iso-8859-1'):
+    for enc in ('utf-8', 'gb2312', 'iso-8859-1'):
         try:
             data.decode(enc)
             return enc
@@ -160,8 +160,8 @@ def api_convert():
             dbc_import_encoding = 'utf-8'
         else:
             dbc_import_encoding = detected
-            if dbc_import_encoding in ('gb2312', 'gbk', 'gb18030'):
-                dbc_export_encoding = dbc_import_encoding
+            if dbc_import_encoding == 'gb2312':
+                dbc_export_encoding = 'gb2312'
 
     # 对非文本格式（Excel/ARXML/JSON等），编码检测不适用，统一用 UTF-8
     if dbc_import_encoding == 'auto':
@@ -219,15 +219,6 @@ def api_convert():
         convert_options['additionalSignalAttributes'] = request.form['additional_signal_attrs']
     if request.form.get('additional_frame_attrs'):
         convert_options['additionalFrameAttributes'] = request.form['additional_frame_attrs']
-    
-    # xlsx 导出时自动包含 frame.comment 以保留帧注释
-    if output_format == 'xlsx':
-        existing_frame_attrs = convert_options.get('additionalFrameAttributes', '')
-        if existing_frame_attrs:
-            if 'comment' not in existing_frame_attrs.split(','):
-                convert_options['additionalFrameAttributes'] = existing_frame_attrs + ',comment'
-        else:
-            convert_options['additionalFrameAttributes'] = 'comment'
 
     # 执行转换
     try:

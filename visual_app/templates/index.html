@@ -119,12 +119,7 @@
 
         .tnode{user-select:none;cursor:pointer;line-height:1.35}
         .tnode:hover{background:rgba(56,189,248,.04)}
-        .tnode.collapsing>.tn-children{max-height:0!important;opacity:0;overflow:hidden;transition:max-height .25s ease,opacity .2s ease}
-        .tnode .tn-row{display:flex;align-items:flex-start;padding:2px 8px 2px 4px;gap:4px;min-height:22px;position:relative}
-        .tnode .tn-row.longpress-active{background:rgba(251,191,36,.15)!important;transition:background .08s}
-        .tn-row.sync-highlight{background:rgba(56,189,248,.18)!important;box-shadow:inset 2px 0 0 var(--accent);outline:1px solid rgba(56,189,248,.35);outline-offset:-1px}
-        .tn-row.sync-pending{animation:syncPulse .6s ease-in-out 2}
-        @keyframes syncPulse{0%,100%{box-shadow:inset 2px 0 0 var(--accent)}50%{box-shadow:inset 2px 0 0 var(--accent),0 0 12px rgba(56,189,248,.35)}}
+        .tnode .tn-row{display:flex;align-items:flex-start;padding:2px 8px 2px 4px;gap:4px;min-height:22px}
         .tnode .tn-arrow{width:16px;height:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.55rem;color:var(--text2);transition:transform .15s;margin-top:2px}
         .tnode .tn-arrow.open{transform:rotate(90deg)}
         .tnode .tn-arrow.empty{visibility:hidden}
@@ -194,13 +189,6 @@
         .cht-tooltip .cht-pnew{color:var(--green);word-break:break-all}
         .cht-tooltip .cht-ft{background:rgba(255,255,255,.02);padding:6px 14px;font-size:.6rem;color:var(--text2);text-align:center;border-top:1px solid rgba(255,255,255,.04)}
 
-        .sync-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:10000;padding:10px 20px;border-radius:8px;font-size:.78rem;font-weight:600;pointer-events:none;opacity:0;transition:opacity .25s ease,transform .25s ease;box-shadow:0 4px 16px rgba(0,0,0,.4);white-space:nowrap}
-        .sync-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-        .sync-toast.ok{background:rgba(56,189,248,.92);color:#fff}
-        .sync-toast.warn{background:rgba(251,191,36,.92);color:#111}
-        .sync-toast.err{background:rgba(248,113,113,.92);color:#fff}
-        .sync-toast.fallback{background:rgba(168,85,247,.9);color:#fff}
-
         .sstats-bar{display:flex;gap:8px;align-items:center;padding:4px 14px;flex-shrink:0;border-top:1px solid var(--border);background:var(--surface2);font-size:.68rem;color:var(--text2)}
         .sstats-bar .ss-item{display:flex;align-items:center;gap:3px}
         .sstats-bar .ss-dot{width:6px;height:6px;border-radius:50%}
@@ -211,8 +199,6 @@
         .tn-legend .lg-dot{width:8px;height:8px;border-radius:2px}
         .tn-legend .lg-dot.a{background:var(--green)}.tn-legend .lg-dot.d{background:var(--red)}.tn-legend .lg-dot.c{background:var(--yellow)}
         .tn-legend .lg-dot.e{background:var(--text2)}
-
-        .sync-hint{font-size:.66rem;color:var(--text2);margin-bottom:8px;padding:5px 12px;background:rgba(56,189,248,.06);border-radius:6px;border:1px solid rgba(56,189,248,.12);text-align:center}
 
         @media(max-width:640px){
             .navbar .tabs{margin-left:8px}.navbar .tab{padding:8px 12px;font-size:.8rem}
@@ -274,8 +260,8 @@
 <div class="opts">
 <div class="opt opt-col"><label style="font-size:.75rem;color:var(--text2)">DLC重算</label><select id="cDlc"><option value="">不重算</option><option value="max">max</option><option value="force">force</option></select></div>
 <div class="opt opt-col"><label style="font-size:.75rem;color:var(--text2)">ARXML版本</label><select id="cAr"><option value="4.1.0">4.1.0</option><option value="3.2.3">3.2.3</option></select></div>
-<div class="opt opt-col"><label style="font-size:.75rem;color:var(--text2)">DBC导入编码</label><select id="cEncI"><option value="utf-8">utf-8 (推荐)</option><option value="auto">自动检测</option><option value="gb18030">gb18030 (中文)</option><option value="gbk">gbk (中文)</option><option value="gb2312">gb2312 (中文)</option><option value="iso-8859-1">iso-8859-1</option></select></div>
-<div class="opt opt-col"><label style="font-size:.75rem;color:var(--text2)">DBC导出编码</label><select id="cEncO"><option value="utf-8">utf-8</option><option value="gb18030">gb18030</option><option value="gbk">gbk</option><option value="gb2312">gb2312</option><option value="iso-8859-1">iso-8859-1</option></select></div>
+<div class="opt opt-col"><label style="font-size:.75rem;color:var(--text2)">DBC导入编码</label><select id="cEncI"><option value="utf-8">utf-8 (推荐)</option><option value="auto">自动检测</option><option value="gb2312">gb2312 (中文GBK)</option><option value="iso-8859-1">iso-8859-1</option></select></div>
+<div class="opt opt-col"><label style="font-size:.75rem;color:var(--text2)">DBC导出编码</label><select id="cEncO"><option value="utf-8">utf-8</option><option value="gb2312">gb2312</option><option value="iso-8859-1">iso-8859-1</option></select></div>
 <div class="opt opt-col"><label style="font-size:.75rem;color:var(--text2)">Motorola位格式</label><select id="cMot"><option value="msbreverse">msbreverse</option><option value="msb">msb</option><option value="lsb">lsb</option></select></div>
 <div class="opt"><input type="checkbox" id="cUniq"><label for="cUniq">DBC唯一信号名</label></div>
 <div class="opt"><input type="checkbox" id="cCanard"><label for="cCanard">JSON CANard兼容</label></div>
@@ -342,7 +328,6 @@
     <span><span class="lg-dot c"></span> 变更 (Changed)</span>
     <span><span class="lg-dot e"></span> 相同 (Equal)</span>
 </div>
-<div class="sync-hint">&#x1F4CC; 点击任意行可在另一面板同步定位匹配项 &#x1F4CC; | 长按已展开节点(500ms)可折叠父级菜单</div>
 <div class="cmp-split" id="cmpSplit">
     <div class="cmp-panel" id="cmpPanelLeft">
         <div class="cmp-panel-header"><span class="p-label">BASE</span><span class="p-name" id="pNameLeft">-</span></div>
@@ -564,7 +549,6 @@ function showResCmp(d){
     renderSideTree('cmpBodyRight', d.tree2, d.diff_map, 'compare');
     updateSideStats(d.tree1, d.tree2, d.diff_map);
     initTooltip(d.diff_map);
-    buildSyncIndex();
 
     initDivider();
 
@@ -644,12 +628,10 @@ function renderTreeNode(node, diffMap, side, depth){
         if(node.signals)meta='<span class="tn-meta">signals: '+node.signals.length+'</span>';
     }
 
-    var indentPx=4+depth*9;
-    var compositeKey=nodeType+'::'+nodeName;
     var cls='tnode tn-'+nodeType+diffClass;
     var html='<div class="'+cls+'"'+tooltipAttr+'>';
-    html+='<div class="tn-row" data-sync-key="'+escapeHtml(compositeKey)+'" data-sync-type="'+escapeHtml(nodeType)+'" data-sync-name="'+escapeHtml(nodeName)+'" data-depth="'+depth+'" style="padding-left:'+indentPx+'px" onclick="onSyncRowClick(event,this,\''+side+'\')" onpointerdown="onSyncRowPointerDown(event,this)" onpointerup="onSyncRowPointerUp(event,this)" onpointerleave="onSyncRowPointerLeave(event,this)">';
-    html+='<span class="tn-arrow'+(hasChildren?'':' empty')+'" onclick="event.stopPropagation();toggleTreeNode(this)">&#x25B6;</span>';
+    html+='<div class="tn-row" onclick="toggleTreeNode(this)">';
+    html+='<span class="tn-arrow'+(hasChildren?'':' empty')+'">&#x25B6;</span>';
     html+='<span class="tn-icon">'+icon+'</span>';
     html+='<span class="tn-label"><span class="tn-name">'+escapeHtml(nodeName)+'</span>'+meta+diffBadge+changesHtml+'</span>';
     html+='</div>';
@@ -827,136 +809,6 @@ function _onTooltipOut(e){
     _tooltipTimer=setTimeout(function(){
         _tooltipEl.classList.remove('show');
     },150);
-}
-
-var _lpTimer=null,_lpTarget=null,_lpActive=false;
-var _syncIndex=null,_syncHighlighted=[],_syncToastTimer=null;
-function onSyncRowPointerDown(e,row){
-    if(e.button!==0)return;
-    _lpTarget=row;_lpActive=false;
-    _lpTimer=setTimeout(function(){
-        _lpActive=true;
-        row.classList.add('longpress-active');
-        var node=row.closest('.tnode');
-        if(node&&node.classList.contains('expanded')){
-            node.classList.add('collapsing');
-            var children=node.querySelector('.tn-children');
-            if(children){
-                var ih=children.scrollHeight;
-                children.style.maxHeight=ih+'px';
-                requestAnimationFrame(function(){children.style.maxHeight='0px'});
-            }
-            setTimeout(function(){
-                node.classList.remove('expanded');
-                node.classList.remove('collapsing');
-                if(children)children.style.maxHeight='';
-                var arrow=node.querySelector('.tn-arrow');
-                if(arrow)arrow.classList.remove('open');
-                var parentTnode=node.parentElement.closest('.tnode');
-                if(parentTnode){
-                    var pr=parentTnode.querySelector('.tn-row');
-                    if(pr){pr.focus();pr.scrollIntoView({block:'nearest',behavior:'smooth'})}
-                }
-            },260);
-        }
-        row.classList.remove('longpress-active');
-    },500);
-}
-function onSyncRowPointerUp(e,row){
-    clearTimeout(_lpTimer);_lpTimer=null;
-    row.classList.remove('longpress-active');
-}
-function onSyncRowPointerLeave(e,row){
-    clearTimeout(_lpTimer);_lpTimer=null;
-    row.classList.remove('longpress-active');
-}
-
-function buildSyncIndex(){
-    _syncIndex={};
-    var allRows=document.querySelectorAll('#cmpBodyLeft .tn-row, #cmpBodyRight .tn-row');
-    allRows.forEach(function(row){
-        var key=row.getAttribute('data-sync-key');
-        var stype=row.getAttribute('data-sync-type');
-        var sname=row.getAttribute('data-sync-name');
-        if(!key||stype==='category'||stype==='db'||stype==='signalgroup_category')return;
-        if(!_syncIndex[key])_syncIndex[key]={left:[],right:[]};
-        var panel=row.closest('.cmp-panel');
-        var side=panel&&panel.id==='cmpPanelLeft'?'left':'right';
-        _syncIndex[key][side].push(row);
-        var nameKey='name::'+sname.toLowerCase();
-        if(!_syncIndex[nameKey])_syncIndex[nameKey]={left:[],right:[]};
-        _syncIndex[nameKey][side].push(row);
-    });
-}
-
-function onSyncRowClick(e,row,side){
-    if(_lpActive){_lpActive=false;return}
-    e.stopPropagation();
-    if(row.classList.contains('sync-highlight')){
-        clearSyncHighlights();
-        showSyncToast('\u2716 \u5DF2\u53D6\u6D88\u5173\u8054','warn');
-        return;
-    }
-    clearSyncHighlights();
-    var key=row.getAttribute('data-sync-key');
-    var stype=row.getAttribute('data-sync-type');
-    var sname=row.getAttribute('data-sync-name');
-    if(stype==='category'||stype==='db'||stype==='signalgroup_category')return;
-    if(!_syncIndex)buildSyncIndex();
-    var otherSide=side==='left'?'right':'left';
-    var entry=_syncIndex[key];
-    var matches=[];
-    if(entry)matches=entry[otherSide]||[];
-    if(matches.length===0){
-        var nameKey='name::'+sname.toLowerCase();
-        var nameEntry=_syncIndex[nameKey];
-        if(nameEntry){
-            var nameMatches=nameEntry[otherSide]||[];
-            nameMatches=nameMatches.filter(function(r){return r!==row});
-            if(nameMatches.length>0){
-                matches=nameMatches;
-                showSyncToast('\uD83D\uDD0D \u540C\u540D\u5B9A\u4F4D: "'+escapeHtml(sname)+'" ('+matches.length+'\u4E2A\u5339\u914D)','fallback');
-            }
-        }
-    }
-    if(matches.length>0){
-        var target=matches[0];
-        _syncHighlighted=[row,target];
-        row.classList.add('sync-highlight','sync-pending');
-        target.classList.add('sync-highlight','sync-pending');
-        var highlightBody=target.closest('.cmp-panel-body');
-        if(highlightBody){
-            var rowRect=row.getBoundingClientRect();
-            var targetRect=target.getBoundingClientRect();
-            var bodyRect=highlightBody.getBoundingClientRect();
-            var offset=targetRect.top-bodyRect.top+highlightBody.scrollTop-(bodyRect.height/2)+(targetRect.height/2);
-            highlightBody.scrollTo({top:offset,behavior:'smooth'});
-        }
-        var panel=target.closest('.cmp-panel');
-        var panelName=panel?panel.querySelector('.p-name').textContent:'';
-        showSyncToast('\u2713 \u5DF2\u5B9A\u4F4D: "'+escapeHtml(sname)+'" \u2192 '+panelName,'ok');
-    }else{
-        showSyncToast('\u2716 \u672A\u627E\u5230\u5339\u914D\u9879: "'+escapeHtml(sname)+'"','warn');
-    }
-}
-
-function clearSyncHighlights(){
-    _syncHighlighted.forEach(function(r){r.classList.remove('sync-highlight','sync-pending')});
-    _syncHighlighted=[];
-}
-
-function showSyncToast(msg,cls){
-    if(_syncToastTimer)clearTimeout(_syncToastTimer);
-    var toast=document.getElementById('syncToast');
-    if(!toast){
-        toast=document.createElement('div');
-        toast.id='syncToast';
-        toast.className='sync-toast';
-        document.body.appendChild(toast);
-    }
-    toast.className='sync-toast '+cls+' show';
-    toast.innerHTML=msg;
-    _syncToastTimer=setTimeout(function(){toast.classList.remove('show')},2200);
 }
 </script>
 </body>

@@ -90,36 +90,6 @@ def apply_mojibake_fix_to_db(db):  # type: (canmatrix.CanMatrix) -> None
                 db.value_tables[name][key] = fix_mojibake_gbk(val)
 
 
-def _detect_mojibake_in_db(db):  # type: (canmatrix.CanMatrix) -> bool
-    """Check if any text field in the database contains mojibake (double-encoded GBK Chinese).
-    
-    Returns True if mojibake is detected in any comment field.
-    """
-    texts_to_check = []
-    for frame in db.frames:
-        if frame.comment:
-            texts_to_check.append(frame.comment)
-        for sig in frame.signals:
-            if sig.comment:
-                texts_to_check.append(sig.comment)
-            if sig.unit:
-                texts_to_check.append(sig.unit)
-    for ecu in db.ecus:
-        if ecu.comment:
-            texts_to_check.append(ecu.comment)
-    
-    for text in texts_to_check:
-        try:
-            fixed = text.encode('latin-1').decode('gbk')
-            cjk_orig = sum(1 for c in text if '\u4e00' <= c <= '\u9fff')
-            cjk_fixed = sum(1 for c in fixed if '\u4e00' <= c <= '\u9fff')
-            if cjk_fixed > cjk_orig:
-                return True
-        except (UnicodeDecodeError, UnicodeEncodeError):
-            continue
-    return False
-
-
 def convert_pdu_container_to_multiplexed(frame):  # type: (canmatrix.Frame) -> canmatrix.Frame
     new_frame = copy.deepcopy(frame)
     if not frame.is_pdu_container:
@@ -157,12 +127,6 @@ def convert(infile, out_file_name, **options):  # type: (str, str, **str) -> Non
         for name in dbs:
             apply_mojibake_fix_to_db(dbs[name])
         logger.info("Mojibake fix applied")
-    else:
-        # Auto-detect mojibake and fix if found (for non-text inputs like Excel)
-        for name in dbs:
-            if _detect_mojibake_in_db(dbs[name]):
-                apply_mojibake_fix_to_db(dbs[name])
-                logger.info("Auto mojibake fix applied for '%s'", name)
 
     logger.info("Exporting " + out_file_name + " ...")
     out_dbs = {}  # type: typing.Dict[str, canmatrix.CanMatrix]

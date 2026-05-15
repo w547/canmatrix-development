@@ -417,7 +417,7 @@ def load(file, **options):
             for col_head in column_heads:
                 if col_head.startswith("frame."):
                     command_str = col_head.replace("frame", "new_frame")
-                    command_str += "=" + repr(row[column_heads.index(col_head)].value)
+                    command_str += "=" + str(row[column_heads.index(col_head)].value)
                     exec(command_str)
                     
             db.add_frame(new_frame)
@@ -445,11 +445,8 @@ def load(file, **options):
                 multiplex = 'Multiplexor'
                 signal_comment = signal_comment[12:]
             elif signal_comment is not None and signal_comment.startswith('Mode '):
-                try:
-                    mux, signal_comment = signal_comment[4:].split(':', 1)
-                    multiplex = int(mux.strip())
-                except (ValueError, IndexError):
-                    pass
+                mux, signal_comment = signal_comment[4:].split(':', 1)
+                multiplex = int(mux.strip())
 
             signal_byte_order = get_if_possible(row, 'Byteorder')
             if signal_byte_order is not None:

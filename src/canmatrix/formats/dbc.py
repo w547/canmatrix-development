@@ -480,7 +480,7 @@ class _FollowUps(object):
     NOTHING, SIGNAL_COMMENT, FRAME_COMMENT, BOARD_UNIT_COMMENT, GLOBAL_COMMENT = range(5)
 
 
-def _decode_fallback(raw_bytes, primary_encoding, fallback_encodings=('gb18030', 'gbk', 'gb2312', 'iso-8859-1')):
+def _decode_fallback(raw_bytes, primary_encoding, fallback_encodings=('gb2312', 'iso-8859-1')):
     # type: (bytes, str, typing.Tuple[str, ...]) -> str
     """Decode bytes with primary encoding, falling back to alternates on failure."""
     try:
