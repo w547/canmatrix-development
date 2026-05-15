@@ -445,8 +445,12 @@ def load(file, **options):
                 multiplex = 'Multiplexor'
                 signal_comment = signal_comment[12:]
             elif signal_comment is not None and signal_comment.startswith('Mode '):
-                mux, signal_comment = signal_comment[4:].split(':', 1)
-                multiplex = int(mux.strip())
+                rest = signal_comment[4:].split(':', 1)
+                if len(rest) >= 2:
+                    multiplex = int(rest[0].strip())
+                    signal_comment = rest[1]
+                else:
+                    multiplex = None
 
             signal_byte_order = get_if_possible(row, 'Byteorder')
             if signal_byte_order is not None:
