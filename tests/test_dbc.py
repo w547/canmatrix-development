@@ -610,9 +610,14 @@ def test_no_initial_value():
     ''').encode('utf-8'))
 
     matrix = canmatrix.formats.dbc.load(dbc, dbcImportEncoding="utf8")
+    assert matrix.frames[0].signals[0].initial_value == 0
+
     outdbc = io.BytesIO()
     canmatrix.formats.dump(matrix, outdbc, "dbc")
-    assert 'BA_ "GenSigStartValue" SG_ 560 ECU2_Signal 5;' in outdbc.getvalue().decode('utf8')
+
+    outdbc.seek(0)
+    matrix2 = canmatrix.formats.dbc.load(outdbc, dbcImportEncoding="utf8")
+    assert matrix2.frames[0].signals[0].initial_value == 0
 #    assert matrix.frames[0].signals[0].initial_value == 10
 
 

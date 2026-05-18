@@ -32,6 +32,7 @@ import openpyxl.utils
 
 import canmatrix
 import canmatrix.formats.xls_common
+import decimal
 from openpyxl.worksheet.dimensions import ColumnDimension
 from openpyxl.styles import NamedStyle, Font, Alignment, PatternFill, Border, Side
 
@@ -438,7 +439,7 @@ def load(file, **options):
             signal_name = get_if_possible(row, 'Signal Name')
             signal_comment = get_if_possible(row, 'Signal Function')
             signal_length = int(get_if_possible(row, 'Signal Length [Bit]', 0))
-            # signal_default = get_if_possible(row, 'Signal Default')
+            signal_default = get_if_possible(row, 'Signal Default')
             # signal_sna = get_if_possible(row, 'Signal Not Available')
             multiplex = None  # type: typing.Union[str, int, None]
             if signal_comment is not None and signal_comment.startswith('Mode Signal:'):
@@ -495,6 +496,11 @@ def load(file, **options):
                 if signal_name is not None:
                     new_frame.add_signal(new_signal)
                     new_signal.add_comment(signal_comment)
+                    if signal_default is not None and signal_default != '':
+                        try:
+                            new_signal.initial_value = new_signal.float_factory(signal_default)
+                        except (ValueError, decimal.InvalidOperation):
+                            pass
                 # function = get_if_possible(row, 'Function / Increment Unit')
         value = get_if_possible(row, 'Value')
         if value is not None:

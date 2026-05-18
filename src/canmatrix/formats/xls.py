@@ -522,6 +522,11 @@ def load(file, **options):
 
                 new_frame.add_signal(new_signal)
                 new_signal.add_comment(signal_comment)
+                if signal_default is not None and signal_default != '':
+                    try:
+                        new_signal.initial_value = float_factory(signal_default)
+                    except (ValueError, decimal.InvalidOperation):
+                        pass
                 function = sh.cell(row_num, index['function']).value
 
         value = str(sh.cell(row_num, index['Value']).value)

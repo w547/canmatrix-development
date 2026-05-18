@@ -242,9 +242,14 @@ def dump(in_db, f, **options):
                 db.add_signal_defines("GenSigStartValue", 'FLOAT 0 100000000000')
                 
             if "GenSigStartValue" in db.signal_defines:
-                if signal.phys2raw(None) != 0:
+                if signal.initial_value != 0:
                     if db.signal_defines["GenSigStartValue"].defaultValue is None:
-                        signal.add_attribute("GenSigStartValue", signal.phys2raw(None))
+                        raw_val = signal.float_factory(
+                            (signal.float_factory(signal.initial_value) - signal.float_factory(signal.offset))
+                            / signal.float_factory(signal.factor))
+                        if not signal.is_float:
+                            raw_val = int(round(raw_val))
+                        signal.add_attribute("GenSigStartValue", raw_val)
                         
             name = normalized_names[signal]
             if compatibility:
