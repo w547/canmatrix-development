@@ -603,7 +603,7 @@ def load(f, **options):  # type: (typing.IO, **typing.Any) -> canmatrix.CanMatri
                         offset=temp.group(7),
                         min=temp.group(8),
                         max=temp.group(9),
-                        unit=temp_raw.group(10).decode(dbc_import_encoding),
+                        unit=_decode_fallback(temp_raw.group(10), dbc_import_encoding),
                         receivers=receiver,
                         **extras
                     )
@@ -651,7 +651,7 @@ def load(f, **options):  # type: (typing.IO, **typing.Any) -> canmatrix.CanMatri
                         offset=temp.group(8),
                         min=temp.group(9),
                         max=temp.group(10),
-                        unit=temp_raw.group(11).decode(dbc_import_encoding),
+                        unit=_decode_fallback(temp_raw.group(11), dbc_import_encoding),
                         receivers=receiver,
                         multiplex=multiplex,
                         **extras
@@ -963,9 +963,8 @@ def load(f, **options):  # type: (typing.IO, **typing.Any) -> canmatrix.CanMatri
                                           "accessNodes": access_nodes, "values": {}})
 
         # else:
-        except:
-            print("error with line no: %d" % i)
-            print(line)
+        except Exception as ex:
+            logger.error("Error parsing line %d: %s - %s", i, str(ex)[:200], line.strip()[:200])
 # Backtracking
     env_var_names = list(db.env_vars.keys())
     for env_var_name in env_var_names:

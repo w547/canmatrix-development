@@ -43,6 +43,8 @@ def get_frame_info(db, frame):
     # frame-Name
     ret_array.append(frame.name)
 
+    ret_array.append(str(frame.size))
+
     ret_array.append(frame.effective_cycle_time)
 
     # determine send-type

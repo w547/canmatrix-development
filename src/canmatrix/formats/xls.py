@@ -107,7 +107,7 @@ def write_excel_line(worksheet, row, col, row_array, style):
 
 def dump(db, file, **options):
     # type: (canmatrix.CanMatrix, typing.IO, **typing.Any) -> None
-    head_top = ['ID', 'Frame Name', 'Cycle Time [ms]', 'Launch Type', 'Launch Parameter', 'Signal Byte No.',
+    head_top = ['ID', 'Frame Name', 'DLC', 'Cycle Time [ms]', 'Launch Type', 'Launch Parameter', 'Signal Byte No.',
                 'Signal Bit No.', 'Signal Name', 'Signal Function', 'Signal Length [Bit]', 'Signal Default',
                 ' Signal Not Available', 'Byteorder']
     head_tail = ['Value',   'Name / Phys. Range', 'Function / Increment Unit']
@@ -363,6 +363,8 @@ def load(file, **options):
             index['ID'] = i
         elif "Frame Name" in value:
             index['frameName'] = i
+        elif "DLC" in value:
+            index['dlc'] = i
         elif "Cycle" in value:
             index['cycle'] = i
         elif "Launch Type" in value:
@@ -421,7 +423,7 @@ def load(file, **options):
             frame_name = sh.cell(row_num, index['frameName']).value
             cycle_time = sh.cell(row_num, index['cycle']).value
             launch_type = sh.cell(row_num, index['launchType']).value
-            dlc = 8
+            dlc = int(sh.cell(row_num, index['dlc']).value) if 'dlc' in index else 8
             launch_param = sh.cell(row_num, index['launchParam']).value
             try:
                 launch_param = str(int(launch_param))

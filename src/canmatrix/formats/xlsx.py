@@ -118,6 +118,7 @@ def dump(db, filename, **options):
     head_top = [
         'ID',
         'Frame Name',
+        'DLC',
         'Cycle Time [ms]',
         'Launch Type',
         'Launch Parameter',
@@ -405,7 +406,7 @@ def load(file, **options):
             frame_name = row[column_heads.index('Frame Name')].value
             cycle_time = get_if_possible(row, 'Cycle Time [ms]', '0')
             launch_type = get_if_possible(row, 'Launch Type')
-            dlc = 8
+            dlc = int(get_if_possible(row, 'DLC', '8'))
                     
             # launch_param = get_if_possible(row, 'Launch Parameter', '0')
             # launch_param = str(int(launch_param))
@@ -581,7 +582,7 @@ def load(file, **options):
 
 
 
-    # dlc-estimation / dlc is not in xls, thus calculate a minimum-dlc:
+    # dlc-estimation / ensure minimum DLC based on signals (preserves user-set DLC if sufficient)
     for frame in db.frames:
         frame.update_receiver()
         frame.calc_dlc()
