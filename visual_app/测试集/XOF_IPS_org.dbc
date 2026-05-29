@@ -1,0 +1,799 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: Tester MCU PFC
+
+
+BO_ 2583384329 PFC_CalibRpt: 8 PFC
+ SG_ PFC_CalRpt_Resvd2 : 56|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_CalRpt_Resvd1 : 52|4@1+ (1,0) [0|15] ""  MCU
+ SG_ PFC_CalRpt_Resvd0 : 28|24@1+ (1,0) [0|16777215] ""  MCU
+ SG_ PFC_CalRpt_CalibSts : 0|4@1+ (1,0) [0|15] ""  MCU
+ SG_ PFC_CalRpt_CalibDataType : 8|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_CalRpt_CalibDataSts : 4|4@1+ (1,0) [0|15] ""  MCU
+ SG_ PFC_CalRpt_CalibData : 16|12@1+ (1,0) [0|4095] ""  MCU
+
+BO_ 2432500001 PFC_AD0Report: 8 PFC
+ SG_ PFC_AD0Rpt_SceNum : 8|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_AD0Rpt_Rsvd0 : 0|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_AD0Rpt_Rst02 : 48|16@1+ (1,0) [0|65535] ""  MCU
+ SG_ PFC_AD0Rpt_Rst01 : 32|16@1+ (1,0) [0|65535] ""  MCU
+ SG_ PFC_AD0Rpt_Rst00 : 16|16@1+ (1,0) [0|65535] ""  MCU
+
+BO_ 2432499985 PFC_GpioState: 8 PFC
+ SG_ PFC_GpioSts_SecNum : 8|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_GpioSts_Rsvd0 : 0|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_GpioSts_Group04 : 48|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_GpioSts_Group05 : 56|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_GpioSts_Group03 : 40|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_GpioSts_Group02 : 32|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_GpioSts_Group01 : 24|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_GpioSts_Group00 : 16|8@1+ (1,0) [0|255] ""  MCU
+
+BO_ 2432499969 PFC_SetReport: 8 PFC
+ SG_ PFC_Rpt_Type : 8|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_Rpt_Rsvd3 : 48|16@1+ (1,0) [0|65535] ""  MCU
+ SG_ PFC_Rpt_Rsvd2 : 40|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_Rpt_Rsvd1 : 32|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_Rpt_Rsvd0 : 0|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_Rpt_Gpio_Cmp_Num : 16|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_Rpt_ErrCode : 24|8@1+ (1,0) [0|255] ""  MCU
+
+BO_ 2432434177 Master_PwmCmd: 8 MCU
+ SG_ M_Pwm_Rsvd0 : 60|4@1+ (1,0) [0|15] ""  PFC
+ SG_ M_Pwm_ModNum : 48|6@1+ (1,0) [0|63] ""  PFC
+ SG_ M_Pwm_McuNum : 0|8@1+ (1,0) [0|9] ""  PFC
+ SG_ M_Pwm_GroupNum : 54|4@1+ (1,0) [0|15] ""  PFC
+ SG_ M_Pwm_GpioNum : 8|8@1+ (1,0) [0|255] ""  PFC
+ SG_ M_Pwm_Freq : 16|16@1+ (0.01,0) [0.01|600] "kHz"  PFC
+ SG_ M_Pwm_Enable : 58|2@1+ (1,0) [0|3] ""  PFC
+ SG_ M_Pwm_Duty : 32|16@1+ (1,0) [0|100] "%"  PFC
+
+BO_ 2432434178 Master_GpioCmd: 8 MCU
+ SG_ M_Gpio_Set : 32|16@1+ (1,0) [0|1] ""  PFC
+ SG_ M_Gpio_Rsvd : 48|16@1+ (1,0) [0|65535] ""  PFC
+ SG_ M_Gpio_McuNum : 0|8@1+ (1,0) [0|9] ""  PFC
+ SG_ M_Gpio_GpioNum : 8|8@1+ (1,0) [0|255] ""  PFC
+ SG_ M_Gpio_Dir : 16|16@1+ (1,0) [0|1] ""  PFC
+
+BO_ 2583384071 IFB_Calib_Cmd: 8 MCU
+ SG_ IFB_CalRpt_DataSeq : 56|8@1+ (1,0) [0|255] ""  PFC
+ SG_ IFB_CalRpt_Resvd0 : 48|4@1+ (1,0) [0|15] ""  PFC
+ SG_ IFB_CalRpt_CalibOffset : 32|16@1+ (1,-32768) [-32768|32767] ""  PFC
+ SG_ IFB_CalRpt_CalibScope : 16|16@1+ (1,0) [0|65535] ""  PFC
+ SG_ IFB_CalRpt_CalibDataSection : 12|4@1+ (1,0) [0|15] ""  PFC
+ SG_ IFB_CalRpt_CalibDataType : 4|8@1+ (1,0) [0|255] ""  PFC
+ SG_ IFB_CalRpt_CalibCmd : 0|4@1+ (1,0) [0|15] ""  PFC
+ SG_ IFB_CalRpt_Resvd1 : 52|4@1+ (1,0) [0|15] ""  PFC
+
+BO_ 335 FCT_Debug_Rx_A: 8 Tester
+ SG_ B0_Rx_A : 0|8@1+ (1,0) [0|255] ""  MCU
+ SG_ B1_Rx_A : 8|8@1+ (1,0) [0|255] ""  MCU
+ SG_ B2_Rx_A : 16|8@1+ (1,0) [0|255] ""  MCU
+ SG_ B3_Rx_A : 24|8@1+ (1,0) [0|255] ""  MCU
+ SG_ B4_Rx_A : 32|8@1+ (1,0) [0|255] ""  MCU
+ SG_ B5_Rx_A : 40|8@1+ (1,0) [0|255] ""  MCU
+ SG_ B6_Rx_A : 48|8@1+ (1,0) [0|255] ""  MCU
+ SG_ B7_Rx_A : 56|8@1+ (1,0) [0|255] ""  MCU
+
+BO_ 235 FCT_Debug_Tx_A: 8 MCU
+ SG_ B0_Tx_A : 0|8@1+ (1,0) [0|255] ""  Tester
+ SG_ B1_Tx_A : 8|8@1+ (1,0) [0|255] ""  Tester
+ SG_ B2_Tx_A : 16|8@1+ (1,0) [0|255] ""  Tester
+ SG_ B3_Tx_A : 24|8@1+ (1,0) [0|255] ""  Tester
+ SG_ B4_Tx_A : 32|8@1+ (1,0) [0|255] ""  Tester
+ SG_ B5_Tx_A : 40|8@1+ (1,0) [0|255] ""  Tester
+ SG_ B6_Tx_A : 48|8@1+ (1,0) [0|255] ""  Tester
+ SG_ B7_Tx_A : 56|8@1+ (1,0) [0|255] ""  Tester
+
+BO_ 2015 INT_Func_Diag_Cmd: 8 MCU
+ SG_ Func_Diag_B0 : 0|8@1+ (1,0) [0|255] ""  PFC
+ SG_ Func_Diag_B1 : 8|8@1+ (1,0) [0|255] ""  PFC
+ SG_ Func_Diag_B2 : 16|8@1+ (1,0) [0|255] ""  PFC
+ SG_ Func_Diag_B3 : 24|8@1+ (1,0) [0|255] ""  PFC
+ SG_ Func_Diag_B4 : 32|8@1+ (1,0) [0|255] ""  PFC
+ SG_ Func_Diag_B5 : 40|8@1+ (1,0) [0|255] ""  PFC
+ SG_ Func_Diag_B6 : 48|8@1+ (1,0) [0|255] ""  PFC
+ SG_ Func_Diag_B7 : 56|8@1+ (1,0) [0|255] ""  PFC
+
+BO_ 2044 INT_NIDU_Diag_Tx: 8 MCU
+ SG_ Diag_Tx_B0 : 0|8@1+ (1,0) [0|255] ""  PFC
+ SG_ Diag_Tx_B1 : 8|8@1+ (1,0) [0|255] ""  PFC
+ SG_ Diag_Tx_B2 : 16|8@1+ (1,0) [0|255] ""  PFC
+ SG_ Diag_Tx_B3 : 24|8@1+ (1,0) [0|255] ""  PFC
+ SG_ Diag_Tx_B4 : 32|8@1+ (1,0) [0|255] ""  PFC
+ SG_ Diag_Tx_B5 : 40|8@1+ (1,0) [0|255] ""  PFC
+ SG_ Diag_Tx_B6 : 48|8@1+ (1,0) [0|255] ""  PFC
+ SG_ Diag_Tx_B7 : 56|8@1+ (1,0) [0|255] ""  PFC
+
+BO_ 2036 INT_NIDU_Diag_Rx: 8 PFC
+ SG_ Diag_Rx_B0 : 0|8@1+ (1,0) [0|255] ""  MCU
+ SG_ Diag_Rx_B1 : 8|8@1+ (1,0) [0|255] ""  MCU
+ SG_ Diag_Rx_B2 : 16|8@1+ (1,0) [0|255] ""  MCU
+ SG_ Diag_Rx_B3 : 24|8@1+ (1,0) [0|255] ""  MCU
+ SG_ Diag_Rx_B4 : 32|8@1+ (1,0) [0|255] ""  MCU
+ SG_ Diag_Rx_B5 : 40|8@1+ (1,0) [0|255] ""  MCU
+ SG_ Diag_Rx_B6 : 48|8@1+ (1,0) [0|255] ""  MCU
+ SG_ Diag_Rx_B7 : 56|8@1+ (1,0) [0|255] ""  MCU
+
+BO_ 2583384065 IFB_OBC_Cmd: 8 MCU
+ SG_ IFB_OBCCmd_WorkModeCmd : 0|5@1+ (1,0) [0|31] ""  PFC
+ SG_ IFB_OBCCmd_HvVol_Set : 5|14@1+ (0.1,0) [0|1638.3] "V"  PFC
+ SG_ IFB_OBCCmd_HvCur_Set : 19|13@1+ (0.01,0) [0|81.91] "A"  PFC
+ SG_ IFB_OBCCmd_IacLimit : 32|10@1+ (0.1,0) [0|102.3] "A"  PFC
+ SG_ IFB_OBCCmd_OBC_FaultClear : 42|1@1+ (1,0) [0|1] ""  PFC
+ SG_ IFB_OBCCmd_V2L_Frequency : 43|1@1+ (1,0) [0|1] ""  PFC
+ SG_ IFB_OBCCmd_PFSet : 44|8@1+ (0.01,-1.2) [-1.2|1.35] ""  PFC
+
+BO_ 2583384066 IFB_LVDC_Cmd: 8 MCU
+ SG_ IFB_DCCmd_WorkModeCmd : 0|5@1+ (1,0) [0|31] ""  Tester
+ SG_ IFB_DCCmd_LvVolSet : 5|13@1+ (0.01,0) [0|81.91] "V"  Tester
+ SG_ IFB_DCCmd_LvCurSet : 18|13@1+ (0.1,-300) [-300|519.1] "A"  Tester
+ SG_ IFB_DCCmd_PreHvVolSet : 31|14@1+ (0.1,0) [0|1638.3] "V"  Tester
+ SG_ IFB_DCCmd_Resvd0 : 45|4@1+ (1,0) [0|15] ""  Tester
+ SG_ IFB_DCCmd_DCDC_FaultClear : 49|1@1+ (1,0) [0|0] ""  Tester
+ SG_ IFB_DCCmd_Resvd1 : 50|2@1+ (1,0) [0|3] ""  Tester
+ SG_ IFB_DCCmd_Resvd2 : 52|4@1+ (1,0) [0|15] ""  Tester
+ SG_ IFB_DCCmd_Resvd3 : 56|8@1+ (1,0) [0|0] ""  Tester
+
+BO_ 2583384067 IFB_OBC_DC_Com: 8 MCU
+ SG_ IFB_Com_Temp_WaterCalc1 : 0|12@1+ (0.1,-50) [-50|359.5] ""  PFC
+
+BO_ 2583385089 IPS_Debug: 8 Tester
+ SG_ IPS_Debug_TestByte0 : 0|8@1+ (1,0) [0|0] ""  MCU
+ SG_ IPS_Debug_TestByte1 : 8|8@1+ (1,0) [0|0] ""  MCU
+ SG_ IPS_Debug_TestByte2 : 16|8@1+ (1,0) [0|0] ""  MCU
+ SG_ IPS_Debug_TestByte3 : 24|8@1+ (1,0) [0|0] ""  MCU
+ SG_ IPS_Debug_TestByte4 : 32|8@1+ (1,0) [0|0] ""  MCU
+ SG_ IPS_Debug_TestByte5 : 40|8@1+ (1,0) [0|0] ""  MCU
+ SG_ IPS_Debug_TestByte6 : 48|8@1+ (1,0) [0|0] ""  MCU
+ SG_ IPS_Debug_TestByte7 : 56|8@1+ (1,0) [0|0] ""  MCU
+
+BO_ 2583385090 IPS_Debug2: 8 Tester
+ SG_ IPS_Debug2_TestByte0 : 0|8@1+ (1,0) [0|0] ""  MCU
+ SG_ IPS_Debug2_TestByte1 : 8|8@1+ (1,0) [0|0] ""  MCU
+ SG_ IPS_Debug2_TestByte2 : 16|8@1+ (1,0) [0|0] ""  MCU
+ SG_ IPS_Debug2_TestByte3 : 24|8@1+ (1,0) [0|0] ""  MCU
+ SG_ IPS_Debug2_TestByte4 : 32|8@1+ (1,0) [0|0] ""  MCU
+ SG_ IPS_Debug2_TestByte5 : 40|8@1+ (1,0) [0|0] ""  MCU
+ SG_ IPS_Debug2_TestByte6 : 48|8@1+ (1,0) [0|0] ""  MCU
+ SG_ IPS_Debug2_TestByte7 : 56|8@1+ (1,0) [0|0] ""  MCU
+
+BO_ 2583384580 LC_FaultInfo: 8 MCU
+ SG_ IFB_L_FI_FaultByte0 : 0|8@1+ (1,0) [0|255] ""  PFC
+ SG_ IFB_L_FI_FaultByte1 : 8|8@1+ (1,0) [0|255] ""  PFC
+ SG_ IFB_L_FI_FaultByte2 : 16|8@1+ (1,0) [0|255] ""  PFC
+ SG_ IFB_L_FI_FaultByte3 : 24|8@1+ (1,0) [0|255] ""  PFC
+ SG_ IFB_L_FI_FaultByte4 : 32|8@1+ (1,0) [0|255] ""  PFC
+ SG_ IFB_L_FI_FaultByte5 : 40|8@1+ (1,0) [0|255] ""  PFC
+ SG_ IFB_L_FI_FaultResvd0 : 48|4@1+ (1,0) [0|0] ""  PFC
+
+BO_ 2583384579 LC_InnerReport: 8 MCU
+ SG_ IFB_L_InRpt_SVCC : 0|8@1+ (0.1,0) [0|25.5] "V"  PFC
+ SG_ IFB_L_InRpt_Alpha : 8|13@1+ (1,0) [0|8191] "ns"  PFC
+ SG_ IFB_L_InRpt_WorkFreq : 21|12@1+ (0.1,0) [0|409.5] "kHz"  PFC
+ SG_ IFB_L_InRpt_HvCurMid : 33|9@1+ (0.01,0) [0|5.11] "V"  PFC
+ SG_ IFB_L_InRpt_Resvd0 : 42|2@1+ (1,0) [0|0] ""  PFC
+ SG_ IFB_L_InRpt_Vloop_RefRpt : 44|10@1+ (1,0) [0|1023] ""  PFC
+ SG_ IFB_L_InRpt_Iloop_RefRpt : 54|10@1+ (0.1,0) [0|102.3] ""  PFC
+
+BO_ 2583384577 LC_InOutReport: 8 MCU
+ SG_ IFB_L_IORpt_HvVol : 0|14@1+ (0.1,0) [0|1638.3] "V"  PFC
+ SG_ IFB_L_IORpt_HvCur : 14|13@1+ (0.01,0) [0|81.91] "A"  PFC
+ SG_ IFB_L_IORpt_Vbulk : 27|14@1+ (0.1,0) [0|1638.3] "V"  PFC
+ SG_ IFB_L_IORpt_Resvd : 41|11@1+ (1,0) [0|2047] ""  PFC
+
+BO_ 2583384578 LC_StsReport: 8 MCU
+ SG_ IFB_L_StsRpt_SysSts : 0|3@1+ (1,0) [0|7] ""  PFC
+ SG_ IFB_L_StsRpt_MaxPout : 3|14@1+ (0.01,0) [0|163.83] "kW"  PFC
+ SG_ IFB_L_StsRpt_FaultAll : 17|1@1+ (1,0) [0|0] ""  PFC
+ SG_ IFB_L_StsRpt_PFCStop : 18|1@1+ (1,0) [0|0] ""  PFC
+ SG_ IFB_L_StsRpt_Resvd0 : 19|1@1+ (1,0) [0|0] ""  PFC
+ SG_ IFB_L_StsRpt_Resvd1 : 20|33@1+ (1,0) [0|10000] ""  PFC
+
+BO_ 2583384581 LC_TempReport: 8 MCU
+ SG_ IFB_L_TmpRpt_Temp1 : 0|12@1+ (0.1,-50) [-50|359.5] ""  PFC
+ SG_ IFB_L_TmpRpt_Temp2 : 12|12@1+ (0.1,-50) [-50|359.5] ""  PFC
+ SG_ IFB_L_TmpRpt_Resvd0 : 24|12@1+ (1,0) [0|4095] ""  PFC
+ SG_ IFB_L_TmpRpt_Version : 36|16@1+ (1,0) [0|65535] ""  PFC
+ SG_ IFB_L_TmpRpt_Resvd1 : 52|12@1+ (1,0) [0|4095] ""  PFC
+
+BO_ 2583384836 LVDC_FaultInfo: 8 MCU
+ SG_ IFB_D_FI_FaultByte0 : 0|8@1+ (1,0) [0|255] ""  PFC
+ SG_ IFB_D_FI_FaultByte1 : 8|8@1+ (1,0) [0|255] ""  PFC
+ SG_ IFB_D_FI_FaultByte2 : 16|8@1+ (1,0) [0|255] ""  PFC
+ SG_ IFB_D_FI_FaultByte3 : 24|8@1+ (1,0) [0|255] ""  PFC
+ SG_ IFB_D_FI_FaultByte4 : 32|8@1+ (1,0) [0|0] ""  PFC
+ SG_ IFB_D_FI_FaultByte5 : 40|8@1+ (1,0) [0|255] ""  PFC
+
+BO_ 2583384835 LVDC_InnerReport: 8 MCU
+ SG_ IFB_D_InRpt_LVCC : 0|8@1+ (0.1,0) [0|25.5] "V"  PFC
+ SG_ IFB_D_InRpt_Duty : 8|10@1+ (0.1,0) [0|102.3] "%"  PFC
+ SG_ IFB_D_InRpt_IoutMid : 18|9@1+ (0.01,0) [0|5.11] "V"  PFC
+ SG_ IFB_D_InRpt_Resvd0 : 27|11@1+ (1,0) [0|0] ""  PFC
+ SG_ IFB_D_InRpt_Vloop_RefRpt : 38|13@1+ (0.01,0) [0|81.91] ""  PFC
+ SG_ IFB_D_InRpt_Iloop_RefRpt : 51|13@1+ (0.1,-300) [-300|519.1] ""  PFC
+
+BO_ 2583384833 LVDC_InOutReport: 8 MCU
+ SG_ IFB_D_IORpt_LvVol : 0|13@1+ (0.01,0) [0|81.91] "V"  PFC
+ SG_ IFB_D_IORpt_LvCur : 13|13@1+ (0.1,-300) [-300|519.1] "A"  PFC
+ SG_ IFB_D_IORpt_HvVol : 26|14@1+ (0.1,0) [0|1638.3] "V"  PFC
+ SG_ IFB_D_IORpt_HvCur : 40|12@1+ (0.01,0) [0|40.95] "A"  PFC
+
+BO_ 2583384834 LVDC_StsReport: 8 MCU
+ SG_ IFB_D_StsRpt_SysSts : 0|4@1+ (1,0) [0|15] ""  PFC
+ SG_ IFB_D_StsRpt_SRSts : 4|4@1+ (1,0) [0|15] ""  PFC
+ SG_ IFB_D_StsRpt_MaxPout : 8|14@1+ (0.01,0) [0|163.83] "kW"  PFC
+ SG_ IFB_D_StsRpt_Resvd0 : 22|30@1+ (1,0) [0|0] ""  PFC
+
+BO_ 2583384837 LVDC_TempReport: 8 MCU
+ SG_ IFB_D_TmpRpt_Temp1 : 0|12@1+ (0.1,-50) [-50|359.5] ""  PFC
+ SG_ IFB_D_TmpRpt_Temp2 : 12|12@1+ (0.1,-50) [-50|359.5] ""  PFC
+ SG_ IFB_D_TmpRpt_Resvd0 : 24|12@1+ (1,0) [0|4095] ""  PFC
+ SG_ IFB_D_TmpRpt_Version : 36|16@1+ (1,0) [0|65535] ""  PFC
+ SG_ IFB_D_TmpRpt_Resvd1 : 52|12@1+ (1,0) [0|4095] ""  PFC
+
+BO_ 2583384325 PFC_FaultInfo1: 8 PFC
+ SG_ PFC_FI_Fault1Byte0 : 0|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_FI_Fault1Byte1 : 8|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_FI_Fault1Byte2 : 16|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_FI_Fault1Byte3 : 24|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_FI_Fault1Byte4 : 32|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_FI_Fault1Byte5 : 40|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_FI_Fault1Resvd0 : 48|4@1+ (1,0) [0|0] ""  MCU
+
+BO_ 2583384326 PFC_FaultInfo2: 8 PFC
+ SG_ PFC_FI_Fault2Byte0 : 0|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_FI_Fault2Byte1 : 8|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_FI_Fault2Byte2 : 16|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_FI_Fault2Byte3 : 24|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_FI_Fault2Byte4 : 32|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_FI_Fault2Byte5 : 40|8@1+ (1,0) [0|255] ""  MCU
+ SG_ PFC_FI_Fault2Resvd0 : 48|4@1+ (1,0) [0|0] ""  MCU
+
+BO_ 2583384322 PFC_IacReport: 8 PFC
+ SG_ PFC_IacRpt_IacRms_A : 0|14@1+ (0.01,0) [0|163.83] "A"  MCU
+ SG_ PFC_IacRpt_IacRms_B : 14|14@1+ (0.01,0) [0|163.83] "A"  MCU
+ SG_ PFC_IacRpt_IacRms_C : 28|14@1+ (0.01,0) [0|163.83] "A"  MCU
+ SG_ PFC_IacRpt_Resvd0 : 42|10@1+ (1,0) [0|1023] ""  MCU
+
+BO_ 2583384324 PFC_InnerReport: 8 PFC
+ SG_ PFC_InRpt_PVCC : 0|8@1+ (0.1,0) [0|25.5] "V"  MCU
+ SG_ PFC_InRpt_VacMid : 8|9@1+ (0.01,0) [0|5.11] "V"  MCU
+ SG_ PFC_InRpt_IacMid : 17|9@1+ (0.01,0) [0|5.11] "V"  MCU
+ SG_ PFC_InRpt_Vbulk : 26|14@1+ (0.1,0) [0|1638.3] "V"  MCU
+ SG_ PFC_InRpt_Vloop_RefRpt : 40|14@1+ (0.1,0) [0|1638.3] ""  MCU
+ SG_ PFC_InRpt_Iloop_RefRpt : 54|10@1+ (0.1,0) [0|102.3] ""  MCU
+
+BO_ 2583384323 PFC_StsReport: 8 PFC
+ SG_ PFC_StsRpt_SysSts : 0|7@1+ (1,0) [0|127] ""  MCU
+ SG_ PFC_StsRpt_RelaySts : 7|4@1+ (1,0) [0|15] ""  MCU
+ SG_ PFC_StsRpt_MaxInvertPower : 11|14@1+ (0.01,0) [0|163.83] ""  MCU
+ SG_ PFC_StsRpt_FaultAll : 25|1@1+ (1,0) [0|1] ""  MCU
+ SG_ PFC_StsRpt_LCStop : 26|1@1+ (1,0) [0|1] ""  MCU
+ SG_ PFC_StsRpt_Resvd0 : 27|25@1+ (1,0) [0|0] ""  MCU
+
+BO_ 2583384327 PFC_TempReport: 8 PFC
+ SG_ PFC_TmpRpt_Temp1 : 0|12@1+ (0.1,-50) [-50|359.5] ""  MCU
+ SG_ PFC_TmpRpt_Temp2 : 12|12@1+ (0.1,-50) [-50|359.5] ""  MCU
+ SG_ PFC_TmpRpt_Version : 36|16@1+ (1,0) [0|65535] ""  MCU
+
+BO_ 2583384321 PFC_VacReport: 8 PFC
+ SG_ PFC_VacRpt_VacRms_A : 0|12@1+ (0.1,0) [0|409.5] "V"  MCU
+ SG_ PFC_VacRpt_VacRms_B : 12|12@1+ (0.1,0) [0|409.5] "V"  MCU
+ SG_ PFC_VacRpt_VacRms_C : 24|12@1+ (0.1,0) [0|409.5] "V"  MCU
+ SG_ PFC_VacRpt_VacFrq : 36|10@1+ (0.1,0) [0|102.3] "Hz"  MCU
+ SG_ PFC_VacRpt_ACType : 46|4@1+ (1,0) [0|15] ""  MCU
+ SG_ PFC_VacRpt_ACSeq : 50|2@1+ (1,0) [0|3] ""  MCU
+
+BO_ 2583384328 PFC_VersionInfo: 8 PFC
+ SG_ PFC_V_VerSection : 0|8@1+ (1,0) [0|0] ""  MCU
+ SG_ PFC_V_VerInfo1_8_15 : 8|8@1+ (1,0) [0|0] ""  MCU
+ SG_ PFC_V_VerInfo2_9_16 : 16|8@1+ (1,0) [0|0] ""  MCU
+ SG_ PFC_V_VerInfo3_10_17 : 24|8@1+ (1,0) [0|0] ""  MCU
+ SG_ PFC_V_VerInfo4_11_18 : 32|8@1+ (1,0) [0|0] ""  MCU
+ SG_ PFC_V_VerInfo5_12_19 : 40|8@1+ (1,0) [0|0] ""  MCU
+ SG_ PFC_V_VerInfo6_13_20 : 48|8@1+ (1,0) [0|0] ""  MCU
+ SG_ PFC_V_VerInfo7_14_21 : 56|8@1+ (1,0) [0|0] ""  MCU
+
+
+
+CM_ SG_ 2583384329 PFC_CalRpt_Resvd0 "预留";
+CM_ SG_ 2583384329 PFC_CalRpt_CalibSts "校表状态";
+CM_ SG_ 2583384329 PFC_CalRpt_CalibDataType "校表数据类型";
+CM_ SG_ 2583384329 PFC_CalRpt_CalibDataSts "数据类型";
+CM_ SG_ 2583384329 PFC_CalRpt_CalibData "采样：数字量0-4095";
+CM_ BO_ 2432500001 "AD信息上报，分组上传数据，通过两个ID进行上报，每次上报3组数据";
+CM_ BO_ 2432499985 "GPIO状态上报";
+CM_ SG_ 2432499985 PFC_GpioSts_Group04 "GPIO输入状态";
+CM_ SG_ 2432499985 PFC_GpioSts_Group05 "GPIO输入状态";
+CM_ SG_ 2432499985 PFC_GpioSts_Group03 "GPIO输入状态";
+CM_ SG_ 2432499985 PFC_GpioSts_Group02 "GPIO输入状态";
+CM_ SG_ 2432499985 PFC_GpioSts_Group01 "GPIO输入状态";
+CM_ SG_ 2432499985 PFC_GpioSts_Group00 "GPIO输入状态";
+CM_ BO_ 2432499969 "配置结果反馈";
+CM_ SG_ 2432499969 PFC_Rpt_Type "针对类型的反馈结果";
+CM_ SG_ 2432499969 PFC_Rpt_Gpio_Cmp_Num "GPIO配置/Cmpss配置反馈结果";
+CM_ SG_ 2432499969 PFC_Rpt_ErrCode "故障码反馈";
+CM_ BO_ 2432434177 "PWM配置";
+CM_ SG_ 2432434177 M_Pwm_ModNum "PWM模块组序号";
+CM_ SG_ 2432434177 M_Pwm_McuNum "MCU配置";
+CM_ SG_ 2432434177 M_Pwm_GroupNum "PWM输出组编号";
+CM_ SG_ 2432434177 M_Pwm_GpioNum "GPIO配置";
+CM_ SG_ 2432434177 M_Pwm_Freq "频率";
+CM_ SG_ 2432434177 M_Pwm_Enable "PWM使能信号";
+CM_ SG_ 2432434177 M_Pwm_Duty "占空比";
+CM_ BO_ 2432434178 "GPIO配置";
+CM_ SG_ 2432434178 M_Gpio_McuNum "MCU编号";
+CM_ SG_ 2432434178 M_Gpio_GpioNum "GPIO配置";
+CM_ SG_ 2432434178 M_Gpio_Dir "输入输出配置";
+CM_ SG_ 2583384071 IFB_CalRpt_DataSeq "数据顺序信号";
+CM_ SG_ 2583384071 IFB_CalRpt_CalibOffset "偏置：HV电压精度0.1V，DCDC LV 0.01,电流精度0.01A";
+CM_ SG_ 2583384071 IFB_CalRpt_CalibScope "比例：HV电压精度0.1V，DCDC LV 0.01,电流精度0.01A";
+CM_ SG_ 2583384071 IFB_CalRpt_CalibDataSection "段数";
+CM_ SG_ 2583384071 IFB_CalRpt_CalibDataType "参考校表数据类型sheet";
+CM_ SG_ 2583384071 IFB_CalRpt_CalibCmd "校表指令";
+CM_ SG_ 2583384065 IFB_OBCCmd_HvVol_Set "充电/电加热：LLC/LC输出电压
+放电：AC电压";
+CM_ SG_ 2583384065 IFB_OBCCmd_HvCur_Set "充电/电加热：LLC/LC输出电流
+放电：DC侧电流限制";
+CM_ SG_ 2583384065 IFB_OBCCmd_IacLimit "AC侧电流限制";
+CM_ SG_ 2583384065 IFB_OBCCmd_OBC_FaultClear "故障清除指令，检测到0→1上升沿时，持续清除故障，持续时间200ms";
+CM_ SG_ 2583384067 IFB_Com_Temp_WaterCalc1 "IFB计算水温1";
+CM_ SG_ 2583384580 IFB_L_FI_FaultByte0 "LC故障";
+CM_ SG_ 2583384580 IFB_L_FI_FaultByte5 "LC自检警告";
+CM_ SG_ 2583384579 IFB_L_InRpt_SVCC "SVCC电压";
+CM_ SG_ 2583384579 IFB_L_InRpt_Alpha "LC-Alpha";
+CM_ SG_ 2583384579 IFB_L_InRpt_WorkFreq "LC工作频率";
+CM_ SG_ 2583384579 IFB_L_InRpt_HvCurMid "电池侧电流中点偏置";
+CM_ SG_ 2583384577 IFB_L_IORpt_HvVol "高压电池电压";
+CM_ SG_ 2583384577 IFB_L_IORpt_HvCur "高压电池电流";
+CM_ SG_ 2583384577 IFB_L_IORpt_Vbulk "母线电压";
+CM_ SG_ 2583384578 IFB_L_StsRpt_MaxPout "充电最大输出功率";
+CM_ SG_ 2583384836 IFB_D_FI_FaultByte0 "详见故障解析";
+CM_ SG_ 2583384833 IFB_D_IORpt_LvVol "输入输出电压电流";
+CM_ SG_ 2583384834 IFB_D_StsRpt_SysSts "系统状态";
+CM_ SG_ 2583384834 IFB_D_StsRpt_SRSts "SR工作状态";
+CM_ SG_ 2583384325 PFC_FI_Fault1Byte0 "PFC故障1";
+CM_ SG_ 2583384325 PFC_FI_Fault1Byte1 "PFC故障1";
+CM_ SG_ 2583384325 PFC_FI_Fault1Byte2 "PFC故障1";
+CM_ SG_ 2583384325 PFC_FI_Fault1Byte3 "PFC故障1";
+CM_ SG_ 2583384325 PFC_FI_Fault1Byte4 "PFC故障1";
+CM_ SG_ 2583384325 PFC_FI_Fault1Byte5 "PFC故障1";
+CM_ SG_ 2583384326 PFC_FI_Fault2Byte0 "PFC故障2";
+CM_ SG_ 2583384326 PFC_FI_Fault2Byte1 "PFC故障2";
+CM_ SG_ 2583384326 PFC_FI_Fault2Byte2 "PFC故障2";
+CM_ SG_ 2583384326 PFC_FI_Fault2Byte3 "PFC故障2";
+CM_ SG_ 2583384326 PFC_FI_Fault2Byte4 "PFC故障2";
+CM_ SG_ 2583384326 PFC_FI_Fault2Byte5 "PFC故障2";
+CM_ SG_ 2583384322 PFC_IacRpt_IacRms_A "A相相电流有效值";
+CM_ SG_ 2583384322 PFC_IacRpt_IacRms_B "B相相电流有效值";
+CM_ SG_ 2583384322 PFC_IacRpt_IacRms_C "C相相电流有效值";
+CM_ SG_ 2583384324 PFC_InRpt_PVCC "PVCC电压";
+CM_ SG_ 2583384324 PFC_InRpt_VacMid "AC电压中点";
+CM_ SG_ 2583384324 PFC_InRpt_IacMid "AC电流中点";
+CM_ SG_ 2583384324 PFC_InRpt_Vbulk "母线电压";
+CM_ SG_ 2583384323 PFC_StsRpt_MaxInvertPower "逆变最大输出功率";
+CM_ SG_ 2583384327 PFC_TmpRpt_Temp1 "温度1上报";
+CM_ SG_ 2583384327 PFC_TmpRpt_Temp2 "温度2上报";
+CM_ SG_ 2583384321 PFC_VacRpt_VacRms_A "A相相电压有效值";
+CM_ SG_ 2583384321 PFC_VacRpt_VacRms_B "B相相电压有效值";
+CM_ SG_ 2583384321 PFC_VacRpt_VacRms_C "C相相电压有效值";
+CM_ SG_ 2583384321 PFC_VacRpt_VacFrq "AC侧频率";
+CM_ SG_ 2583384328 PFC_V_VerSection "版本编号";
+CM_ SG_ 2583384328 PFC_V_VerInfo1_8_15 "版本号字符1/8/15";
+CM_ SG_ 2583384328 PFC_V_VerInfo2_9_16 "版本号字符2/9/16";
+CM_ SG_ 2583384328 PFC_V_VerInfo3_10_17 "版本号字符3/10/17";
+CM_ SG_ 2583384328 PFC_V_VerInfo4_11_18 "版本号字符4/11/18";
+CM_ SG_ 2583384328 PFC_V_VerInfo5_12_19 "版本号字符5/12/19";
+CM_ SG_ 2583384328 PFC_V_VerInfo6_13_20 "版本号字符6/13/20";
+CM_ SG_ 2583384328 PFC_V_VerInfo7_14_21 "版本号字符7/14/21";
+BA_DEF_ BO_  "GenMsgStartDelayTime" INT 0 0;
+BA_DEF_ BO_  "GenMsgDelayTime" INT 0 0;
+BA_DEF_ BO_  "GenMsgNrOfRepetition" INT 0 0;
+BA_DEF_ BO_  "GenMsgCycleTimeFast" INT 0 0;
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 0;
+BA_DEF_ BO_  "GenMsgSendType" ENUM  "Cyclic","Event","NotUsed","NotUsed","NotUsed","NotUsed","NotUsed","IfActive","NoMsgSendType","NotUsed";
+BA_DEF_ BO_  "VFrameFormat" ENUM  "StandardCAN","ExtendedCAN","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","StandardCAN_FD","ExtendedCAN_FD";
+BA_DEF_ SG_  "GenSigStartValue" INT 0 0;
+BA_DEF_ SG_  "GenSigInactiveValue" INT 0 0;
+BA_DEF_ SG_  "GenSigCycleTimeActive" INT 0 0;
+BA_DEF_ SG_  "GenSigCycleTime" INT 0 0;
+BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","Trigger","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType","NotUsed","NotUsed","NotUsed","NotUsed";
+BA_DEF_  "Baudrate" INT 0 1000000;
+BA_DEF_  "BusType" STRING ;
+BA_DEF_  "NmType" STRING ;
+BA_DEF_  "Manufacturer" STRING ;
+BA_DEF_ BO_  "TpTxIndex" INT 0 255;
+BA_DEF_ BU_  "NodeLayerModules" STRING ;
+BA_DEF_ BU_  "NmStationAddress" HEX 0 255;
+BA_DEF_ BU_  "NmNode" ENUM  "no","yes";
+BA_DEF_ BO_  "NmMessage" ENUM  "no","yes";
+BA_DEF_  "NmAsrWaitBusSleepTime" INT 0 65535;
+BA_DEF_  "NmAsrTimeoutTime" INT 1 65535;
+BA_DEF_  "NmAsrRepeatMessageTime" INT 0 65535;
+BA_DEF_ BU_  "NmAsrNodeIdentifier" HEX 0 255;
+BA_DEF_ BU_  "NmAsrNode" ENUM  "no","yes";
+BA_DEF_  "NmAsrMessageCount" INT 1 256;
+BA_DEF_ BO_  "NmAsrMessage" ENUM  "no","yes";
+BA_DEF_ BU_  "NmAsrCanMsgReducedTime" INT 1 65535;
+BA_DEF_  "NmAsrCanMsgCycleTime" INT 1 65535;
+BA_DEF_ BU_  "NmAsrCanMsgCycleOffset" INT 0 65535;
+BA_DEF_  "NmAsrBaseAddress" HEX 0 2047;
+BA_DEF_ BU_  "ILUsed" ENUM  "no","yes";
+BA_DEF_  "ILTxTimeout" INT 0 65535;
+BA_DEF_ SG_  "GenSigTimeoutValue" INT 0 65535;
+BA_DEF_ SG_  "GenSigTimeoutTime" INT 0 65535;
+BA_DEF_ BO_  "GenMsgILSupport" ENUM  "no","yes";
+BA_DEF_ BO_  "GenMsgFastOnStart" INT 0 65535;
+BA_DEF_ BO_  "DiagUudtResponse" ENUM  "false","true";
+BA_DEF_ BO_  "DiagUudResponse" ENUM  "False","True";
+BA_DEF_ BO_  "DiagState" ENUM  "no","yes";
+BA_DEF_ BO_  "DiagResponse" ENUM  "no","yes";
+BA_DEF_ BO_  "DiagRequest" ENUM  "no","yes";
+BA_DEF_  "DBName" STRING ;
+BA_DEF_DEF_  "GenMsgStartDelayTime" 0;
+BA_DEF_DEF_  "GenMsgDelayTime" 0;
+BA_DEF_DEF_  "GenMsgNrOfRepetition" 0;
+BA_DEF_DEF_  "GenMsgCycleTimeFast" 0;
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
+BA_DEF_DEF_  "GenMsgSendType" "Cyclic";
+BA_DEF_DEF_  "VFrameFormat" "";
+BA_DEF_DEF_  "GenSigStartValue" 0;
+BA_DEF_DEF_  "GenSigInactiveValue" 0;
+BA_DEF_DEF_  "GenSigCycleTimeActive" 0;
+BA_DEF_DEF_  "GenSigCycleTime" 0;
+BA_DEF_DEF_  "GenSigSendType" "Cyclic";
+BA_DEF_DEF_  "Baudrate" 500000;
+BA_DEF_DEF_  "BusType" "";
+BA_DEF_DEF_  "NmType" "";
+BA_DEF_DEF_  "Manufacturer" "Vector";
+BA_DEF_DEF_  "TpTxIndex" 0;
+BA_DEF_DEF_  "NodeLayerModules" " ";
+BA_DEF_DEF_  "NmStationAddress" 0;
+BA_DEF_DEF_  "NmNode" "no";
+BA_DEF_DEF_  "NmMessage" "no";
+BA_DEF_DEF_  "NmAsrWaitBusSleepTime" 1500;
+BA_DEF_DEF_  "NmAsrTimeoutTime" 2000;
+BA_DEF_DEF_  "NmAsrRepeatMessageTime" 3200;
+BA_DEF_DEF_  "NmAsrNodeIdentifier" 50;
+BA_DEF_DEF_  "NmAsrNode" "no";
+BA_DEF_DEF_  "NmAsrMessageCount" 128;
+BA_DEF_DEF_  "NmAsrMessage" "no";
+BA_DEF_DEF_  "NmAsrCanMsgReducedTime" 320;
+BA_DEF_DEF_  "NmAsrCanMsgCycleTime" 640;
+BA_DEF_DEF_  "NmAsrCanMsgCycleOffset" 0;
+BA_DEF_DEF_  "NmAsrBaseAddress" 1280;
+BA_DEF_DEF_  "ILUsed" "no";
+BA_DEF_DEF_  "ILTxTimeout" 0;
+BA_DEF_DEF_  "GenSigTimeoutValue" 0;
+BA_DEF_DEF_  "GenSigTimeoutTime" 0;
+BA_DEF_DEF_  "GenMsgILSupport" "no";
+BA_DEF_DEF_  "GenMsgFastOnStart" 0;
+BA_DEF_DEF_  "DiagUudtResponse" "false";
+BA_DEF_DEF_  "DiagUudResponse" "False";
+BA_DEF_DEF_  "DiagState" "no";
+BA_DEF_DEF_  "DiagResponse" "no";
+BA_DEF_DEF_  "DiagRequest" "no";
+BA_DEF_DEF_  "DBName" "ECAN";
+BA_ "Manufacturer" "Vector";
+BA_ "NmType" "NmAsr";
+BA_ "BusType" "CAN";
+BA_ "Baudrate" 500000;
+BA_ "NmAsrWaitBusSleepTime" 2000;
+BA_ "DBName" "XOF_IPS_InterCanDbc_CanIntel_V11";
+BA_ "GenMsgCycleTime" BO_ 2583384329 20;
+BA_ "VFrameFormat" BO_ 2583384329 1;
+BA_ "GenMsgILSupport" BO_ 2583384329 1;
+BA_ "GenMsgCycleTime" BO_ 2432500001 50;
+BA_ "VFrameFormat" BO_ 2432500001 1;
+BA_ "GenMsgILSupport" BO_ 2432500001 1;
+BA_ "GenMsgCycleTime" BO_ 2432499985 50;
+BA_ "VFrameFormat" BO_ 2432499985 1;
+BA_ "GenMsgILSupport" BO_ 2432499985 1;
+BA_ "GenMsgCycleTime" BO_ 2432499969 50;
+BA_ "VFrameFormat" BO_ 2432499969 1;
+BA_ "GenMsgILSupport" BO_ 2432499969 1;
+BA_ "GenMsgCycleTime" BO_ 2432434177 50;
+BA_ "VFrameFormat" BO_ 2432434177 1;
+BA_ "GenMsgILSupport" BO_ 2432434177 1;
+BA_ "VFrameFormat" BO_ 2432434178 1;
+BA_ "GenMsgILSupport" BO_ 2432434178 1;
+BA_ "GenMsgCycleTime" BO_ 2432434178 50;
+BA_ "VFrameFormat" BO_ 2583384071 1;
+BA_ "GenMsgILSupport" BO_ 2583384071 1;
+BA_ "GenMsgSendType" BO_ 2583384071 0;
+BA_ "GenMsgCycleTime" BO_ 2583384071 10;
+BA_ "VFrameFormat" BO_ 335 0;
+BA_ "GenMsgILSupport" BO_ 335 1;
+BA_ "GenMsgSendType" BO_ 335 0;
+BA_ "GenMsgCycleTime" BO_ 335 10;
+BA_ "VFrameFormat" BO_ 235 0;
+BA_ "GenMsgILSupport" BO_ 235 1;
+BA_ "GenMsgSendType" BO_ 235 0;
+BA_ "GenMsgCycleTime" BO_ 235 10;
+BA_ "GenMsgSendType" BO_ 2015 1;
+BA_ "VFrameFormat" BO_ 2015 0;
+BA_ "GenMsgSendType" BO_ 2044 1;
+BA_ "VFrameFormat" BO_ 2044 0;
+BA_ "GenMsgSendType" BO_ 2036 1;
+BA_ "VFrameFormat" BO_ 2036 0;
+BA_ "VFrameFormat" BO_ 2583384065 1;
+BA_ "GenMsgILSupport" BO_ 2583384065 1;
+BA_ "GenMsgSendType" BO_ 2583384065 0;
+BA_ "GenMsgCycleTime" BO_ 2583384065 10;
+BA_ "VFrameFormat" BO_ 2583384066 1;
+BA_ "GenMsgILSupport" BO_ 2583384066 1;
+BA_ "GenMsgSendType" BO_ 2583384066 0;
+BA_ "GenMsgCycleTime" BO_ 2583384066 10;
+BA_ "VFrameFormat" BO_ 2583384067 1;
+BA_ "GenMsgILSupport" BO_ 2583384067 1;
+BA_ "GenMsgSendType" BO_ 2583384067 0;
+BA_ "GenMsgCycleTime" BO_ 2583384067 100;
+BA_ "VFrameFormat" BO_ 2583385089 1;
+BA_ "GenMsgILSupport" BO_ 2583385089 1;
+BA_ "GenMsgSendType" BO_ 2583385089 0;
+BA_ "GenMsgCycleTime" BO_ 2583385089 10;
+BA_ "VFrameFormat" BO_ 2583385090 1;
+BA_ "GenMsgILSupport" BO_ 2583385090 1;
+BA_ "GenMsgSendType" BO_ 2583385090 0;
+BA_ "GenMsgCycleTime" BO_ 2583385090 10;
+BA_ "VFrameFormat" BO_ 2583384580 1;
+BA_ "GenMsgILSupport" BO_ 2583384580 1;
+BA_ "GenMsgSendType" BO_ 2583384580 0;
+BA_ "GenMsgCycleTime" BO_ 2583384580 20;
+BA_ "VFrameFormat" BO_ 2583384579 1;
+BA_ "GenMsgILSupport" BO_ 2583384579 1;
+BA_ "GenMsgSendType" BO_ 2583384579 0;
+BA_ "GenMsgCycleTime" BO_ 2583384579 50;
+BA_ "VFrameFormat" BO_ 2583384577 1;
+BA_ "GenMsgILSupport" BO_ 2583384577 1;
+BA_ "GenMsgSendType" BO_ 2583384577 0;
+BA_ "GenMsgCycleTime" BO_ 2583384577 20;
+BA_ "VFrameFormat" BO_ 2583384578 1;
+BA_ "GenMsgILSupport" BO_ 2583384578 1;
+BA_ "GenMsgSendType" BO_ 2583384578 0;
+BA_ "GenMsgCycleTime" BO_ 2583384578 20;
+BA_ "VFrameFormat" BO_ 2583384581 1;
+BA_ "GenMsgILSupport" BO_ 2583384581 1;
+BA_ "GenMsgSendType" BO_ 2583384581 0;
+BA_ "GenMsgCycleTime" BO_ 2583384581 20;
+BA_ "VFrameFormat" BO_ 2583384836 1;
+BA_ "GenMsgILSupport" BO_ 2583384836 1;
+BA_ "GenMsgSendType" BO_ 2583384836 0;
+BA_ "GenMsgCycleTime" BO_ 2583384836 20;
+BA_ "VFrameFormat" BO_ 2583384835 1;
+BA_ "GenMsgILSupport" BO_ 2583384835 1;
+BA_ "GenMsgSendType" BO_ 2583384835 0;
+BA_ "GenMsgCycleTime" BO_ 2583384835 50;
+BA_ "VFrameFormat" BO_ 2583384833 1;
+BA_ "GenMsgILSupport" BO_ 2583384833 1;
+BA_ "GenMsgSendType" BO_ 2583384833 0;
+BA_ "GenMsgCycleTime" BO_ 2583384833 20;
+BA_ "VFrameFormat" BO_ 2583384834 1;
+BA_ "GenMsgILSupport" BO_ 2583384834 1;
+BA_ "GenMsgSendType" BO_ 2583384834 0;
+BA_ "GenMsgCycleTime" BO_ 2583384834 20;
+BA_ "VFrameFormat" BO_ 2583384837 1;
+BA_ "GenMsgILSupport" BO_ 2583384837 1;
+BA_ "GenMsgSendType" BO_ 2583384837 0;
+BA_ "GenMsgCycleTime" BO_ 2583384837 20;
+BA_ "VFrameFormat" BO_ 2583384325 1;
+BA_ "GenMsgILSupport" BO_ 2583384325 1;
+BA_ "GenMsgSendType" BO_ 2583384325 0;
+BA_ "GenMsgCycleTime" BO_ 2583384325 20;
+BA_ "VFrameFormat" BO_ 2583384326 1;
+BA_ "GenMsgILSupport" BO_ 2583384326 1;
+BA_ "GenMsgSendType" BO_ 2583384326 0;
+BA_ "GenMsgCycleTime" BO_ 2583384326 20;
+BA_ "VFrameFormat" BO_ 2583384322 1;
+BA_ "GenMsgILSupport" BO_ 2583384322 1;
+BA_ "GenMsgSendType" BO_ 2583384322 0;
+BA_ "GenMsgCycleTime" BO_ 2583384322 20;
+BA_ "VFrameFormat" BO_ 2583384324 1;
+BA_ "GenMsgILSupport" BO_ 2583384324 1;
+BA_ "GenMsgSendType" BO_ 2583384324 0;
+BA_ "GenMsgCycleTime" BO_ 2583384324 50;
+BA_ "VFrameFormat" BO_ 2583384323 1;
+BA_ "GenMsgILSupport" BO_ 2583384323 1;
+BA_ "GenMsgSendType" BO_ 2583384323 0;
+BA_ "GenMsgCycleTime" BO_ 2583384323 20;
+BA_ "VFrameFormat" BO_ 2583384327 1;
+BA_ "GenMsgILSupport" BO_ 2583384327 1;
+BA_ "GenMsgSendType" BO_ 2583384327 0;
+BA_ "GenMsgCycleTime" BO_ 2583384327 100;
+BA_ "VFrameFormat" BO_ 2583384321 1;
+BA_ "GenMsgILSupport" BO_ 2583384321 1;
+BA_ "GenMsgSendType" BO_ 2583384321 0;
+BA_ "GenMsgCycleTime" BO_ 2583384321 20;
+BA_ "VFrameFormat" BO_ 2583384328 1;
+BA_ "GenMsgILSupport" BO_ 2583384328 1;
+BA_ "GenMsgSendType" BO_ 2583384328 0;
+BA_ "GenMsgCycleTime" BO_ 2583384328 50;
+BA_ "GenSigStartValue" SG_ 2432434177 M_Pwm_Freq 1000;
+BA_ "GenSigStartValue" SG_ 2583384071 IFB_CalRpt_CalibOffset 32768;
+BA_ "GenSigStartValue" SG_ 335 B0_Rx_A 0;
+BA_ "GenSigStartValue" SG_ 335 B1_Rx_A 0;
+BA_ "GenSigStartValue" SG_ 335 B2_Rx_A 0;
+BA_ "GenSigStartValue" SG_ 335 B3_Rx_A 0;
+BA_ "GenSigStartValue" SG_ 335 B4_Rx_A 0;
+BA_ "GenSigStartValue" SG_ 335 B5_Rx_A 0;
+BA_ "GenSigStartValue" SG_ 335 B6_Rx_A 0;
+BA_ "GenSigStartValue" SG_ 335 B7_Rx_A 0;
+BA_ "GenSigStartValue" SG_ 235 B0_Tx_A 0;
+BA_ "GenSigStartValue" SG_ 235 B1_Tx_A 0;
+BA_ "GenSigStartValue" SG_ 235 B2_Tx_A 0;
+BA_ "GenSigStartValue" SG_ 235 B3_Tx_A 0;
+BA_ "GenSigStartValue" SG_ 235 B4_Tx_A 0;
+BA_ "GenSigStartValue" SG_ 235 B5_Tx_A 0;
+BA_ "GenSigStartValue" SG_ 235 B6_Tx_A 0;
+BA_ "GenSigStartValue" SG_ 235 B7_Tx_A 0;
+BA_ "GenSigStartValue" SG_ 2583384065 IFB_OBCCmd_WorkModeCmd 0;
+BA_ "GenSigStartValue" SG_ 2583384065 IFB_OBCCmd_HvVol_Set 0;
+BA_ "GenSigStartValue" SG_ 2583384065 IFB_OBCCmd_HvCur_Set 0;
+BA_ "GenSigStartValue" SG_ 2583384065 IFB_OBCCmd_IacLimit 0;
+BA_ "GenSigStartValue" SG_ 2583384065 IFB_OBCCmd_OBC_FaultClear 0;
+BA_ "GenSigStartValue" SG_ 2583384065 IFB_OBCCmd_V2L_Frequency 0;
+BA_ "GenSigStartValue" SG_ 2583384065 IFB_OBCCmd_PFSet 120;
+BA_ "GenSigStartValue" SG_ 2583384066 IFB_DCCmd_WorkModeCmd 0;
+BA_ "GenSigStartValue" SG_ 2583384066 IFB_DCCmd_LvVolSet 0;
+BA_ "GenSigStartValue" SG_ 2583384066 IFB_DCCmd_LvCurSet 3000;
+BA_ "GenSigStartValue" SG_ 2583384066 IFB_DCCmd_PreHvVolSet 0;
+BA_ "GenSigStartValue" SG_ 2583384066 IFB_DCCmd_Resvd0 0;
+BA_ "GenSigStartValue" SG_ 2583384066 IFB_DCCmd_DCDC_FaultClear 0;
+BA_ "GenSigStartValue" SG_ 2583384066 IFB_DCCmd_Resvd1 0;
+BA_ "GenSigStartValue" SG_ 2583384066 IFB_DCCmd_Resvd2 0;
+BA_ "GenSigStartValue" SG_ 2583384066 IFB_DCCmd_Resvd3 0;
+BA_ "GenSigStartValue" SG_ 2583384067 IFB_Com_Temp_WaterCalc1 500;
+BA_ "GenSigStartValue" SG_ 2583385089 IPS_Debug_TestByte0 0;
+BA_ "GenSigStartValue" SG_ 2583385089 IPS_Debug_TestByte1 0;
+BA_ "GenSigStartValue" SG_ 2583385089 IPS_Debug_TestByte2 0;
+BA_ "GenSigStartValue" SG_ 2583385089 IPS_Debug_TestByte3 0;
+BA_ "GenSigStartValue" SG_ 2583385089 IPS_Debug_TestByte4 0;
+BA_ "GenSigStartValue" SG_ 2583385089 IPS_Debug_TestByte5 0;
+BA_ "GenSigStartValue" SG_ 2583385089 IPS_Debug_TestByte6 0;
+BA_ "GenSigStartValue" SG_ 2583385089 IPS_Debug_TestByte7 0;
+BA_ "GenSigStartValue" SG_ 2583385090 IPS_Debug2_TestByte0 0;
+BA_ "GenSigStartValue" SG_ 2583385090 IPS_Debug2_TestByte1 0;
+BA_ "GenSigStartValue" SG_ 2583385090 IPS_Debug2_TestByte2 0;
+BA_ "GenSigStartValue" SG_ 2583385090 IPS_Debug2_TestByte3 0;
+BA_ "GenSigStartValue" SG_ 2583385090 IPS_Debug2_TestByte4 0;
+BA_ "GenSigStartValue" SG_ 2583385090 IPS_Debug2_TestByte5 0;
+BA_ "GenSigStartValue" SG_ 2583385090 IPS_Debug2_TestByte6 0;
+BA_ "GenSigStartValue" SG_ 2583385090 IPS_Debug2_TestByte7 0;
+BA_ "GenSigStartValue" SG_ 2583384580 IFB_L_FI_FaultByte0 0;
+BA_ "GenSigStartValue" SG_ 2583384580 IFB_L_FI_FaultByte1 0;
+BA_ "GenSigStartValue" SG_ 2583384580 IFB_L_FI_FaultByte2 0;
+BA_ "GenSigStartValue" SG_ 2583384580 IFB_L_FI_FaultByte3 0;
+BA_ "GenSigStartValue" SG_ 2583384580 IFB_L_FI_FaultByte4 0;
+BA_ "GenSigStartValue" SG_ 2583384580 IFB_L_FI_FaultByte5 0;
+BA_ "GenSigStartValue" SG_ 2583384580 IFB_L_FI_FaultResvd0 0;
+BA_ "GenSigStartValue" SG_ 2583384579 IFB_L_InRpt_SVCC 0;
+BA_ "GenSigStartValue" SG_ 2583384579 IFB_L_InRpt_Alpha 0;
+BA_ "GenSigStartValue" SG_ 2583384579 IFB_L_InRpt_WorkFreq 0;
+BA_ "GenSigStartValue" SG_ 2583384579 IFB_L_InRpt_HvCurMid 0;
+BA_ "GenSigStartValue" SG_ 2583384579 IFB_L_InRpt_Resvd0 0;
+BA_ "GenSigStartValue" SG_ 2583384579 IFB_L_InRpt_Vloop_RefRpt 0;
+BA_ "GenSigStartValue" SG_ 2583384579 IFB_L_InRpt_Iloop_RefRpt 0;
+BA_ "GenSigStartValue" SG_ 2583384577 IFB_L_IORpt_HvVol 0;
+BA_ "GenSigStartValue" SG_ 2583384577 IFB_L_IORpt_HvCur 0;
+BA_ "GenSigStartValue" SG_ 2583384577 IFB_L_IORpt_Vbulk 0;
+BA_ "GenSigStartValue" SG_ 2583384577 IFB_L_IORpt_Resvd 0;
+BA_ "GenSigStartValue" SG_ 2583384578 IFB_L_StsRpt_SysSts 0;
+BA_ "GenSigStartValue" SG_ 2583384578 IFB_L_StsRpt_MaxPout 0;
+BA_ "GenSigStartValue" SG_ 2583384578 IFB_L_StsRpt_FaultAll 0;
+BA_ "GenSigStartValue" SG_ 2583384578 IFB_L_StsRpt_PFCStop 0;
+BA_ "GenSigStartValue" SG_ 2583384578 IFB_L_StsRpt_Resvd0 0;
+BA_ "GenSigStartValue" SG_ 2583384578 IFB_L_StsRpt_Resvd1 0;
+BA_ "GenSigStartValue" SG_ 2583384581 IFB_L_TmpRpt_Temp1 500;
+BA_ "GenSigStartValue" SG_ 2583384581 IFB_L_TmpRpt_Temp2 500;
+BA_ "GenSigStartValue" SG_ 2583384581 IFB_L_TmpRpt_Resvd0 0;
+BA_ "GenSigStartValue" SG_ 2583384581 IFB_L_TmpRpt_Version 0;
+BA_ "GenSigStartValue" SG_ 2583384581 IFB_L_TmpRpt_Resvd1 0;
+BA_ "GenSigStartValue" SG_ 2583384836 IFB_D_FI_FaultByte0 0;
+BA_ "GenSigStartValue" SG_ 2583384836 IFB_D_FI_FaultByte1 0;
+BA_ "GenSigStartValue" SG_ 2583384836 IFB_D_FI_FaultByte2 0;
+BA_ "GenSigStartValue" SG_ 2583384836 IFB_D_FI_FaultByte3 0;
+BA_ "GenSigStartValue" SG_ 2583384836 IFB_D_FI_FaultByte4 0;
+BA_ "GenSigStartValue" SG_ 2583384836 IFB_D_FI_FaultByte5 0;
+BA_ "GenSigStartValue" SG_ 2583384835 IFB_D_InRpt_LVCC 0;
+BA_ "GenSigStartValue" SG_ 2583384835 IFB_D_InRpt_Duty 0;
+BA_ "GenSigStartValue" SG_ 2583384835 IFB_D_InRpt_IoutMid 0;
+BA_ "GenSigStartValue" SG_ 2583384835 IFB_D_InRpt_Resvd0 0;
+BA_ "GenSigStartValue" SG_ 2583384835 IFB_D_InRpt_Vloop_RefRpt 0;
+BA_ "GenSigStartValue" SG_ 2583384835 IFB_D_InRpt_Iloop_RefRpt 3000;
+BA_ "GenSigStartValue" SG_ 2583384833 IFB_D_IORpt_LvVol 0;
+BA_ "GenSigStartValue" SG_ 2583384833 IFB_D_IORpt_LvCur 3000;
+BA_ "GenSigStartValue" SG_ 2583384833 IFB_D_IORpt_HvVol 0;
+BA_ "GenSigStartValue" SG_ 2583384833 IFB_D_IORpt_HvCur 0;
+BA_ "GenSigStartValue" SG_ 2583384834 IFB_D_StsRpt_SysSts 0;
+BA_ "GenSigStartValue" SG_ 2583384834 IFB_D_StsRpt_SRSts 0;
+BA_ "GenSigStartValue" SG_ 2583384834 IFB_D_StsRpt_MaxPout 0;
+BA_ "GenSigStartValue" SG_ 2583384834 IFB_D_StsRpt_Resvd0 0;
+BA_ "GenSigStartValue" SG_ 2583384837 IFB_D_TmpRpt_Temp1 500;
+BA_ "GenSigStartValue" SG_ 2583384837 IFB_D_TmpRpt_Temp2 500;
+BA_ "GenSigStartValue" SG_ 2583384837 IFB_D_TmpRpt_Resvd0 0;
+BA_ "GenSigStartValue" SG_ 2583384837 IFB_D_TmpRpt_Version 0;
+BA_ "GenSigStartValue" SG_ 2583384837 IFB_D_TmpRpt_Resvd1 0;
+BA_ "GenSigStartValue" SG_ 2583384325 PFC_FI_Fault1Byte0 0;
+BA_ "GenSigStartValue" SG_ 2583384325 PFC_FI_Fault1Byte1 0;
+BA_ "GenSigStartValue" SG_ 2583384325 PFC_FI_Fault1Byte2 0;
+BA_ "GenSigStartValue" SG_ 2583384325 PFC_FI_Fault1Byte3 0;
+BA_ "GenSigStartValue" SG_ 2583384325 PFC_FI_Fault1Byte4 0;
+BA_ "GenSigStartValue" SG_ 2583384325 PFC_FI_Fault1Byte5 0;
+BA_ "GenSigStartValue" SG_ 2583384325 PFC_FI_Fault1Resvd0 0;
+BA_ "GenSigStartValue" SG_ 2583384326 PFC_FI_Fault2Byte0 0;
+BA_ "GenSigStartValue" SG_ 2583384326 PFC_FI_Fault2Byte1 0;
+BA_ "GenSigStartValue" SG_ 2583384326 PFC_FI_Fault2Byte2 0;
+BA_ "GenSigStartValue" SG_ 2583384326 PFC_FI_Fault2Byte3 0;
+BA_ "GenSigStartValue" SG_ 2583384326 PFC_FI_Fault2Byte4 0;
+BA_ "GenSigStartValue" SG_ 2583384326 PFC_FI_Fault2Byte5 0;
+BA_ "GenSigStartValue" SG_ 2583384326 PFC_FI_Fault2Resvd0 0;
+BA_ "GenSigStartValue" SG_ 2583384322 PFC_IacRpt_IacRms_A 0;
+BA_ "GenSigStartValue" SG_ 2583384322 PFC_IacRpt_IacRms_B 0;
+BA_ "GenSigStartValue" SG_ 2583384322 PFC_IacRpt_IacRms_C 0;
+BA_ "GenSigStartValue" SG_ 2583384322 PFC_IacRpt_Resvd0 0;
+BA_ "GenSigStartValue" SG_ 2583384324 PFC_InRpt_PVCC 0;
+BA_ "GenSigStartValue" SG_ 2583384324 PFC_InRpt_VacMid 0;
+BA_ "GenSigStartValue" SG_ 2583384324 PFC_InRpt_IacMid 0;
+BA_ "GenSigStartValue" SG_ 2583384324 PFC_InRpt_Vbulk 0;
+BA_ "GenSigStartValue" SG_ 2583384324 PFC_InRpt_Vloop_RefRpt 0;
+BA_ "GenSigStartValue" SG_ 2583384324 PFC_InRpt_Iloop_RefRpt 0;
+BA_ "GenSigStartValue" SG_ 2583384323 PFC_StsRpt_SysSts 0;
+BA_ "GenSigStartValue" SG_ 2583384323 PFC_StsRpt_RelaySts 0;
+BA_ "GenSigStartValue" SG_ 2583384323 PFC_StsRpt_MaxInvertPower 0;
+BA_ "GenSigStartValue" SG_ 2583384323 PFC_StsRpt_FaultAll 0;
+BA_ "GenSigStartValue" SG_ 2583384323 PFC_StsRpt_LCStop 0;
+BA_ "GenSigStartValue" SG_ 2583384323 PFC_StsRpt_Resvd0 0;
+BA_ "GenSigStartValue" SG_ 2583384327 PFC_TmpRpt_Temp1 500;
+BA_ "GenSigStartValue" SG_ 2583384327 PFC_TmpRpt_Temp2 500;
+BA_ "GenSigStartValue" SG_ 2583384327 PFC_TmpRpt_Version 0;
+BA_ "GenSigStartValue" SG_ 2583384321 PFC_VacRpt_VacRms_A 0;
+BA_ "GenSigStartValue" SG_ 2583384321 PFC_VacRpt_VacRms_B 0;
+BA_ "GenSigStartValue" SG_ 2583384321 PFC_VacRpt_VacRms_C 0;
+BA_ "GenSigStartValue" SG_ 2583384321 PFC_VacRpt_VacFrq 0;
+BA_ "GenSigStartValue" SG_ 2583384321 PFC_VacRpt_ACType 0;
+BA_ "GenSigStartValue" SG_ 2583384321 PFC_VacRpt_ACSeq 0;
+BA_ "GenSigStartValue" SG_ 2583384328 PFC_V_VerSection 0;
+BA_ "GenSigStartValue" SG_ 2583384328 PFC_V_VerInfo1_8_15 0;
+BA_ "GenSigStartValue" SG_ 2583384328 PFC_V_VerInfo2_9_16 0;
+BA_ "GenSigStartValue" SG_ 2583384328 PFC_V_VerInfo3_10_17 0;
+BA_ "GenSigStartValue" SG_ 2583384328 PFC_V_VerInfo4_11_18 0;
+BA_ "GenSigStartValue" SG_ 2583384328 PFC_V_VerInfo5_12_19 0;
+BA_ "GenSigStartValue" SG_ 2583384328 PFC_V_VerInfo6_13_20 0;
+BA_ "GenSigStartValue" SG_ 2583384328 PFC_V_VerInfo7_14_21 0;
+VAL_ 2432434178 M_Gpio_Set 1 "Set" 0 "Clear" ;
+VAL_ 2432434178 M_Gpio_Dir 1 "Output" 0 "Input" ;
+
