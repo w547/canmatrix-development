@@ -1021,12 +1021,10 @@ def load(f, **options):  # type: (typing.IO, **typing.Any) -> canmatrix.CanMatri
         for signal in frame.signals:
             if "GenSigStartValue" in db.signal_defines \
                     and db.signal_defines["GenSigStartValue"].defaultValue is not None:
-                default_value = float_factory(db.signal_defines["GenSigStartValue"].defaultValue)
+                default_value = signal.phys2raw(float_factory(db.signal_defines["GenSigStartValue"].defaultValue))
             else:
-                default_value = 0
+                default_value = signal.phys2raw(None)
             gen_sig_start_value = float_factory(signal.attributes.get("GenSigStartValue", default_value))
-            if "GenSigStartValue" not in signal.attributes:
-                signal.add_attribute("GenSigStartValue", str(gen_sig_start_value))
             signal.initial_value = (gen_sig_start_value * signal.factor) + signal.offset
             signal.cycle_time = int(signal.attributes.get("GenSigCycleTime", 0))
             if signal.attribute("SystemSignalLongSymbol") is not None:

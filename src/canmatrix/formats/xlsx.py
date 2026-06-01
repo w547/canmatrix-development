@@ -138,9 +138,11 @@ def dump(db, filename, **options):
         'Signal Length [Bit]',
         'Signal Default',
         'GenSigStartValue',
+        'Factor',
+        'Offset',
         'Signal Not Available',
         'Byteorder']
-    head_tail = ['Value', 'Name / Phys. Range', 'Function / Increment Unit', 'Factor', 'Offset']
+    head_tail = ['Value', 'Name / Phys. Range', 'Function / Increment Unit']
 
     workbook = openpyxl.Workbook()
     # ws_name = os.path.basename(filename).replace('.xlsx', '')
@@ -331,7 +333,7 @@ def dump(db, filename, **options):
                 write_excel_line(worksheet, row, front_col, frontRow, signal_style)
 
                 if float(sig.min) != 0 or float(sig.max) != 1.0:
-                    back_row.insert(0, str("%g..%g" % (sig.min, sig.max)))  # type: ignore
+                    back_row.insert(0, str(sig.min) + ".." + str(sig.max))  # type: ignore
                 else:
                     back_row.insert(0, "")
                 back_row.insert(0, "")

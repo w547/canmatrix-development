@@ -160,6 +160,9 @@ def get_signal(db, frame, sig, motorola_bit_format):
     gen_sig_start_value = sig.attributes.get("GenSigStartValue", "")
     front_array.append(gen_sig_start_value)
 
+    front_array.append(str(sig.factor))
+    front_array.append(str(sig.offset))
+
     # SNA-value of signal available
     if "GenSigSNA" in db.signal_defines:
         sna = sig.attribute("GenSigSNA", db=db)
@@ -193,8 +196,5 @@ def get_signal(db, frame, sig, motorola_bit_format):
         # factor == 1.0
         else:
             back_array.append("")
-
-    back_array.append("%g" % float(sig.factor))
-    back_array.append("%g" % float(sig.offset))
 
     return front_array, back_array

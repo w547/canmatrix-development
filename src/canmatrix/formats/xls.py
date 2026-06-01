@@ -111,8 +111,8 @@ def dump(db, file, **options):
                 'DiagRequest', 'DiagResponse', 'DiagState', 'NmMessage', 'GenMsgILSupport',
                 'GenMsgCycleTimeFast', 'GenMsgNoOfRepetitions', 'CANFD_BRS',
                 'Signal Byte No.', 'Signal Bit No.', 'Signal Name', 'Signal Function', 'Signal Length [Bit]',
-                'Signal Default', 'GenSigStartValue', ' Signal Not Available', 'Byteorder']
-    head_tail = ['Value',   'Name / Phys. Range', 'Function / Increment Unit', 'Factor', 'Offset']
+                'Signal Default', 'GenSigStartValue', 'Factor', 'Offset', 'Signal Not Available', 'Byteorder']
+    head_tail = ['Value',   'Name / Phys. Range', 'Function / Increment Unit']
 
     if len(options.get("additionalSignalAttributes", "")) > 0:
         additional_signal_columns = options.get("additionalSignalAttributes").split(",")  # type: typing.List[str]
@@ -272,7 +272,7 @@ def dump(db, file, **options):
                 write_excel_line(worksheet, row, front_col, frontRow, sig_style)
 
                 if float(sig.min) != 0 or float(sig.max) != 1.0:
-                    backRow.insert(0, str("%g..%g" % (sig.min, sig.max)))  # type: ignore
+                    backRow.insert(0, str(sig.min) + ".." + str(sig.max))  # type: ignore
                 else:
                     backRow.insert(0, "")
                 backRow.insert(0, "")
