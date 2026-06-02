@@ -158,6 +158,13 @@ def cli_convert(infile, outfile, silent, verbosity, **options):
     else:
         options["ignoreEncodingErrors"] = "strict"
 
+    if options.get('force_output') is None:
+        infile_lower = infile.lower()
+        if infile_lower.endswith('.dbc'):
+            options['force_output'] = 'xlsx'
+        elif infile_lower.endswith('.xls') or infile_lower.endswith('.xlsx'):
+            options['force_output'] = 'dbc'
+
     canmatrix.convert.convert(infile, outfile, **options)
     return 0
 

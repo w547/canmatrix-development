@@ -117,12 +117,20 @@ def api_convert():
 
         input_format = request.form.get('input_format', '').strip()
         output_format = request.form.get('output_format', '').strip()
-        output_ext = canmatrix.formats.extensionMapping.get(output_format, output_format)
+
+        original_name = secure_filename(file.filename)
+
+        if not output_format:
+            name_lower = original_name.lower()
+            if name_lower.endswith('.dbc'):
+                output_format = 'xlsx'
+            elif name_lower.endswith('.xls') or name_lower.endswith('.xlsx'):
+                output_format = 'dbc'
 
         if not output_format:
             return jsonify({'success': False, 'error': '请选择输出格式'}), 400
 
-        original_name = secure_filename(file.filename)
+        output_ext = canmatrix.formats.extensionMapping.get(output_format, output_format)
         input_path = os.path.join(UPLOAD_FOLDER, original_name)
         try:
             file.save(input_path)

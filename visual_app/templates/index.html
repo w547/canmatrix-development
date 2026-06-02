@@ -391,6 +391,14 @@ function fileInCvt(f){
         sel.value='';badge.classList.remove('show');
         document.getElementById('fmtHint').textContent='\u26A0 无法自动识别 "'+f.name+'" 的格式，请手动选择或确认文件扩展名';
     }
+
+    let outSel=document.getElementById('outFmtCvt');
+    if(fmtKey==='dbc'){
+        outSel.value='xlsx';
+    }else if(fmtKey==='xls'||fmtKey==='xlsx'){
+        outSel.value='dbc';
+    }
+
     updBtnCvt()
 }
 
