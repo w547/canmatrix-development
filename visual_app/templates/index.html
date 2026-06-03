@@ -596,23 +596,7 @@ function renderTreeNode(node, diffMap, side, depth){
     }
     else if(nodeType!=='category'&&nodeType!=='db'&&nodeType!=='signalgroup_category'){diffClass=''}
 
-    if(diffStatus==='changed'&&diffEntry){
-        var detailList=diffEntry.detail_changes||[];
-        var directChanges=diffEntry.changes||[];
-        if(detailList.length>0){
-            var cItems=[];
-            for(var i=0;i<detailList.length;i++){
-                var item=detailList[i];
-                cItems.push(item.label+': <span class=cht-pold>'+escapeHtml(item.old)+'</span> &rarr; <span class=cht-pnew>'+escapeHtml(item.new)+'</span>');
-            }
-            changesHtml='<span class="tn-changes">'+cItems.join('; ')+'</span>';
-            diffDetailRow=buildDiffDetailRow(detailList);
-        }else if(directChanges.length>=2){
-            var oldVal=escapeHtml(String(directChanges[0])),newVal=escapeHtml(String(directChanges[1]));
-            changesHtml='<span class="tn-changes"><span class="ch-old">'+oldVal+'</span> <span class="ch-arrow">&rarr;</span> <span class="ch-new">'+newVal+'</span></span>';
-            diffDetailRow='<div class="tn-diff-detail"><div class="tdd-row tdd-old"><span class="tdd-label">[OLD]</span>'+oldVal+'</div><div class="tdd-row tdd-new"><span class="tdd-label">[NEW]</span>'+newVal+'</div></div>';
-        }
-    }else if(diffStatus==='deleted'){
+    if(diffStatus==='deleted'){
         if(nodeType==='frame'&&node.can_id_hex)diffBadge+=' <span class="tn-meta">'+escapeHtml(node.can_id_hex)+' DLC:'+node.dlc+'</span>';
     }else if(diffStatus==='added'){
         if(nodeType==='frame'&&node.can_id_hex)diffBadge+=' <span class="tn-meta">'+escapeHtml(node.can_id_hex)+' DLC:'+node.dlc+'</span>';
