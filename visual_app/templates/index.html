@@ -797,13 +797,21 @@ function _onTooltipOver(e){
     html+='<div class="cht-ft">'+nodeTypeLabel+' &middot; 差异字段数: '+totalChanges+'</div>';
     _tooltipEl.innerHTML=html;
 
-    var rect=el.getBoundingClientRect();
-    var left=rect.right+10;
-    var top=rect.top;
+    var side=el.getAttribute('data-cmp-tooltip');
     var tw=_tooltipEl.offsetWidth||280;
-    if(left+tw>window.innerWidth-10)left=rect.left-tw-10;
-    if(left<10)left=10;
     var th=_tooltipEl.offsetHeight||200;
+    var resCard=document.getElementById('resCardCmp');
+    var resRect=resCard.getBoundingClientRect();
+    var left, top;
+    if(side==='base'){
+        left=resRect.left-tw-10;
+        if(left<10)left=10;
+    }else{
+        left=resRect.right+10;
+        if(left+tw>window.innerWidth-10)left=window.innerWidth-tw-10;
+        if(left<10)left=10;
+    }
+    top=e.clientY-th/2;
     if(top+th>window.innerHeight-10)top=window.innerHeight-th-10;
     if(top<10)top=10;
     _tooltipEl.style.left=left+'px';
