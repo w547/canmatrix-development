@@ -537,11 +537,20 @@ def _build_diff_map(compare_result):
                     if hasattr(child, 'changes') and child.changes and len(child.changes) >= 2:
                         old_val = str(child.changes[0]) if child.changes[0] is not None else ''
                         new_val = str(child.changes[1]) if child.changes[1] is not None else ''
+                    else:
+                        ref_name = ''
+                        if hasattr(child, 'ref') and child.ref is not None:
+                            ref_name = child.ref.name if hasattr(child.ref, 'name') else str(child.ref)
+                        if child.result in ('deleted', 'removed'):
+                            old_val = ref_name
+                        elif child.result == 'added':
+                            new_val = ref_name
                     details.append({
                         'type': ctype,
                         'label': label,
                         'old': old_val,
                         'new': new_val,
+                        'result': child.result,
                     })
         return details
 

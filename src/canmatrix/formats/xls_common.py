@@ -160,6 +160,29 @@ def get_signal(db, frame, sig, motorola_bit_format):
     gen_sig_start_value = sig.attributes.get("GenSigStartValue", "")
     front_array.append(gen_sig_start_value)
 
+    # ---- Interaction Layer signal attributes ----
+    gen_sig_inactive_value = sig.attributes.get("GenSigInactiveValue", "")
+    front_array.append(gen_sig_inactive_value)
+
+    if "GenSigSendType" in db.signal_defines:
+        gen_sig_send_type = sig.attribute("GenSigSendType", db=db)
+    else:
+        gen_sig_send_type = ""
+    front_array.append(gen_sig_send_type)
+
+    # ---- No category assigned signal attributes ----
+    event_command_signal = sig.attributes.get("EventCommandSignal", "")
+    front_array.append(event_command_signal)
+
+    gatewayed_signals = sig.attributes.get("GatewayedSignals", "")
+    front_array.append(gatewayed_signals)
+
+    gen_sig_invalid_value = sig.attributes.get("GenSigInvalidValue", "")
+    front_array.append(gen_sig_invalid_value)
+
+    gen_sig_timeout_value = sig.attributes.get("GenSigTimeoutValue", "")
+    front_array.append(gen_sig_timeout_value)
+
     front_array.append(str(sig.factor))
     front_array.append(str(sig.offset))
 

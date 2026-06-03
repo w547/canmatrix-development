@@ -111,7 +111,9 @@ def dump(db, file, **options):
                 'DiagRequest', 'DiagResponse', 'DiagState', 'NmMessage', 'GenMsgILSupport',
                 'GenMsgCycleTimeFast', 'GenMsgNoOfRepetitions', 'CANFD_BRS',
                 'Signal Byte No.', 'Signal Bit No.', 'Signal Name', 'Signal Function', 'Signal Length [Bit]',
-                'Signal Default', 'GenSigStartValue', 'Factor', 'Offset', 'Signal Not Available', 'Byteorder']
+                'Signal Default', 'GenSigStartValue', 'GenSigInactiveValue', 'GenSigSendType',
+                'EventCommandSignal', 'GatewayedSignals', 'GenSigInvalidValue', 'GenSigTimeoutValue',
+                'Factor', 'Offset', 'Signal Not Available', 'Byteorder']
     head_tail = ['Value',   'Name / Phys. Range', 'Function / Increment Unit']
 
     if len(options.get("additionalSignalAttributes", "")) > 0:
@@ -382,7 +384,13 @@ def load(file, **options):
     db.add_frame_defines("CANFD_BRS", 'STRING')
 
     launch_types = []  # type: typing.List[str]
+    sig_send_types = []  # type: typing.List[str]
     db.add_signal_defines("GenSigSNA", 'STRING')
+    db.add_signal_defines("GenSigInactiveValue", 'STRING')
+    db.add_signal_defines("EventCommandSignal", 'STRING')
+    db.add_signal_defines("GatewayedSignals", 'STRING')
+    db.add_signal_defines("GenSigInvalidValue", 'STRING')
+    db.add_signal_defines("GenSigTimeoutValue", 'STRING')
 
     # eval search for correct columns:
     index = {}
@@ -432,6 +440,18 @@ def load(file, **options):
             index['signalDefault'] = i
         elif "GenSigStartValue" in value:
             index['genSigStartValue'] = i
+        elif "GenSigInactiveValue" in value:
+            index['genSigInactiveValue'] = i
+        elif "GenSigSendType" in value:
+            index['genSigSendType'] = i
+        elif "EventCommandSignal" in value:
+            index['eventCommandSignal'] = i
+        elif "GatewayedSignals" in value:
+            index['gatewayedSignals'] = i
+        elif "GenSigInvalidValue" in value:
+            index['genSigInvalidValue'] = i
+        elif "GenSigTimeoutValue" in value:
+            index['genSigTimeoutValue'] = i
         elif "Signal Not Ava" in value:
             index['signalSNA'] = i
         elif "Value" in value:
@@ -646,6 +666,38 @@ def load(file, **options):
                     gen_sig_start_value = sh.cell(row_num, index['genSigStartValue']).value
                     if gen_sig_start_value is not None and str(gen_sig_start_value).strip() != '':
                         new_signal.add_attribute("GenSigStartValue", str(gen_sig_start_value).strip())
+
+                if 'genSigInactiveValue' in index:
+                    gen_sig_inactive_value = sh.cell(row_num, index['genSigInactiveValue']).value
+                    if gen_sig_inactive_value is not None and str(gen_sig_inactive_value).strip() != '':
+                        new_signal.add_attribute("GenSigInactiveValue", str(gen_sig_inactive_value).strip())
+
+                if 'genSigSendType' in index:
+                    gen_sig_send_type = sh.cell(row_num, index['genSigSendType']).value
+                    if gen_sig_send_type is not None and str(gen_sig_send_type).strip() != '':
+                        new_signal.add_attribute("GenSigSendType", str(gen_sig_send_type).strip())
+                        if gen_sig_send_type not in sig_send_types:
+                            sig_send_types.append(gen_sig_send_type)
+
+                if 'eventCommandSignal' in index:
+                    event_command_signal = sh.cell(row_num, index['eventCommandSignal']).value
+                    if event_command_signal is not None and str(event_command_signal).strip() != '':
+                        new_signal.add_attribute("EventCommandSignal", str(event_command_signal).strip())
+
+                if 'gatewayedSignals' in index:
+                    gatewayed_signals = sh.cell(row_num, index['gatewayedSignals']).value
+                    if gatewayed_signals is not None and str(gatewayed_signals).strip() != '':
+                        new_signal.add_attribute("GatewayedSignals", str(gatewayed_signals).strip())
+
+                if 'genSigInvalidValue' in index:
+                    gen_sig_invalid_value = sh.cell(row_num, index['genSigInvalidValue']).value
+                    if gen_sig_invalid_value is not None and str(gen_sig_invalid_value).strip() != '':
+                        new_signal.add_attribute("GenSigInvalidValue", str(gen_sig_invalid_value).strip())
+
+                if 'genSigTimeoutValue' in index:
+                    gen_sig_timeout_value = sh.cell(row_num, index['genSigTimeoutValue']).value
+                    if gen_sig_timeout_value is not None and str(gen_sig_timeout_value).strip() != '':
+                        new_signal.add_attribute("GenSigTimeoutValue", str(gen_sig_timeout_value).strip())
                 function = sh.cell(row_num, index['function']).value
 
         value = str(sh.cell(row_num, index['Value']).value)
@@ -715,6 +767,13 @@ def load(file, **options):
     launch_type_enum = "ENUM"
     launch_type_enum += ",".join([' "{}"'.format(launch_type) for launch_type in launch_types if launch_type])
     db.add_frame_defines("GenMsgSendType", launch_type_enum)
+
+    sig_send_type_enum = "ENUM"
+    if "Cyclic" not in sig_send_types:
+        sig_send_types.insert(0, "Cyclic")
+    sig_send_type_enum += ",".join([' "{}"'.format(sig_send_type) for sig_send_type in sig_send_types if sig_send_type])
+    db.add_signal_defines("GenSigSendType", sig_send_type_enum)
+    db.add_define_default("GenSigSendType", "Cyclic")
 
     db.set_fd_type()
     return db

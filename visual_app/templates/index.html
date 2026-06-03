@@ -187,6 +187,17 @@
         .cht-tooltip .cht-pold{color:var(--red);text-decoration:line-through;word-break:break-all}
         .cht-tooltip .cht-parrow{color:var(--text2);flex-shrink:0}
         .cht-tooltip .cht-pnew{color:var(--green);word-break:break-all}
+        .cht-tooltip .cht-section{margin:4px 0}
+        .cht-tooltip .cht-section-title{font-size:.65rem;font-weight:700;padding:5px 14px;letter-spacing:.3px}
+        .cht-tooltip .cht-sec-added{color:var(--green);background:rgba(74,222,128,.06);border-bottom:1px solid rgba(74,222,128,.15)}
+        .cht-tooltip .cht-sec-deleted{color:var(--red);background:rgba(248,113,113,.06);border-bottom:1px solid rgba(248,113,113,.15)}
+        .cht-tooltip .cht-sec-changed{color:var(--yellow);background:rgba(251,191,36,.06);border-bottom:1px solid rgba(251,191,36,.15)}
+        .cht-tooltip .cht-item{display:flex;align-items:center;gap:8px;padding:4px 14px;font-size:.65rem;border-bottom:1px solid rgba(255,255,255,.03)}
+        .cht-tooltip .cht-item:last-child{border-bottom:none}
+        .cht-tooltip .cht-item-added .cht-ival{color:var(--green);font-weight:600}
+        .cht-tooltip .cht-item-deleted .cht-ival{color:var(--red);text-decoration:line-through;font-weight:600}
+        .cht-tooltip .cht-iname{color:var(--text2);flex-shrink:0;min-width:80px}
+        .cht-tooltip .cht-ival{word-break:break-all}
         .cht-tooltip .cht-ft{background:rgba(255,255,255,.02);padding:6px 14px;font-size:.6rem;color:var(--text2);text-align:center;border-top:1px solid rgba(255,255,255,.04)}
 
         .sstats-bar{display:flex;gap:8px;align-items:center;padding:4px 14px;flex-shrink:0;border-top:1px solid var(--border);background:var(--surface2);font-size:.68rem;color:var(--text2)}
@@ -762,23 +773,59 @@ function _onTooltipOver(e){
     var nodeType=keyParts[0]||'';
     var nodeName=keyParts.slice(1).join('::')||'';
     var nodeTypeLabel=typeMap[nodeType]||nodeType;
-    var label=el.getAttribute('data-cmp-label')||'';
     var html='';
     html+='<div class="cht-hd"><div class="cht-title">&#x26A0; 变更检测 ~ [CHANGED]</div><div class="cht-node">'+escapeHtml(nodeTypeLabel)+' &raquo; <strong>'+escapeHtml(nodeName)+'</strong></div></div>';
     html+='<div class="cht-bd">';
-    var totalChanges=detailList.length>0?detailList.length:directChanges.length;
-    html+='<div class="cht-reason"><strong>判断依据:</strong> 该 '+nodeTypeLabel+' 在两个 DBC 文件中存在 <strong>'+totalChanges+'</strong> 项属性差异。系统逐字段对比后发现以下值不匹配：</div>';
+
+    var addedItems=[], deletedItems=[], changedItems=[];
     if(detailList.length>0){
         for(var i=0;i<detailList.length;i++){
             var d=detailList[i];
-            html+='<div class="cht-prop"><span class="cht-pname">'+escapeHtml(d.label)+'</span><span class="cht-pold">'+escapeHtml(d.old)+'</span><span class="cht-parrow">&rarr;</span><span class="cht-pnew">'+escapeHtml(d.new)+'</span></div>';
+            if(d.result==='added'){
+                addedItems.push(d);
+            }else if(d.result==='deleted'||d.result==='removed'){
+                deletedItems.push(d);
+            }else{
+                changedItems.push(d);
+            }
+        }
+    }
+    var totalChanges=addedItems.length+deletedItems.length+changedItems.length;
+    if(totalChanges===0&&directChanges.length>=2)totalChanges=1;
+
+    html+='<div class="cht-reason"><strong>判断依据:</strong> 该 '+nodeTypeLabel+' 在两个 DBC 文件中存在 <strong>'+totalChanges+'</strong> 项差异。系统逐字段对比后发现以下变更：</div>';
+
+    if(detailList.length>0){
+        if(addedItems.length>0){
+            html+='<div class="cht-section"><div class="cht-section-title cht-sec-added">&#x2795; 新增项 ('+addedItems.length+')</div>';
+            for(var i=0;i<addedItems.length;i++){
+                var d=addedItems[i];
+                html+='<div class="cht-item cht-item-added"><span class="cht-iname">'+escapeHtml(d.label)+'</span><span class="cht-ival">'+escapeHtml(d.new||d.old||'(新增)')+'</span></div>';
+            }
+            html+='</div>';
+        }
+        if(deletedItems.length>0){
+            html+='<div class="cht-section"><div class="cht-section-title cht-sec-deleted">&#x2796; 删除项 ('+deletedItems.length+')</div>';
+            for(var i=0;i<deletedItems.length;i++){
+                var d=deletedItems[i];
+                html+='<div class="cht-item cht-item-deleted"><span class="cht-iname">'+escapeHtml(d.label)+'</span><span class="cht-ival">'+escapeHtml(d.old||d.new||'(已删除)')+'</span></div>';
+            }
+            html+='</div>';
+        }
+        if(changedItems.length>0){
+            html+='<div class="cht-section"><div class="cht-section-title cht-sec-changed">&#x1F504; 修改项 ('+changedItems.length+')</div>';
+            for(var i=0;i<changedItems.length;i++){
+                var d=changedItems[i];
+                html+='<div class="cht-prop"><span class="cht-pname">'+escapeHtml(d.label)+'</span><span class="cht-pold">'+escapeHtml(d.old)+'</span><span class="cht-parrow">&rarr;</span><span class="cht-pnew">'+escapeHtml(d.new)+'</span></div>';
+            }
+            html+='</div>';
         }
     }else if(directChanges.length>=2){
         html+='<div class="cht-vs"><div class="cht-vs-old"><span class="cht-vs-label">[OLD] 基准文件</span>'+escapeHtml(directChanges[0])+'</div><div class="cht-vs-new"><span class="cht-vs-label">[NEW] 对比文件</span>'+escapeHtml(directChanges[1])+'</div></div>';
     }
     html+='<div class="cht-rule"><div class="cht-rule-label">&#x1F50D; 判断标准</div><div class="cht-reason" style="border:none;padding:4px 0">系统对两个 DBC 文件中 <strong>相同名称</strong> 的 '+nodeTypeLabel+' 进行 <strong>逐字段</strong> 深度比较。当任意字段值不一致时，标记为 <strong style="color:var(--yellow)">CHANGED</strong>。</div></div>';
     html+='</div>';
-    html+='<div class="cht-ft">'+nodeTypeLabel+' &middot; 差异字段数: '+totalChanges+'</div>';
+    html+='<div class="cht-ft">'+nodeTypeLabel+' &middot; 差异项数: '+totalChanges+'</div>';
     _tooltipEl.innerHTML=html;
 
     var side=el.getAttribute('data-cmp-tooltip');
