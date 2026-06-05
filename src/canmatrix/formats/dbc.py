@@ -168,6 +168,7 @@ def dump(in_db, f, **options):
 
     if db.contains_fd or db.contains_j1939:
         for frame in db.frames:
+<<<<<<< HEAD
             existing_vff = frame.attributes.get("VFrameFormat", "")
             if existing_vff:
                 if "_FD" in str(existing_vff):
@@ -175,6 +176,8 @@ def dump(in_db, f, **options):
                 if "J1939" in str(existing_vff):
                     frame.is_j1939 = True
 
+=======
+>>>>>>> 5ac5896d2c80fc240d7eee71193c939bd7fa642f
             if frame.is_fd:
                 if frame.arbitration_id.extended:
                     frame.add_attribute("VFrameFormat", "ExtendedCAN_FD")
