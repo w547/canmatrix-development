@@ -1,0 +1,63 @@
+VERSION "created by canmatrix"
+
+
+
+NS_ : 
+
+BS_:
+
+BU_: NodeA NodeB NodeC 
+
+
+BO_ 256 TestFrame: 8 NodeA
+ SG_ Sig1 : 7|8@0+ (1,0) [0|255] "" NodeB
+ SG_ Sig2 : 15|8@0+ (1,0) [0|255] "" NodeB
+
+BO_ 512 TestFrame2: 8 NodeB
+ SG_ Sig3 : 0|16@0+ (0.1,0) [0|6553.5] "V" NodeA,NodeC
+ SG_ Sig4 : 16|16@0+ (0.1,0) [0|6553.5] "V" NodeA,NodeC
+
+
+BA_DEF_ SG_ "GenSigStartValue" INT 0 65535;
+BA_DEF_ SG_ "GenSigInactiveValue" STRING ;
+BA_DEF_ SG_ "GenSigSendType" STRING ;
+BA_DEF_ SG_ "EventCommandSignal" STRING ;
+BA_DEF_ SG_ "GatewayedSignals" STRING ;
+BA_DEF_ SG_ "GenSigInvalidValue" STRING ;
+BA_DEF_ SG_ "GenSigTimeoutValue" STRING ;
+
+BA_ "GenSigStartValue" SG_ 256 Sig1 100;
+BA_ "GenSigInactiveValue" SG_ 256 Sig1 "0";
+BA_ "GenSigSendType" SG_ 256 Sig1 "Cyclic";
+BA_ "EventCommandSignal" SG_ 256 Sig1 "Yes";
+BA_ "GatewayedSignals" SG_ 256 Sig1 "SigA,SigB";
+BA_ "GenSigInvalidValue" SG_ 256 Sig1 "255";
+BA_ "GenSigTimeoutValue" SG_ 256 Sig1 "500";
+
+BA_ "GenSigStartValue" SG_ 256 Sig2 50;
+BA_ "GenSigInactiveValue" SG_ 256 Sig2 "0xFF";
+BA_ "GenSigSendType" SG_ 256 Sig2 "OnChange";
+BA_ "EventCommandSignal" SG_ 256 Sig2 "No";
+BA_ "GatewayedSignals" SG_ 256 Sig2 "";
+BA_ "GenSigInvalidValue" SG_ 256 Sig2 "0";
+BA_ "GenSigTimeoutValue" SG_ 256 Sig2 "1000";
+
+BA_ "GenSigStartValue" SG_ 512 Sig3 200;
+BA_ "GenSigInactiveValue" SG_ 512 Sig3 "0xFFFF";
+BA_ "GenSigSendType" SG_ 512 Sig3 "IfActive";
+BA_ "EventCommandSignal" SG_ 512 Sig3 "Yes";
+BA_ "GatewayedSignals" SG_ 512 Sig3 "SigX";
+BA_ "GenSigInvalidValue" SG_ 512 Sig3 "65535";
+BA_ "GenSigTimeoutValue" SG_ 512 Sig3 "2000";
+
+BA_ "GenSigStartValue" SG_ 512 Sig4 0;
+BA_ "GenSigInactiveValue" SG_ 512 Sig4 "0";
+BA_ "GenSigSendType" SG_ 512 Sig4 "NoSigSendType";
+BA_ "EventCommandSignal" SG_ 512 Sig4 "No";
+BA_ "GatewayedSignals" SG_ 512 Sig4 "";
+BA_ "GenSigInvalidValue" SG_ 512 Sig4 "0";
+BA_ "GenSigTimeoutValue" SG_ 512 Sig4 "3000";
+
+
+CM_ BO_ 256 "Test frame with signal attributes";
+CM_ BO_ 512 "Second test frame with signal attributes";

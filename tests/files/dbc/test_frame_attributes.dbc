@@ -1,0 +1,77 @@
+VERSION "created by canmatrix"
+
+
+
+NS_ : 
+
+BS_:
+
+BU_: NodeA NodeB NodeC 
+
+
+BO_ 256 DiagFrame: 8 NodeA
+ SG_ DiagSig1 : 7|8@0+ (1,0) [0|255] "" NodeB
+ SG_ DiagSig2 : 15|8@0+ (1,0) [0|255] "" NodeB
+
+BO_ 512 NmFrame: 8 NodeB
+ SG_ NmSig1 : 0|8@0+ (1,0) [0|255] "" NodeA,NodeC
+ SG_ NmSig2 : 8|8@0+ (1,0) [0|255] "" NodeA,NodeC
+
+BO_ 768 InteractionFrame: 8 NodeC
+ SG_ ILSig1 : 0|16@0+ (0.1,0) [0|6553.5] "V" NodeA,NodeB
+ SG_ ILSig2 : 16|16@0+ (0.1,0) [0|6553.5] "V" NodeA,NodeB
+
+BO_ 1024 CanFDFrame: 64 NodeA
+ SG_ FDSig1 : 0|32@0+ (1,0) [0|4294967295] "" NodeB
+
+BO_ 1280 CanFDSmallFrame: 8 NodeA
+ SG_ FDSmallSig1 : 0|16@0+ (1,0) [0|65535] "" NodeB
+
+
+BA_DEF_ BO_ "DiagRequest" STRING ;
+BA_DEF_ BO_ "DiagResponse" STRING ;
+BA_DEF_ BO_ "DiagState" STRING ;
+BA_DEF_ BO_ "NmMessage" STRING ;
+BA_DEF_ BO_ "GenMsgILSupport" STRING ;
+BA_DEF_ BO_ "GenMsgSendType" STRING ;
+BA_DEF_ BO_ "GenMsgDelayTime" INT 0 65535;
+BA_DEF_ BO_ "GenMsgCycleTimeFast" INT 0 65535;
+BA_DEF_ BO_ "GenMsgNoOfRepetitions" INT 0 65535;
+BA_DEF_ BO_ "CANFD_BRS" STRING ;
+BA_DEF_ BO_ "VFrameFormat" STRING ;
+BA_DEF_ BO_ "GenMsgCycleTime" INT 0 65535;
+
+BA_ "DiagRequest" BO_ 256 "1";
+BA_ "DiagResponse" BO_ 256 "1";
+BA_ "DiagState" BO_ 256 "DiagState_Default";
+BA_ "GenMsgSendType" BO_ 256 "Cyclic";
+BA_ "GenMsgDelayTime" BO_ 256 10;
+
+BA_ "NmMessage" BO_ 512 "NmActive";
+BA_ "GenMsgSendType" BO_ 512 "Cyclic";
+BA_ "GenMsgDelayTime" BO_ 512 100;
+
+BA_ "GenMsgILSupport" BO_ 768 "Yes";
+BA_ "GenMsgSendType" BO_ 768 "Cyclic";
+BA_ "GenMsgDelayTime" BO_ 768 50;
+BA_ "GenMsgCycleTimeFast" BO_ 768 20;
+BA_ "GenMsgNoOfRepetitions" BO_ 768 3;
+
+BA_ "CANFD_BRS" BO_ 1024 "On";
+BA_ "VFrameFormat" BO_ 1024 "StandardCAN_FD";
+BA_ "GenMsgSendType" BO_ 1024 "Cyclic";
+BA_ "GenMsgDelayTime" BO_ 1024 200;
+BA_ "GenMsgCycleTimeFast" BO_ 1024 10;
+BA_ "GenMsgNoOfRepetitions" BO_ 1024 1;
+
+BA_ "CANFD_BRS" BO_ 1280 "On";
+BA_ "VFrameFormat" BO_ 1280 "StandardCAN_FD";
+BA_ "GenMsgSendType" BO_ 1280 "Cyclic";
+BA_ "GenMsgDelayTime" BO_ 1280 100;
+
+
+CM_ BO_ 256 "Diagnostic request frame";
+CM_ BO_ 512 "Network management frame";
+CM_ BO_ 768 "Interaction layer frame";
+CM_ BO_ 1024 "CAN FD frame with BRS";
+CM_ BO_ 1280 "CAN FD frame with DLC <= 8";
