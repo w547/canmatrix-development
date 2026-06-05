@@ -103,7 +103,7 @@
         .collapse-diff{cursor:pointer;color:var(--accent);font-size:.75rem;user-select:none;margin-left:4px}
         .diff-children{margin-left:12px}
 
-        .cmp-split{display:grid;grid-template-columns:1fr 4px 1fr;gap:0;margin-top:12px;min-height:400px;max-height:70vh;overflow:hidden}
+        .cmp-split{display:grid;grid-template-columns:1fr 4px 1fr 12px;gap:0;margin-top:12px;min-height:400px;max-height:70vh;overflow:hidden}
         .cmp-panel{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
         .cmp-panel-header{background:var(--surface2);padding:10px 14px;font-size:.82rem;font-weight:600;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);flex-shrink:0}
         .cmp-panel-header .p-label{font-size:.68rem;color:var(--text2);padding:2px 8px;border-radius:4px;background:var(--surface);text-transform:uppercase;letter-spacing:.5px}
@@ -113,6 +113,12 @@
         .cmp-panel-body::-webkit-scrollbar-track{background:var(--surface)}
         .cmp-panel-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
         .cmp-panel-body::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+        .cmp-sync-scrollbar{position:relative;background:rgba(71,85,105,.25);border-radius:0 4px 4px 0;cursor:pointer;margin:1px 0}
+        .cmp-sync-scrollbar .sync-thumb{position:absolute;left:1px;right:1px;min-height:20px;border-radius:3px;background:var(--accent2);opacity:.7;cursor:grab;transition:opacity .15s,background .15s}
+        .cmp-sync-scrollbar .sync-thumb:hover{opacity:.9}
+        .cmp-sync-scrollbar.dragging .sync-thumb{opacity:1;cursor:grabbing;background:var(--accent)}
+        .cmp-sync-scrollbar .sync-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-90deg);font-size:.5rem;color:var(--accent2);letter-spacing:1px;font-weight:700;opacity:.5;pointer-events:none;white-space:nowrap}
 
         .cmp-divider{background:var(--border);border-radius:2px;cursor:col-resize;transition:background .2s}
         .cmp-divider:hover{background:var(--accent)}
@@ -322,9 +328,9 @@
 <div class="card-title"><span class="icon set">&#x2699;&#xFE0F;</span> 步骤2: 比较维度设置</div>
 <div style="font-size:.78rem;color:var(--text2);margin-bottom:12px">选择需要参与比较的维度，未勾选的维度将在比较中忽略</div>
 <div class="opts">
-<div class="opt"><input type="checkbox" id="pComments" checked><label for="pComments">比较注释差异 (Comments)</label></div>
-<div class="opt"><input type="checkbox" id="pAttrs" checked><label for="pAttrs">比较属性差异 (Attributes)</label></div>
-<div class="opt"><input type="checkbox" id="pValTabs"><label for="pValTabs">忽略值表差异 (ValueTables)</label></div>
+<div class="opt"><input type="checkbox" id="pComments"><label for="pComments">比较注释差异 (Comments)</label></div>
+<div class="opt"><input type="checkbox" id="pAttrs"><label for="pAttrs">比较属性差异 (Attributes)</label></div>
+<div class="opt"><input type="checkbox" id="pValTabs" checked><label for="pValTabs">忽略值表差异 (ValueTables)</label></div>
 <div class="opt"><input type="checkbox" id="pDefs"><label for="pDefs">忽略定义差异 (Defines)</label></div>
 </div></div>
 
@@ -352,6 +358,7 @@
         <div class="cmp-panel-body" id="cmpBodyRight"></div>
         <div class="sstats-bar" id="cmpStatsRight"></div>
     </div>
+    <div class="cmp-sync-scrollbar" id="cmpSyncScrollbar"><span class="sync-label">SYNC</span><div class="sync-thumb" id="cmpSyncThumb"></div></div>
 </div>
 </div>
 </div>
@@ -571,6 +578,7 @@ function showResCmp(d){
     initTooltip(d.diff_map);
 
     initDivider();
+    initSyncScrollbar();
 
     card.scrollIntoView({behavior:'smooth'});
 }
@@ -678,6 +686,22 @@ function toggleTreeNode(rowEl){
     }else{
         arrow.classList.remove('open');
     }
+    setTimeout(function(){
+        var rightBody=document.getElementById('cmpBodyRight');
+        var syncThumb=document.getElementById('cmpSyncThumb');
+        if(rightBody.scrollHeight>rightBody.clientHeight){
+            syncThumb.style.display='';
+            var syncBar=document.getElementById('cmpSyncScrollbar');
+            var trackHeight=syncBar.clientHeight;
+            var thumbHeight=Math.max(20,(rightBody.clientHeight/rightBody.scrollHeight)*trackHeight);
+            syncThumb.style.height=thumbHeight+'px';
+            var thumbTravel=trackHeight-thumbHeight;
+            var scrollPct=rightBody.scrollTop/(rightBody.scrollHeight-rightBody.clientHeight);
+            syncThumb.style.top=(scrollPct*thumbTravel)+'px';
+        }else{
+            syncThumb.style.display='none';
+        }
+    },0);
 }
 
 function updateSideStats(tree1, tree2, diffMap){
@@ -728,14 +752,95 @@ function initDivider(){
     });
     document.addEventListener('mousemove',function(e){
         if(!isDragging)return;
-        var dx=e.clientX-startX,total=split.getBoundingClientRect().width-4;
+        var dx=e.clientX-startX,total=split.getBoundingClientRect().width-16;
         var pct=((startLeft+dx)/total)*100;
         pct=Math.max(15,Math.min(85,pct));
-        split.style.gridTemplateColumns=pct+'% 4px '+(100-pct)+'%';
+        split.style.gridTemplateColumns=pct+'% 4px calc('+(100-pct)+'% - 16px) 12px';
     });
     document.addEventListener('mouseup',function(){
         if(isDragging){isDragging=false;document.body.style.cursor='';document.body.style.userSelect=''}
     });
+}
+
+function initSyncScrollbar(){
+    var leftBody=document.getElementById('cmpBodyLeft');
+    var rightBody=document.getElementById('cmpBodyRight');
+    var syncBar=document.getElementById('cmpSyncScrollbar');
+    var syncThumb=document.getElementById('cmpSyncThumb');
+    var isDragging=false;
+    var dragStartY=0;
+    var dragStartScroll=0;
+
+    function updateThumb(){
+        var body=rightBody;
+        var maxScroll=body.scrollHeight-body.clientHeight;
+        if(maxScroll<=0){
+            syncThumb.style.display='none';
+            return;
+        }
+        syncThumb.style.display='';
+        var trackHeight=syncBar.clientHeight;
+        var thumbHeight=Math.max(20,(body.clientHeight/body.scrollHeight)*trackHeight);
+        syncThumb.style.height=thumbHeight+'px';
+        var thumbTravel=trackHeight-thumbHeight;
+        var scrollPct=maxScroll>0?body.scrollTop/maxScroll:0;
+        syncThumb.style.top=(scrollPct*thumbTravel)+'px';
+    }
+
+    function syncScrollBoth(scrollTop){
+        var body=rightBody;
+        var maxScroll=body.scrollHeight-body.clientHeight;
+        if(maxScroll<=0)return;
+        var clamped=Math.max(0,Math.min(scrollTop,maxScroll));
+        leftBody.scrollTop=clamped;
+        rightBody.scrollTop=clamped;
+    }
+
+    rightBody.addEventListener('scroll',function(){
+        if(isDragging)return;
+        updateThumb();
+    });
+
+    syncThumb.addEventListener('mousedown',function(e){
+        isDragging=true;
+        dragStartY=e.clientY;
+        dragStartScroll=rightBody.scrollTop;
+        syncBar.classList.add('dragging');
+        document.body.style.userSelect='none';
+        e.preventDefault();
+        e.stopPropagation();
+    });
+
+    document.addEventListener('mousemove',function(e){
+        if(!isDragging)return;
+        var body=rightBody;
+        var maxScroll=body.scrollHeight-body.clientHeight;
+        if(maxScroll<=0)return;
+        var trackHeight=syncBar.clientHeight;
+        var thumbHeight=syncThumb.offsetHeight;
+        var thumbTravel=trackHeight-thumbHeight;
+        if(thumbTravel<=0)return;
+        var dy=e.clientY-dragStartY;
+        var scrollDelta=(dy/thumbTravel)*maxScroll;
+        var newScroll=dragStartScroll+scrollDelta;
+        newScroll=Math.max(0,Math.min(newScroll,maxScroll));
+        syncScrollBoth(newScroll);
+    });
+
+    document.addEventListener('mouseup',function(){
+        if(isDragging){
+            isDragging=false;
+            syncBar.classList.remove('dragging');
+            document.body.style.userSelect='';
+        }
+    });
+
+    var observer=new MutationObserver(function(){
+        setTimeout(function(){updateThumb();},0);
+    });
+    observer.observe(rightBody,{childList:true,subtree:true,characterData:true});
+
+    setTimeout(function(){updateThumb();},100);
 }
 
 var ICONS={'db':'\uD83D\uDCC1','category':'\uD83D\uDCC2','frame':'\uD83D\uDCC4','signal':'\u26A1',

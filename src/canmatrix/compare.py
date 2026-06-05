@@ -446,23 +446,13 @@ def compare_signal(s1, s2, ignore=None):
                         "changed", "comment", s1, [
                             "only whitespaces differ", ""]))
 
-    for receiver in s1.receivers:
-        if receiver.strip() not in s2.receivers:
-            result.add_child(
-                CompareResult(
-                    "removed",
-                    "receiver " +
-                    receiver,
-                    s1.receivers))
-
-    for receiver in s2.receivers:
-        if receiver.strip() not in s1.receivers:
-            result.add_child(
-                CompareResult(
-                    "added",
-                    "receiver " +
-                    receiver,
-                    s1.receivers))
+    if s1.receivers != s2.receivers:
+        result.add_child(
+            CompareResult(
+                "changed",
+                "receivers",
+                s1,
+                [", ".join(s1.receivers), ", ".join(s2.receivers)]))
 
     if "ATTRIBUTE" in ignore and ignore["ATTRIBUTE"] == "*":
         pass
