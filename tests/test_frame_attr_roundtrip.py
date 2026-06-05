@@ -53,6 +53,8 @@ def get_frame_attrs(frame):
         "GenMsgCycleTimeFast": frame.attribute("GenMsgCycleTimeFast"),
         "GenMsgNoOfRepetitions": frame.attribute("GenMsgNoOfRepetitions"),
         "CANFD_BRS": frame.attribute("CANFD_BRS"),
+        "VFrameFormat": frame.attribute("VFrameFormat"),
+        "is_fd": frame.is_fd,
     }
 
 
@@ -66,7 +68,10 @@ def attr_roundtrip_check(db_original, db_roundtrip):
 
         for attr_name, orig_val in orig_attrs.items():
             rt_val = rt_attrs[attr_name]
-            if orig_val is not None and rt_val is not None:
+            if attr_name == "is_fd":
+                assert orig_val == rt_val, \
+                    f"Frame {orig_frame.name}: is_fd mismatch: orig={orig_val} vs rt={rt_val}"
+            elif orig_val is not None and rt_val is not None:
                 assert str(orig_val) == str(rt_val), \
                     f"Frame {orig_frame.name}: attr '{attr_name}' mismatch: orig='{orig_val}' vs rt='{rt_val}'"
             elif orig_val is not None and rt_val is None:
@@ -131,6 +136,13 @@ def test_xls_expected_values():
     assert str(fd_frame.attribute("GenMsgCycleTimeFast")) == "10"
     assert str(fd_frame.attribute("GenMsgNoOfRepetitions")) == "1"
     assert str(fd_frame.attribute("GenMsgDelayTime")) == "200"
+    assert fd_frame.is_fd is True
+
+    fd_small_frame = db.frame_by_id(canmatrix.ArbitrationId(1280))
+    assert fd_small_frame is not None
+    assert str(fd_small_frame.attribute("CANFD_BRS")) == "On"
+    assert fd_small_frame.is_fd is True
+    assert fd_small_frame.size == 8
 
     print("PASS: XLS expected values test - all specific attributes verified")
 
@@ -148,7 +160,7 @@ def test_xls_export_contains_columns():
 
     expected_headers = [
         "DiagRequest", "DiagResponse", "DiagState", "NmMessage",
-        "GenMsgILSupport", "GenMsgCycleTimeFast", "GenMsgNoOfRepetitions", "CANFD_BRS"
+        "GenMsgILSupport", "GenMsgCycleTimeFast", "GenMsgNoOfRepetitions", "CANFD_BRS", "ID-Format"
     ]
     for h in expected_headers:
         assert h in headers, f"Column '{h}' not found in XLS headers: {headers}"

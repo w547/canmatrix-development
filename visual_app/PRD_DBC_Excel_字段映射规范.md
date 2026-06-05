@@ -80,9 +80,16 @@ Excel 文件（`.xls` 或 `.xlsx`）按以下列顺序组织数据：
 | 19 | `Signal Function` | 信号前半 | 字符串（含 Multiplex 信息） |
 | 20 | `Signal Length [Bit]` | 信号前半 | 整数 |
 | 21 | `Signal Default` | 信号前半 | 数值 |
-| 22 | `Signal Not Available` | 信号前半 | 字符串（`GenSigSNA` 属性值） |
-| 23 | `Byteorder` | 信号前半 | `"i"`(Intel) 或 `"m"`(Motorola) |
-| 24..N | `{ECU名称}` (每个ECU各占一列) | ECU | `"s"`/`"r"`/`"sr"`/`"rs"` |
+| 22 | `GenSigStartValue` | 信号前半（Interaction Layer） | STRING |
+| 23 | `GenSigInactiveValue` | 信号前半（Interaction Layer） | STRING |
+| 24 | `GenSigSendType` | 信号前半（Interaction Layer） | ENUM（动态收集） |
+| 25 | `EventCommandSignal` | 信号前半（No category） | STRING |
+| 26 | `GatewayedSignals` | 信号前半（No category） | STRING |
+| 27 | `GenSigInvalidValue` | 信号前半（No category） | STRING |
+| 28 | `GenSigTimeoutValue` | 信号前半（No category） | STRING |
+| 29 | `Signal Not Available` | 信号前半 | 字符串（`GenSigSNA` 属性值） |
+| 30 | `Byteorder` | 信号前半 | `"i"`(Intel) 或 `"m"`(Motorola) |
+| 31..N | `{ECU名称}` (每个ECU各占一列) | ECU | `"s"`/`"r"`/`"sr"`/`"rs"` |
 | N+1 | `Value` | 信号后半 | 整数（值表键） |
 | N+2 | `Name / Phys. Range` | 信号后半 | 字符串（值表项名 或 `min..max`） |
 | N+3 | `Function / Increment Unit` | 信号后半 | 字符串（因子+单位 或 仅单位） |
@@ -148,6 +155,13 @@ Excel 文件（`.xls` 或 `.xlsx`）按以下列顺序组织数据：
 | `sig.receivers` | ECU 列（`"r"`） | 双向 | List[String] | 每信号行 ECU 列中标记 `r` |
 | `sig.cycle_time` / `BA_ "GenSigCycleTime"` | — | DBC only | Integer | Excel 无独立列 |
 | `sig.attributes["GenSigSNA"]` | `Signal Not Available` | 双向 | String | 条件出现：仅当 DBC 定义了 `GenSigSNA` |
+| `sig.attributes["GenSigStartValue"]` | `GenSigStartValue` | 双向 | STRING | 信号初始值属性 |
+| `sig.attributes["GenSigInactiveValue"]` | `GenSigInactiveValue` | 双向 | STRING | 信号非活跃值 |
+| `sig.attributes["GenSigSendType"]` | `GenSigSendType` | 双向 | ENUM | 信号发送类型（如 Cyclic, Event 等）；默认值 `"Cyclic"` |
+| `sig.attributes["EventCommandSignal"]` | `EventCommandSignal` | 双向 | STRING | 事件命令信号标识 |
+| `sig.attributes["GatewayedSignals"]` | `GatewayedSignals` | 双向 | STRING | 网关信号列表 |
+| `sig.attributes["GenSigInvalidValue"]` | `GenSigInvalidValue` | 双向 | STRING | 信号无效值 |
+| `sig.attributes["GenSigTimeoutValue"]` | `GenSigTimeoutValue` | 双向 | STRING | 信号超时值 |
 | `CM_ SG_` | `Signal Function` | 双向 | String | 信号注释与 Function 共用一列 |
 
 ### 2.3 DBC 属性映射
@@ -171,6 +185,13 @@ Excel 文件（`.xls` 或 `.xlsx`）按以下列顺序组织数据：
 | `GenMsgNoOfRepetitions` | Interaction Layer | INT 0 65535 | `GenMsgNoOfRepetitions` 列 | 重复发送次数 |
 | `CANFD_BRS` | — | STRING | `CANFD_BRS` 列 | CAN FD 比特率切换 |
 | `VFrameFormat` | 帧属性 | ENUM | 无独立列 | CAN FD / J1939 格式标识 |
+| `GenSigStartValue` | 信号属性 | STRING | `GenSigStartValue` 列 | 信号初始值属性 |
+| `GenSigInactiveValue` | Interaction Layer | STRING | `GenSigInactiveValue` 列 | 信号非活跃值 |
+| `GenSigSendType` | Interaction Layer | ENUM（动态收集） | `GenSigSendType` 列 | 信号发送类型；默认值 `"Cyclic"` |
+| `EventCommandSignal` | No category | STRING | `EventCommandSignal` 列 | 事件命令信号标识 |
+| `GatewayedSignals` | No category | STRING | `GatewayedSignals` 列 | 网关信号列表 |
+| `GenSigInvalidValue` | No category | STRING | `GenSigInvalidValue` 列 | 信号无效值 |
+| `GenSigTimeoutValue` | No category | STRING | `GenSigTimeoutValue` 列 | 信号超时值 |
 
 **分类说明**：
 - **Interaction Layer**：交互层（IL）相关属性，用于控制报文发送行为（周期、延迟、重复次数、IL 支持等）
@@ -178,6 +199,55 @@ Excel 文件（`.xls` 或 `.xlsx`）按以下列顺序组织数据：
 - **Net Management**：网络管理相关属性（NmMessage）
 - **帧属性**：报文/帧级别的通用属性
 - **信号属性**：信号级别的通用属性
+
+### 2.4 属性默认值汇总
+
+DBC 与 Excel 互转中涉及的属性及其默认值：
+
+| 属性名 | 作用域 | 类型 | 默认值 | 说明 |
+|--------|--------|------|--------|------|
+| `GenMsgSendType` | Frame | ENUM（动态收集） | **无** | 报文发送类型 |
+| `GenMsgDelayTime` | Frame | `INT 0 65535` | **无** | 报文延迟时间 |
+| `GenMsgCycleTimeActive` | Frame | `INT 0 65535` | **无** | 报文活跃周期时间 |
+| `GenMsgNrOfRepetitions` | Frame | `INT 0 65535` | **无** | 报文重复次数 |
+| `DiagRequest` | Frame | `STRING` | **无** | 诊断请求标识 |
+| `DiagResponse` | Frame | `STRING` | **无** | 诊断响应标识 |
+| `DiagState` | Frame | `STRING` | **无** | 诊断状态 |
+| `NmMessage` | Frame | `STRING` | **无** | 网络管理报文标识 |
+| `GenMsgILSupport` | Frame | `STRING` | **无** | IL 支持标识 |
+| `GenMsgCycleTimeFast` | Frame | `INT 0 65535` | **无** | 快速周期时间 |
+| `GenMsgNoOfRepetitions` | Frame | `INT 0 65535` | **无** | 报文重复次数 |
+| `CANFD_BRS` | Frame | `STRING` | **无** | CAN FD 比特率切换 |
+| `VFrameFormat` | Frame | `STRING` | **无** | CAN FD / J1939 格式标识 |
+| `GenSigSNA` | Signal | `STRING` | **无** | 信号不可用值 |
+| `GenSigStartValue` | Signal | `STRING` | **无** | 信号初始值 |
+| `GenSigInactiveValue` | Signal | `STRING` | **无** | 信号非活跃值 |
+| `GenSigSendType` | Signal | ENUM（动态收集） | **`"Cyclic"`** ✅ | 信号发送类型 |
+| `EventCommandSignal` | Signal | `STRING` | **无** | 事件命令信号标识 |
+| `GatewayedSignals` | Signal | `STRING` | **无** | 网关信号列表 |
+| `GenSigInvalidValue` | Signal | `STRING` | **无** | 信号无效值 |
+| `GenSigTimeoutValue` | Signal | `STRING` | **无** | 信号超时值 |
+
+**注意**：仅 `GenSigSendType` 设置了默认值 `"Cyclic"`，其余属性的 `defaultValue` 均为 `None`。
+
+### 2.5 默认值标记规则（`*` 后缀）
+
+在 DBC ↔ Excel 双向转换过程中，使用 `*` 后缀标记区分"用户显式设置的值"与"系统默认值"：
+
+**导出规则（DBC → Excel）**：
+- 若属性值来自用户显式设置（存在于 `obj.attributes` 字典中），直接输出原值
+- 若属性值来自系统默认值（回退到 `define.defaultValue`），在原值末尾追加 `*` 标记
+
+**导入规则（Excel → DBC）**：
+- 若值以 `*` 结尾，表示该值为系统默认值，**不存储**到 `obj.attributes` 字典（后续通过 `attribute()` 方法自然回退到 `define.defaultValue`）
+- 若值不以 `*` 结尾，表示该值为用户显式设置，存储到 `obj.attributes` 字典
+
+**示例**：
+| 场景 | DBC 中 | Excel 中 | 说明 |
+|------|--------|----------|------|
+| 用户显式设置 | `BA_ "GenSigSendType" SG_ 256 Sig1 "Event"` | `Event` | 无 `*`，正常值 |
+| 使用默认值 | 无 `BA_` 行，define 默认 `"Cyclic"` | `Cyclic*` | 带 `*` 标记 |
+| 导入默认值标记 | — | `Cyclic*` | 不存入 `attributes`，回退到 define 默认值 |
 
 ---
 

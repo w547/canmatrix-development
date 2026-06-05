@@ -109,7 +109,7 @@ def dump(db, file, **options):
     # type: (canmatrix.CanMatrix, typing.IO, **typing.Any) -> None
     head_top = ['ID', 'Frame Name', 'DLC', 'frame.comment', 'Cycle Time [ms]', 'Launch Type', 'Launch Parameter',
                 'DiagRequest', 'DiagResponse', 'DiagState', 'NmMessage', 'GenMsgILSupport',
-                'GenMsgCycleTimeFast', 'GenMsgNoOfRepetitions', 'CANFD_BRS',
+                'GenMsgCycleTimeFast', 'GenMsgNoOfRepetitions', 'CANFD_BRS', 'ID-Format',
                 'Signal Byte No.', 'Signal Bit No.', 'Signal Name', 'Signal Function', 'Signal Length [Bit]',
                 'Signal Default', 'GenSigStartValue', 'GenSigInactiveValue', 'GenSigSendType',
                 'EventCommandSignal', 'GatewayedSignals', 'GenSigInvalidValue', 'GenSigTimeoutValue',
@@ -382,9 +382,11 @@ def load(file, **options):
 
     # ---- CAN FD attributes ----
     db.add_frame_defines("CANFD_BRS", 'STRING')
+    db.add_frame_defines("VFrameFormat", 'STRING')
 
     launch_types = []  # type: typing.List[str]
     sig_send_types = []  # type: typing.List[str]
+    sig_send_type_default = None  # type: typing.Optional[str]
     db.add_signal_defines("GenSigSNA", 'STRING')
     db.add_signal_defines("GenSigInactiveValue", 'STRING')
     db.add_signal_defines("EventCommandSignal", 'STRING')
@@ -426,6 +428,8 @@ def load(file, **options):
             index['genMsgNoOfRepetitions'] = i
         elif "CANFD_BRS" in value:
             index['canfdBrs'] = i
+        elif "ID-Format" in value:
+            index['idFormat'] = i
         elif "Signal Byte No." in value:
             index['startbyte'] = i
         elif "Signal Bit No." in value:
@@ -508,68 +512,61 @@ def load(file, **options):
             # eval launch_type
             if launch_type is not None:
                 if len(launch_type) > 0:
-                    new_frame.add_attribute("GenMsgSendType", launch_type)
-                    if launch_type not in launch_types:
-                        launch_types.append(launch_type)
+                    stripped, is_default = canmatrix.formats.xls_common._strip_default_mark(launch_type)
+                    if not is_default:
+                        new_frame.add_attribute("GenMsgSendType", stripped)
+                    if stripped not in launch_types:
+                        launch_types.append(stripped)
 
             # ---- Interaction Layer attributes ----
             # eval launch parameter (GenMsgDelayTime)
             if 'launchParam' in index:
-                launch_param = sh.cell(row_num, index['launchParam']).value
-                if launch_param is not None and str(launch_param).strip() != '' and str(launch_param).strip() != '0':
-                    new_frame.add_attribute("GenMsgDelayTime", str(launch_param).strip())
+                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgDelayTime", sh.cell(row_num, index['launchParam']).value, db=db, defines_dict=db.frame_defines)
 
             # ---- Diagnostics attributes ----
             # eval DiagRequest
             if 'diagRequest' in index:
-                val = sh.cell(row_num, index['diagRequest']).value
-                if val is not None and str(val).strip() != '':
-                    new_frame.add_attribute("DiagRequest", str(val).strip())
+                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "DiagRequest", sh.cell(row_num, index['diagRequest']).value, db=db, defines_dict=db.frame_defines)
 
             # eval DiagResponse
             if 'diagResponse' in index:
-                val = sh.cell(row_num, index['diagResponse']).value
-                if val is not None and str(val).strip() != '':
-                    new_frame.add_attribute("DiagResponse", str(val).strip())
+                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "DiagResponse", sh.cell(row_num, index['diagResponse']).value, db=db, defines_dict=db.frame_defines)
 
             # eval DiagState
             if 'diagState' in index:
-                val = sh.cell(row_num, index['diagState']).value
-                if val is not None and str(val).strip() != '':
-                    new_frame.add_attribute("DiagState", str(val).strip())
+                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "DiagState", sh.cell(row_num, index['diagState']).value, db=db, defines_dict=db.frame_defines)
 
             # ---- Net Management attributes ----
             # eval NmMessage
             if 'nmMessage' in index:
-                val = sh.cell(row_num, index['nmMessage']).value
-                if val is not None and str(val).strip() != '':
-                    new_frame.add_attribute("NmMessage", str(val).strip())
+                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "NmMessage", sh.cell(row_num, index['nmMessage']).value, db=db, defines_dict=db.frame_defines)
 
             # ---- Interaction Layer attributes ----
             # eval GenMsgILSupport
             if 'genMsgILSupport' in index:
-                val = sh.cell(row_num, index['genMsgILSupport']).value
-                if val is not None and str(val).strip() != '':
-                    new_frame.add_attribute("GenMsgILSupport", str(val).strip())
+                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgILSupport", sh.cell(row_num, index['genMsgILSupport']).value, db=db, defines_dict=db.frame_defines)
 
             # eval GenMsgCycleTimeFast
             if 'genMsgCycleTimeFast' in index:
-                val = sh.cell(row_num, index['genMsgCycleTimeFast']).value
-                if val is not None and str(val).strip() != '':
-                    new_frame.add_attribute("GenMsgCycleTimeFast", str(val).strip())
+                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgCycleTimeFast", sh.cell(row_num, index['genMsgCycleTimeFast']).value, db=db, defines_dict=db.frame_defines)
 
             # eval GenMsgNoOfRepetitions
             if 'genMsgNoOfRepetitions' in index:
-                val = sh.cell(row_num, index['genMsgNoOfRepetitions']).value
-                if val is not None and str(val).strip() != '':
-                    new_frame.add_attribute("GenMsgNoOfRepetitions", str(val).strip())
+                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgNoOfRepetitions", sh.cell(row_num, index['genMsgNoOfRepetitions']).value, db=db, defines_dict=db.frame_defines)
 
             # ---- CAN FD attributes ----
             # eval CANFD_BRS
             if 'canfdBrs' in index:
-                val = sh.cell(row_num, index['canfdBrs']).value
-                if val is not None and str(val).strip() != '':
-                    new_frame.add_attribute("CANFD_BRS", str(val).strip())
+                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "CANFD_BRS", sh.cell(row_num, index['canfdBrs']).value, db=db, defines_dict=db.frame_defines)
+
+            # eval ID-Format (VFrameFormat)
+            if 'idFormat' in index:
+                id_format = sh.cell(row_num, index['idFormat']).value
+                if id_format is not None and str(id_format).strip() != '':
+                    id_format_str = str(id_format).strip()
+                    if '_FD' in id_format_str:
+                        new_frame.is_fd = True
+                    new_frame.add_attribute("VFrameFormat", id_format_str)
 
             # eval cycle time
             try:
@@ -673,11 +670,9 @@ def load(file, **options):
                         new_signal.add_attribute("GenSigInactiveValue", str(gen_sig_inactive_value).strip())
 
                 if 'genSigSendType' in index:
-                    gen_sig_send_type = sh.cell(row_num, index['genSigSendType']).value
-                    if gen_sig_send_type is not None and str(gen_sig_send_type).strip() != '':
-                        new_signal.add_attribute("GenSigSendType", str(gen_sig_send_type).strip())
-                        if gen_sig_send_type not in sig_send_types:
-                            sig_send_types.append(gen_sig_send_type)
+                    result = canmatrix.formats.xls_common._import_attr_with_default(new_signal, "GenSigSendType", sh.cell(row_num, index['genSigSendType']).value, db=db, defines_dict=db.signal_defines, collect_list=sig_send_types)
+                    if result is not None and sig_send_type_default is None:
+                        sig_send_type_default = result
 
                 if 'eventCommandSignal' in index:
                     event_command_signal = sh.cell(row_num, index['eventCommandSignal']).value
@@ -769,11 +764,10 @@ def load(file, **options):
     db.add_frame_defines("GenMsgSendType", launch_type_enum)
 
     sig_send_type_enum = "ENUM"
-    if "Cyclic" not in sig_send_types:
-        sig_send_types.insert(0, "Cyclic")
     sig_send_type_enum += ",".join([' "{}"'.format(sig_send_type) for sig_send_type in sig_send_types if sig_send_type])
     db.add_signal_defines("GenSigSendType", sig_send_type_enum)
-    db.add_define_default("GenSigSendType", "Cyclic")
+    if sig_send_type_default is not None:
+        db.add_define_default("GenSigSendType", sig_send_type_default)
 
     db.set_fd_type()
     return db

@@ -196,6 +196,7 @@
         .cht-tooltip .cht-item:last-child{border-bottom:none}
         .cht-tooltip .cht-item-added .cht-ival{color:var(--green);font-weight:600}
         .cht-tooltip .cht-item-deleted .cht-ival{color:var(--red);text-decoration:line-through;font-weight:600}
+        .cht-tooltip .cht-item-changed .cht-ival{color:var(--yellow);font-weight:600}
         .cht-tooltip .cht-iname{color:var(--text2);flex-shrink:0;min-width:80px}
         .cht-tooltip .cht-ival{word-break:break-all}
         .cht-tooltip .cht-ft{background:rgba(255,255,255,.02);padding:6px 14px;font-size:.6rem;color:var(--text2);text-align:center;border-top:1px solid rgba(255,255,255,.04)}
@@ -816,7 +817,11 @@ function _onTooltipOver(e){
             html+='<div class="cht-section"><div class="cht-section-title cht-sec-changed">&#x1F504; 修改项 ('+changedItems.length+')</div>';
             for(var i=0;i<changedItems.length;i++){
                 var d=changedItems[i];
-                html+='<div class="cht-prop"><span class="cht-pname">'+escapeHtml(d.label)+'</span><span class="cht-pold">'+escapeHtml(d.old)+'</span><span class="cht-parrow">&rarr;</span><span class="cht-pnew">'+escapeHtml(d.new)+'</span></div>';
+                if(d.old&&!d.new){
+                    html+='<div class="cht-item cht-item-changed"><span class="cht-iname">'+escapeHtml(d.label)+'</span><span class="cht-ival">'+escapeHtml(d.old)+'</span></div>';
+                }else{
+                    html+='<div class="cht-prop"><span class="cht-pname">'+escapeHtml(d.label)+'</span><span class="cht-pold">'+escapeHtml(d.old)+'</span><span class="cht-parrow">&rarr;</span><span class="cht-pnew">'+escapeHtml(d.new)+'</span></div>';
+                }
             }
             html+='</div>';
         }

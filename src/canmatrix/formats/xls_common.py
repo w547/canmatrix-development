@@ -25,6 +25,37 @@ from builtins import *
 import canmatrix
 
 
+def _get_attr_with_default_mark(obj, attr_name, db, defines_dict):
+    if attr_name in defines_dict:
+        if attr_name in obj.attributes:
+            return str(obj.attributes[attr_name])
+        else:
+            default_val = obj.attribute(attr_name, db=db)
+            if default_val is not None and str(default_val).strip() != '':
+                return str(default_val) + "*"
+    return ""
+
+
+def _strip_default_mark(value):
+    if value is not None and str(value).endswith("*"):
+        return str(value)[:-1], True
+    return value, False
+
+
+def _import_attr_with_default(obj, attr_name, cell_value, db=None, defines_dict=None, collect_list=None):
+    if cell_value is None or str(cell_value).strip() == '':
+        return None
+    stripped, is_default = _strip_default_mark(str(cell_value).strip())
+    if not is_default:
+        obj.add_attribute(attr_name, stripped)
+    else:
+        if db is not None and defines_dict is not None and attr_name in defines_dict:
+            defines_dict[attr_name].defaultValue = stripped
+    if collect_list is not None and stripped not in collect_list:
+        collect_list.append(stripped)
+    return stripped if is_default else None
+
+
 def get_frame_info(db, frame):
     # type: (canmatrix.CanMatrix, canmatrix.Frame) -> typing.List[str]
     ret_array = []  # type: typing.List[str]
@@ -51,68 +82,50 @@ def get_frame_info(db, frame):
 
     # ---- Interaction Layer attributes ----
     # Launch Type (GenMsgSendType)
-    if "GenMsgSendType" in db.frame_defines:
-        ret_array.append(frame.attribute("GenMsgSendType", db=db))
-    else:
-        ret_array.append("")
+    ret_array.append(_get_attr_with_default_mark(frame, "GenMsgSendType", db, db.frame_defines))
 
     # Launch Parameter (GenMsgDelayTime)
-    if "GenMsgDelayTime" in db.frame_defines:
-        ret_array.append(frame.attribute("GenMsgDelayTime", db=db))
-    else:
-        ret_array.append("")
+    ret_array.append(_get_attr_with_default_mark(frame, "GenMsgDelayTime", db, db.frame_defines))
 
     # ---- Diagnostics attributes ----
     # DiagRequest
-    if "DiagRequest" in db.frame_defines:
-        ret_array.append(frame.attribute("DiagRequest", db=db))
-    else:
-        ret_array.append("")
+    ret_array.append(_get_attr_with_default_mark(frame, "DiagRequest", db, db.frame_defines))
 
     # DiagResponse
-    if "DiagResponse" in db.frame_defines:
-        ret_array.append(frame.attribute("DiagResponse", db=db))
-    else:
-        ret_array.append("")
+    ret_array.append(_get_attr_with_default_mark(frame, "DiagResponse", db, db.frame_defines))
 
     # DiagState
-    if "DiagState" in db.frame_defines:
-        ret_array.append(frame.attribute("DiagState", db=db))
-    else:
-        ret_array.append("")
+    ret_array.append(_get_attr_with_default_mark(frame, "DiagState", db, db.frame_defines))
 
     # ---- Net Management attributes ----
     # NmMessage
-    if "NmMessage" in db.frame_defines:
-        ret_array.append(frame.attribute("NmMessage", db=db))
-    else:
-        ret_array.append("")
+    ret_array.append(_get_attr_with_default_mark(frame, "NmMessage", db, db.frame_defines))
 
     # ---- Interaction Layer attributes ----
     # GenMsgILSupport
-    if "GenMsgILSupport" in db.frame_defines:
-        ret_array.append(frame.attribute("GenMsgILSupport", db=db))
-    else:
-        ret_array.append("")
+    ret_array.append(_get_attr_with_default_mark(frame, "GenMsgILSupport", db, db.frame_defines))
 
     # GenMsgCycleTimeFast
-    if "GenMsgCycleTimeFast" in db.frame_defines:
-        ret_array.append(frame.attribute("GenMsgCycleTimeFast", db=db))
-    else:
-        ret_array.append("")
+    ret_array.append(_get_attr_with_default_mark(frame, "GenMsgCycleTimeFast", db, db.frame_defines))
 
     # GenMsgNoOfRepetitions
-    if "GenMsgNoOfRepetitions" in db.frame_defines:
-        ret_array.append(frame.attribute("GenMsgNoOfRepetitions", db=db))
-    else:
-        ret_array.append("")
+    ret_array.append(_get_attr_with_default_mark(frame, "GenMsgNoOfRepetitions", db, db.frame_defines))
 
     # ---- CAN FD attributes ----
     # CANFD_BRS
-    if "CANFD_BRS" in db.frame_defines:
-        ret_array.append(frame.attribute("CANFD_BRS", db=db))
+    ret_array.append(_get_attr_with_default_mark(frame, "CANFD_BRS", db, db.frame_defines))
+
+    # ID-Format
+    if frame.is_fd:
+        if frame.arbitration_id.extended:
+            ret_array.append("ExtendedCAN_FD")
+        else:
+            ret_array.append("StandardCAN_FD")
     else:
-        ret_array.append("")
+        if frame.arbitration_id.extended:
+            ret_array.append("ExtendedCAN")
+        else:
+            ret_array.append("StandardCAN")
 
     return ret_array
 
@@ -164,11 +177,7 @@ def get_signal(db, frame, sig, motorola_bit_format):
     gen_sig_inactive_value = sig.attributes.get("GenSigInactiveValue", "")
     front_array.append(gen_sig_inactive_value)
 
-    if "GenSigSendType" in db.signal_defines:
-        gen_sig_send_type = sig.attribute("GenSigSendType", db=db)
-    else:
-        gen_sig_send_type = ""
-    front_array.append(gen_sig_send_type)
+    front_array.append(_get_attr_with_default_mark(sig, "GenSigSendType", db, db.signal_defines))
 
     # ---- No category assigned signal attributes ----
     event_command_signal = sig.attributes.get("EventCommandSignal", "")

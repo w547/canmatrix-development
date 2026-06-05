@@ -518,12 +518,42 @@ _FIELD_LABELS = {
     'signal': '信号列表变更',
     'frame': '帧列表变更',
     'ecus': 'ECU 变更',
+    'attributes': '属性变更',
+    'transmitter': '发送节点变更',
+    'signalgroup': '信号组变更',
 }
 
 
 def _build_diff_map(compare_result):
     """从 CompareResult 构建差异映射, 收集详细子变更信息"""
     diff_map = {}
+
+    def _extract_ref_name(child):
+        if not hasattr(child, 'ref') or child.ref is None:
+            return ''
+        ref = child.ref
+        if hasattr(ref, 'name'):
+            return ref.name
+        if isinstance(ref, list):
+            return ', '.join(str(r) for r in ref)
+        return str(ref)
+
+    def _extract_name_from_type(child):
+        t = child.type or ''
+        if t.lower().startswith('receiver '):
+            return t[len('receiver '):]
+        if t.lower().startswith('transmitter '):
+            return t[len('transmitter '):]
+        return ''
+
+    def _extract_value_name(child):
+        ref_name = _extract_ref_name(child)
+        if ref_name:
+            return ref_name
+        t = child.type or ''
+        if t.lower().startswith('value '):
+            return t[len('value '):]
+        return ''
 
     def collect_detail_changes(node):
         details = []
@@ -537,14 +567,24 @@ def _build_diff_map(compare_result):
                     if hasattr(child, 'changes') and child.changes and len(child.changes) >= 2:
                         old_val = str(child.changes[0]) if child.changes[0] is not None else ''
                         new_val = str(child.changes[1]) if child.changes[1] is not None else ''
-                    else:
-                        ref_name = ''
-                        if hasattr(child, 'ref') and child.ref is not None:
-                            ref_name = child.ref.name if hasattr(child.ref, 'name') else str(child.ref)
-                        if child.result in ('deleted', 'removed'):
-                            old_val = ref_name
-                        elif child.result == 'added':
-                            new_val = ref_name
+                    elif child.result in ('deleted', 'removed'):
+                        ref_name = _extract_value_name(child) or _extract_name_from_type(child) or _extract_ref_name(child)
+                        old_val = ref_name
+                    elif child.result == 'added':
+                        ref_name = _extract_value_name(child) or _extract_name_from_type(child) or _extract_ref_name(child)
+                        new_val = ref_name
+                    elif child.result == 'changed':
+                        sub_details = collect_detail_changes(child)
+                        if sub_details:
+                            parts = []
+                            for sd in sub_details:
+                                if sd['old'] and sd['new']:
+                                    parts.append(sd['old'] + ' \u2192 ' + sd['new'])
+                                elif sd['new']:
+                                    parts.append('+ ' + sd['new'])
+                                elif sd['old']:
+                                    parts.append('- ' + sd['old'])
+                            old_val = '; '.join(parts) if parts else ''
                     details.append({
                         'type': ctype,
                         'label': label,

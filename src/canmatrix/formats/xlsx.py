@@ -131,6 +131,7 @@ def dump(db, filename, **options):
         'GenMsgCycleTimeFast',
         'GenMsgNoOfRepetitions',
         'CANFD_BRS',
+        'ID-Format',
         'Signal Byte No.',
         'Signal Bit No.',
         'Signal Name',
@@ -398,9 +399,11 @@ def load(file, **options):
 
     # ---- CAN FD attributes ----
     db.add_frame_defines("CANFD_BRS", 'STRING')
+    db.add_frame_defines("VFrameFormat", 'STRING')
 
     launch_types = []  # type: typing.List[str]
     sig_send_types = []  # type: typing.List[str]
+    sig_send_type_default = None  # type: typing.Optional[str]
 
     db.add_signal_defines("GenSigSNA", 'STRING')
     db.add_signal_defines("GenSigInactiveValue", 'STRING')
@@ -474,59 +477,51 @@ def load(file, **options):
 
             # eval launch_type
             if launch_type is not None:
-                new_frame.add_attribute("GenMsgSendType", launch_type)
-                if launch_type not in launch_types:
-                    launch_types.append(launch_type)
+                stripped, is_default = canmatrix.formats.xls_common._strip_default_mark(launch_type)
+                if not is_default:
+                    new_frame.add_attribute("GenMsgSendType", stripped)
+                if stripped not in launch_types:
+                    launch_types.append(stripped)
 
             # ---- Interaction Layer attributes ----
             # eval launch parameter (GenMsgDelayTime)
-            launch_param = get_if_possible(row, 'Launch Parameter')
-            if launch_param is not None and str(launch_param).strip() != '' and str(launch_param).strip() != '0':
-                new_frame.add_attribute("GenMsgDelayTime", str(launch_param).strip())
+            canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgDelayTime", get_if_possible(row, 'Launch Parameter'), db=db, defines_dict=db.frame_defines)
 
             # ---- Diagnostics attributes ----
             # eval DiagRequest
-            diag_request = get_if_possible(row, 'DiagRequest')
-            if diag_request is not None and str(diag_request).strip() != '':
-                new_frame.add_attribute("DiagRequest", str(diag_request).strip())
+            canmatrix.formats.xls_common._import_attr_with_default(new_frame, "DiagRequest", get_if_possible(row, 'DiagRequest'), db=db, defines_dict=db.frame_defines)
 
             # eval DiagResponse
-            diag_response = get_if_possible(row, 'DiagResponse')
-            if diag_response is not None and str(diag_response).strip() != '':
-                new_frame.add_attribute("DiagResponse", str(diag_response).strip())
+            canmatrix.formats.xls_common._import_attr_with_default(new_frame, "DiagResponse", get_if_possible(row, 'DiagResponse'), db=db, defines_dict=db.frame_defines)
 
             # eval DiagState
-            diag_state = get_if_possible(row, 'DiagState')
-            if diag_state is not None and str(diag_state).strip() != '':
-                new_frame.add_attribute("DiagState", str(diag_state).strip())
+            canmatrix.formats.xls_common._import_attr_with_default(new_frame, "DiagState", get_if_possible(row, 'DiagState'), db=db, defines_dict=db.frame_defines)
 
             # ---- Net Management attributes ----
             # eval NmMessage
-            nm_message = get_if_possible(row, 'NmMessage')
-            if nm_message is not None and str(nm_message).strip() != '':
-                new_frame.add_attribute("NmMessage", str(nm_message).strip())
+            canmatrix.formats.xls_common._import_attr_with_default(new_frame, "NmMessage", get_if_possible(row, 'NmMessage'), db=db, defines_dict=db.frame_defines)
 
             # ---- Interaction Layer attributes ----
             # eval GenMsgILSupport
-            gen_msg_il_support = get_if_possible(row, 'GenMsgILSupport')
-            if gen_msg_il_support is not None and str(gen_msg_il_support).strip() != '':
-                new_frame.add_attribute("GenMsgILSupport", str(gen_msg_il_support).strip())
+            canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgILSupport", get_if_possible(row, 'GenMsgILSupport'), db=db, defines_dict=db.frame_defines)
 
             # eval GenMsgCycleTimeFast
-            gen_msg_cycle_time_fast = get_if_possible(row, 'GenMsgCycleTimeFast')
-            if gen_msg_cycle_time_fast is not None and str(gen_msg_cycle_time_fast).strip() != '':
-                new_frame.add_attribute("GenMsgCycleTimeFast", str(gen_msg_cycle_time_fast).strip())
+            canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgCycleTimeFast", get_if_possible(row, 'GenMsgCycleTimeFast'), db=db, defines_dict=db.frame_defines)
 
             # eval GenMsgNoOfRepetitions
-            gen_msg_no_of_reps = get_if_possible(row, 'GenMsgNoOfRepetitions')
-            if gen_msg_no_of_reps is not None and str(gen_msg_no_of_reps).strip() != '':
-                new_frame.add_attribute("GenMsgNoOfRepetitions", str(gen_msg_no_of_reps).strip())
+            canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgNoOfRepetitions", get_if_possible(row, 'GenMsgNoOfRepetitions'), db=db, defines_dict=db.frame_defines)
 
             # ---- CAN FD attributes ----
             # eval CANFD_BRS
-            canfd_brs = get_if_possible(row, 'CANFD_BRS')
-            if canfd_brs is not None and str(canfd_brs).strip() != '':
-                new_frame.add_attribute("CANFD_BRS", str(canfd_brs).strip())
+            canmatrix.formats.xls_common._import_attr_with_default(new_frame, "CANFD_BRS", get_if_possible(row, 'CANFD_BRS'), db=db, defines_dict=db.frame_defines)
+
+            # eval ID-Format (VFrameFormat)
+            id_format = get_if_possible(row, 'ID-Format')
+            if id_format is not None and str(id_format).strip() != '':
+                id_format_str = str(id_format).strip()
+                if '_FD' in id_format_str:
+                    new_frame.is_fd = True
+                new_frame.add_attribute("VFrameFormat", id_format_str)
 
             new_frame.cycle_time = cycle_time
 
@@ -608,11 +603,9 @@ def load(file, **options):
                     if gen_sig_inactive_value is not None and str(gen_sig_inactive_value).strip() != '':
                         new_signal.add_attribute("GenSigInactiveValue", str(gen_sig_inactive_value).strip())
 
-                    gen_sig_send_type = get_if_possible(row, 'GenSigSendType')
-                    if gen_sig_send_type is not None and str(gen_sig_send_type).strip() != '':
-                        new_signal.add_attribute("GenSigSendType", str(gen_sig_send_type).strip())
-                        if gen_sig_send_type not in sig_send_types:
-                            sig_send_types.append(gen_sig_send_type)
+                    result = canmatrix.formats.xls_common._import_attr_with_default(new_signal, "GenSigSendType", get_if_possible(row, 'GenSigSendType'), db=db, defines_dict=db.signal_defines, collect_list=sig_send_types)
+                    if result is not None and sig_send_type_default is None:
+                        sig_send_type_default = result
 
                     event_command_signal = get_if_possible(row, 'EventCommandSignal')
                     if event_command_signal is not None and str(event_command_signal).strip() != '':
@@ -741,13 +734,12 @@ def load(file, **options):
     db.add_frame_defines("GenMsgSendType", launch_type_enum[:-1])
 
     sig_send_type_enum = "ENUM"
-    if "Cyclic" not in sig_send_types:
-        sig_send_types.insert(0, "Cyclic")
     for sig_send_type in sig_send_types:
         if len(sig_send_type) > 0:
             sig_send_type_enum += ' "' + sig_send_type + '",'
     db.add_signal_defines("GenSigSendType", sig_send_type_enum[:-1])
-    db.add_define_default("GenSigSendType", "Cyclic")
+    if sig_send_type_default is not None:
+        db.add_define_default("GenSigSendType", sig_send_type_default)
 
     db.set_fd_type()
     return db
