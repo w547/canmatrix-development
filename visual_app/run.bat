@@ -9,14 +9,14 @@ echo.
 cd /d "%~dp0"
 
 REM 安装依赖（只安装Flask，使用本地修复版canmatrix）
-echo (1/2) 检查依赖...
-pip install Flask openpyxl --quiet 2>nul
-pip uninstall canmatrix -y --quiet 2>nul
+echo [1/2] 检查依赖...
+pip install Flask openpyxl --quiet >nul 2>&1
+pip uninstall canmatrix -y --quiet >nul 2>&1
 
 REM 添加src到Python路径，优先使用本地修复版
 set PYTHONPATH=%~dp0..\src;%PYTHONPATH%
 
-echo (2/2) 启动服务...
+echo [2/2] 启动服务...
 echo.
 python app.py
 

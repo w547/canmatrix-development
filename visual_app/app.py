@@ -564,12 +564,9 @@ def _build_diff_map(compare_result):
                     label = _FIELD_LABELS.get(ctype, child.type or 'unknown')
                     old_val = ''
                     new_val = ''
-<<<<<<< HEAD
                     signal_name = ''
                     if hasattr(child, 'ref') and child.ref is not None and hasattr(child.ref, 'name'):
                         signal_name = child.ref.name
-=======
->>>>>>> 5ac5896d2c80fc240d7eee71193c939bd7fa642f
                     if hasattr(child, 'changes') and child.changes and len(child.changes) >= 2:
                         old_val = str(child.changes[0]) if child.changes[0] is not None else ''
                         new_val = str(child.changes[1]) if child.changes[1] is not None else ''
@@ -597,10 +594,7 @@ def _build_diff_map(compare_result):
                         'old': old_val,
                         'new': new_val,
                         'result': child.result,
-<<<<<<< HEAD
                         'signal_name': signal_name,
-=======
->>>>>>> 5ac5896d2c80fc240d7eee71193c939bd7fa642f
                     })
         return details
 
