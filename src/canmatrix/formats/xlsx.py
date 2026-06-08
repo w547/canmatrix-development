@@ -457,10 +457,24 @@ def load(file, **options):
             # launch_param = get_if_possible(row, 'Launch Parameter', '0')
             # launch_param = str(int(launch_param))
 
-            if frame_id.endswith("xh"):
-                new_frame = canmatrix.Frame(frame_name, canmatrix.ArbitrationId(int(frame_id[:-2], 16), extended=True), size=dlc)
-            else:
-                new_frame = canmatrix.Frame(frame_name, arbitration_id=int(frame_id[:-1], 16), size=dlc)
+            # eval ID-Format FIRST - this is the authoritative source for frame type
+            is_extended = False
+            is_fd = False
+            id_format_str = None
+            id_format = get_if_possible(row, 'ID-Format')
+            if id_format is not None and str(id_format).strip() != '':
+                id_format_str = str(id_format).strip()
+                if 'ExtendedCAN' in id_format_str:
+                    is_extended = True
+                if '_FD' in id_format_str:
+                    is_fd = True
+
+            new_frame = canmatrix.Frame(frame_name, size=dlc)
+            new_frame.arbitration_id = canmatrix.formats.xls_common.parse_frame_id(frame_id, extended=is_extended)
+            new_frame.is_fd = is_fd
+            if id_format_str is not None:
+                new_frame.add_attribute("VFrameFormat", id_format_str)
+            db.add_frame(new_frame)
 
             if 'frame.comment' in column_heads:
                 comment_val = row[column_heads.index('frame.comment')].value
@@ -473,8 +487,6 @@ def load(file, **options):
                     command_str += "=" + str(row[column_heads.index(col_head)].value)
                     exec(command_str)
                     
-            db.add_frame(new_frame)
-
             # eval launch_type
             if launch_type is not None:
                 stripped, is_default = canmatrix.formats.xls_common._strip_default_mark(launch_type)
@@ -514,14 +526,6 @@ def load(file, **options):
             # ---- CAN FD attributes ----
             # eval CANFD_BRS
             canmatrix.formats.xls_common._import_attr_with_default(new_frame, "CANFD_BRS", get_if_possible(row, 'CANFD_BRS'), db=db, defines_dict=db.frame_defines)
-
-            # eval ID-Format (VFrameFormat)
-            id_format = get_if_possible(row, 'ID-Format')
-            if id_format is not None and str(id_format).strip() != '':
-                id_format_str = str(id_format).strip()
-                if '_FD' in id_format_str:
-                    new_frame.is_fd = True
-                new_frame.add_attribute("VFrameFormat", id_format_str)
 
             new_frame.cycle_time = cycle_time
 

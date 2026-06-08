@@ -130,6 +130,12 @@
     <button class="btn-diff-only" id="btnDiffOnly" onclick="DbcTool.Compare.toggleDiffOnly()">
         <span class="btn-check">&#x2713;</span> 只显示差异
     </button>
+    <button class="btn-diff-only" id="btnSummary" onclick="DbcTool.Compare.openSummary()" disabled>
+        &#x1F4CB; 变更明细总结
+    </button>
+    <button class="btn-diff-only" id="btnExport" onclick="DbcTool.Compare.exportReport()" disabled>
+        &#x1F4E5; 导出Excel
+    </button>
 </div>
 <div class="cmp-split" id="cmpSplit">
     <div class="cmp-panel" id="cmpPanelLeft">
@@ -148,6 +154,33 @@
 </div>
 </div>
 
+</div>
+
+<!-- ==================== 变更明细总结弹窗 ==================== -->
+<div class="summary-overlay" id="summaryOverlay" onclick="DbcTool.Compare.closeSummary()">
+    <div class="summary-modal" id="summaryModal" onclick="event.stopPropagation()">
+        <div class="summary-header">
+            <h3>&#x1F4CB; 变更明细总结</h3>
+            <div class="summary-header-right">
+                <span class="summary-count" id="summaryCount"></span>
+                <button class="summary-close" onclick="DbcTool.Compare.closeSummary()">&times;</button>
+            </div>
+        </div>
+        <div class="summary-toolbar">
+            <input type="text" class="summary-search" id="summarySearch" placeholder="&#x1F50D; 搜索关键词..." oninput="DbcTool.Compare.filterSummary()">
+            <select class="summary-filter" id="summaryFilter" onchange="DbcTool.Compare.filterSummary()">
+                <option value="all">全部类型</option>
+                <option value="added">新增项</option>
+                <option value="deleted">删除项</option>
+                <option value="changed">变更项</option>
+            </select>
+            <select class="summary-filter" id="summaryNodeFilter" onchange="DbcTool.Compare.filterSummary()">
+                <option value="all">全部节点</option>
+            </select>
+        </div>
+        <div class="summary-body" id="summaryBody"></div>
+        <div class="summary-pagination" id="summaryPagination"></div>
+    </div>
 </div>
 
 <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
