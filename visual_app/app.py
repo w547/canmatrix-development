@@ -50,7 +50,8 @@ def _resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 template_dir = _resource_path('templates')
-app = Flask(__name__, template_folder=template_dir)
+static_dir = _resource_path('static')
+app = Flask(__name__, template_folder=template_dir, static_folder=static_dir, static_url_path='/static')
 app.secret_key = 'dbctool_viz_secret_key'
 
 # ─── 配置 ───────────────────────────────────────────────────
@@ -555,6 +556,25 @@ def _build_diff_map(compare_result):
             return t[len('value '):]
         return ''
 
+    def _generate_change_description(child):
+        ctype = (child.type or '').lower()
+        if ctype not in ('receivers', 'transmitter'):
+            return ''
+        if not (hasattr(child, 'changes') and child.changes and len(child.changes) >= 2):
+            return ''
+        old_str = str(child.changes[0]) if child.changes[0] is not None else ''
+        new_str = str(child.changes[1]) if child.changes[1] is not None else ''
+        old_set = set(s.strip() for s in old_str.split(',') if s.strip())
+        new_set = set(s.strip() for s in new_str.split(',') if s.strip())
+        added = new_set - old_set
+        removed = old_set - new_set
+        parts = []
+        if added:
+            parts.append('新增' + '、'.join(sorted(added)) + '节点')
+        if removed:
+            parts.append('删除' + '、'.join(sorted(removed)) + '节点')
+        return '，'.join(parts) if parts else ''
+
     def collect_detail_changes(node):
         details = []
         if hasattr(node, 'children') and node.children:
@@ -565,11 +585,14 @@ def _build_diff_map(compare_result):
                     old_val = ''
                     new_val = ''
                     signal_name = ''
+                    description = ''
                     if hasattr(child, 'ref') and child.ref is not None and hasattr(child.ref, 'name'):
                         signal_name = child.ref.name
                     if hasattr(child, 'changes') and child.changes and len(child.changes) >= 2:
                         old_val = str(child.changes[0]) if child.changes[0] is not None else ''
                         new_val = str(child.changes[1]) if child.changes[1] is not None else ''
+                        if child.result == 'changed':
+                            description = _generate_change_description(child)
                     elif child.result in ('deleted', 'removed'):
                         ref_name = _extract_value_name(child) or _extract_name_from_type(child) or _extract_ref_name(child)
                         old_val = ref_name
@@ -595,6 +618,7 @@ def _build_diff_map(compare_result):
                         'new': new_val,
                         'result': child.result,
                         'signal_name': signal_name,
+                        'description': description,
                     })
         return details
 
