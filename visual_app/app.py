@@ -573,7 +573,11 @@ def _build_diff_map(compare_result):
             parts.append('新增' + '、'.join(sorted(added)) + '节点')
         if removed:
             parts.append('删除' + '、'.join(sorted(removed)) + '节点')
-        return '，'.join(parts) if parts else ''
+        if not parts:
+            return ''
+        old_display = '、'.join(sorted(old_set)) if old_set else '(无)'
+        new_display = '、'.join(sorted(new_set)) if new_set else '(无)'
+        return '，'.join(parts) + '，' + old_display + ' → ' + new_display
 
     def collect_detail_changes(node):
         details = []
