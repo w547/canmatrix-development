@@ -502,24 +502,11 @@ def load(file, **options):
             launch_type = sh.cell(row_num, index['launchType']).value
             dlc = int(sh.cell(row_num, index['dlc']).value) if 'dlc' in index else 8
 
-            # eval ID-Format FIRST - this is the authoritative source for frame type
-            is_extended = False
-            is_fd = False
-            id_format_str = None
-            if 'idFormat' in index:
-                id_format = sh.cell(row_num, index['idFormat']).value
-                if id_format is not None and str(id_format).strip() != '':
-                    id_format_str = str(id_format).strip()
-                    if 'ExtendedCAN' in id_format_str:
-                        is_extended = True
-                    if '_FD' in id_format_str:
-                        is_fd = True
-
             new_frame = canmatrix.Frame(frame_name, size=dlc)
-            new_frame.arbitration_id = canmatrix.formats.xls_common.parse_frame_id(frame_id, extended=is_extended)
-            new_frame.is_fd = is_fd
-            if id_format_str is not None:
-                new_frame.add_attribute("VFrameFormat", id_format_str)
+            if frame_id.endswith("xh"):
+                new_frame.arbitration_id = canmatrix.ArbitrationId(int(frame_id[:-2], 16), extended=True)
+            else:
+                new_frame.arbitration_id = canmatrix.ArbitrationId(int(frame_id[:-1], 16), extended=False)
             db.add_frame(new_frame)
 
             # eval launch_type
@@ -571,6 +558,15 @@ def load(file, **options):
             # eval CANFD_BRS
             if 'canfdBrs' in index:
                 canmatrix.formats.xls_common._import_attr_with_default(new_frame, "CANFD_BRS", sh.cell(row_num, index['canfdBrs']).value, db=db, defines_dict=db.frame_defines)
+
+            # eval ID-Format (VFrameFormat)
+            if 'idFormat' in index:
+                id_format = sh.cell(row_num, index['idFormat']).value
+                if id_format is not None and str(id_format).strip() != '':
+                    id_format_str = str(id_format).strip()
+                    if '_FD' in id_format_str:
+                        new_frame.is_fd = True
+                    new_frame.add_attribute("VFrameFormat", id_format_str)
 
             # eval cycle time
             try:

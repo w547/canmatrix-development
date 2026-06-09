@@ -25,55 +25,6 @@ from builtins import *
 import canmatrix
 
 
-def parse_frame_id(cell_value, extended=None):
-    # type: (typing.Any, typing.Optional[bool]) -> canmatrix.ArbitrationId
-    """Parse frame ID from Excel cell value.
-
-    Args:
-        cell_value: The raw cell value from the ID column.
-        extended:  If True/False, use this as the authoritative extended flag.
-                   If None, fall back to heuristics (xh suffix, ID range).
-
-    Handles multiple formats:
-      - "1FF000A1xh" -> extended frame (explicit suffix)
-      - "165h"        -> standard frame (explicit suffix)
-      - "1FF000A1h"   -> extended frame (value > 0x7FF, suffix lost)
-      - 536870561     -> extended frame (numeric, value > 0x7FF)
-      - 357           -> standard frame (numeric, value <= 0x7FF)
-    """
-    if cell_value is None:
-        return canmatrix.ArbitrationId(0, extended=bool(extended))
-
-    if isinstance(cell_value, (int, float)):
-        raw_id = int(cell_value)
-        if extended is not None:
-            return canmatrix.ArbitrationId(raw_id, extended=extended)
-        return canmatrix.ArbitrationId(raw_id, extended=(raw_id > 0x7FF))
-
-    frame_id = str(cell_value).strip()
-
-    if frame_id.endswith("xh"):
-        raw_id = int(frame_id[:-2], 16)
-        return canmatrix.ArbitrationId(raw_id, extended=True)
-
-    if frame_id.endswith("h"):
-        raw_id = int(frame_id[:-1], 16)
-        if extended is not None:
-            return canmatrix.ArbitrationId(raw_id, extended=extended)
-        return canmatrix.ArbitrationId(raw_id, extended=(raw_id > 0x7FF))
-
-    if frame_id.endswith("x"):
-        raw_id = int(frame_id[:-1], 16)
-        if extended is not None:
-            return canmatrix.ArbitrationId(raw_id, extended=extended)
-        return canmatrix.ArbitrationId(raw_id, extended=(raw_id > 0x7FF))
-
-    raw_id = int(frame_id, 16)
-    if extended is not None:
-        return canmatrix.ArbitrationId(raw_id, extended=extended)
-    return canmatrix.ArbitrationId(raw_id, extended=(raw_id > 0x7FF))
-
-
 def _get_attr_with_default_mark(obj, attr_name, db, defines_dict):
     if attr_name in defines_dict:
         if attr_name in obj.attributes:

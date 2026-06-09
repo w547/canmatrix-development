@@ -704,7 +704,7 @@ def main():
 
     # 自动打开浏览器 (可选)
     try:
-        webbrowser.open(f'http://{host}:{port}')
+        webbrowser.open(f'http://{host}:{port}?fresh=1')
     except Exception:
         pass
 
