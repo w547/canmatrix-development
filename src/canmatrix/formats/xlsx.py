@@ -399,7 +399,6 @@ def load(file, **options):
 
     # ---- CAN FD attributes ----
     db.add_frame_defines("CANFD_BRS", 'STRING')
-    db.add_frame_defines("VFrameFormat", 'STRING')
 
     launch_types = []  # type: typing.List[str]
     sig_send_types = []  # type: typing.List[str]

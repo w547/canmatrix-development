@@ -437,6 +437,8 @@ def dump(in_db, f, **options):
     # messages-attributes:
     for frame in db.frames:
         for attrib, val in sorted(frame.attributes.items()):
+            if attrib not in db.frame_defines:
+                continue
             f.write(create_attribute_string(attrib, "BO_", str(frame.arbitration_id.to_compound_integer()), val, db.frame_defines[attrib].type == "STRING").encode(dbc_export_encoding, ignore_encoding_errors))
     f.write("\n".encode(dbc_export_encoding, ignore_encoding_errors))
 
