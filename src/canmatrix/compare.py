@@ -348,15 +348,13 @@ def compare_frame(f1, f2, ignore=None):
     else:
         result.add_child(compare_attributes(f1, f2, ignore))
 
-    temp = [str(item) for item in f2.transmitters]
-    for transmitter in f1.transmitters:
-        if transmitter not in temp:
-            result.add_child(CompareResult("removed", "Frame-Transmitter", f1))
-
-    temp = [str(item) for item in f1.transmitters]
-    for transmitter in f2.transmitters:
-        if transmitter not in temp:
-            result.add_child(CompareResult("added", "Frame-Transmitter", f2))
+    if f1.transmitters != f2.transmitters:
+        result.add_child(
+            CompareResult(
+                "changed",
+                "transmitter",
+                f1,
+                [", ".join(f1.transmitters), ", ".join(f2.transmitters)]))
 
     for sg1 in f1.signalGroups:
         sg2 = f2.signal_group_by_name(sg1.name)

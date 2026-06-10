@@ -496,32 +496,32 @@ def _serialize_db_tree(db):
 
 
 _FIELD_LABELS = {
-    'startbit': '起始位 (Startbit)',
-    'signalsize': '信号长度 (Size)',
-    'signalsign': '符号 (Signed)',
-    'is_little_endian': '字节序 (Little Endian)',
-    'is_signed': '符号 (Signed)',
-    'offset': '偏移量 (Offset)',
-    'factor': '缩放因子 (Factor)',
-    'min': '最小值 (Min)',
-    'max': '最大值 (Max)',
-    'unit': '单位 (Unit)',
-    'comment': '注释 (Comment)',
-    'receivers': '接收节点 (Receivers)',
-    'cycle_time': '周期时间 (Cycle Time)',
-    'signature': '校验签名',
-    'framename': '帧名称 (Frame Name)',
-    'signalname': '信号名称 (Signal Name)',
-    'dlc': 'DLC (数据长度)',
-    'multiplex': '复用类型',
-    'values': '信号值表 (Values)',
-    'valuetable': '信号值表 (ValueTable)',
-    'signal': '信号列表变更',
-    'frame': '帧列表变更',
-    'ecus': 'ECU 变更',
-    'attributes': '属性变更',
-    'transmitter': '发送节点变更',
-    'signalgroup': '信号组变更',
+    'startbit': 'Startbit',
+    'signalsize': 'Size',
+    'signalsign': 'Signed',
+    'is_little_endian': 'Little Endian',
+    'is_signed': 'Signed',
+    'offset': 'Offset',
+    'factor': 'Factor',
+    'min': 'Min',
+    'max': 'Max',
+    'unit': 'Unit',
+    'comment': 'Comment',
+    'receivers': 'Receivers',
+    'cycle_time': 'Cycle Time',
+    'signature': 'Signature',
+    'framename': 'Frame Name',
+    'signalname': 'Signal Name',
+    'dlc': 'DLC',
+    'multiplex': 'Multiplex',
+    'values': 'Values',
+    'valuetable': 'ValueTable',
+    'signal': 'Signal',
+    'frame': 'Frame',
+    'ecus': 'ECU',
+    'attributes': 'Attributes',
+    'transmitter': 'Transmitter',
+    'signalgroup': 'SignalGroup',
 }
 
 
@@ -558,7 +558,7 @@ def _build_diff_map(compare_result):
 
     def _generate_change_description(child):
         ctype = (child.type or '').lower()
-        if ctype not in ('receivers', 'transmitter'):
+        if ctype not in ('receivers',):
             return ''
         if not (hasattr(child, 'changes') and child.changes and len(child.changes) >= 2):
             return ''
@@ -570,9 +570,9 @@ def _build_diff_map(compare_result):
         removed = old_set - new_set
         parts = []
         if added:
-            parts.append('新增' + '、'.join(sorted(added)) + '节点')
+            parts.append('增加' + '、'.join(sorted(added)))
         if removed:
-            parts.append('删除' + '、'.join(sorted(removed)) + '节点')
+            parts.append('删除' + '、'.join(sorted(removed)))
         if not parts:
             return ''
         old_display = '、'.join(sorted(old_set)) if old_set else '(无)'
