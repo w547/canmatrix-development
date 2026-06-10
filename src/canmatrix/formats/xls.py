@@ -362,36 +362,11 @@ def load(file, **options):
     # db.add_ecu_defines("NWM-Stationsadresse", 'HEX 0 63')
     # db.add_ecu_defines("NWM-Knoten", 'ENUM  "nein","ja"')
 
-    # ---- Interaction Layer attributes ----
-    db.add_frame_defines("GenMsgDelayTime", 'INT 0 65535')
-    db.add_frame_defines("GenMsgCycleTimeActive", 'INT 0 65535')
-    db.add_frame_defines("GenMsgNrOfRepetitions", 'INT 0 65535')
-
-    # ---- Diagnostics attributes ----
-    db.add_frame_defines("DiagRequest", 'STRING')
-    db.add_frame_defines("DiagResponse", 'STRING')
-    db.add_frame_defines("DiagState", 'STRING')
-
-    # ---- Net Management attributes ----
-    db.add_frame_defines("NmMessage", 'STRING')
-
-    # ---- Interaction Layer attributes ----
-    db.add_frame_defines("GenMsgILSupport", 'STRING')
-    db.add_frame_defines("GenMsgCycleTimeFast", 'INT 0 65535')
-    db.add_frame_defines("GenMsgNoOfRepetitions", 'INT 0 65535')
-
-    # ---- CAN FD attributes ----
-    db.add_frame_defines("CANFD_BRS", 'STRING')
+    canmatrix.formats.xls_common.initialize_excel_attribute_defines(db)
 
     launch_types = []  # type: typing.List[str]
     sig_send_types = []  # type: typing.List[str]
     sig_send_type_default = None  # type: typing.Optional[str]
-    db.add_signal_defines("GenSigSNA", 'STRING')
-    db.add_signal_defines("GenSigInactiveValue", 'STRING')
-    db.add_signal_defines("EventCommandSignal", 'STRING')
-    db.add_signal_defines("GatewayedSignals", 'STRING')
-    db.add_signal_defines("GenSigInvalidValue", 'STRING')
-    db.add_signal_defines("GenSigTimeoutValue", 'STRING')
 
     # eval search for correct columns:
     index = {}

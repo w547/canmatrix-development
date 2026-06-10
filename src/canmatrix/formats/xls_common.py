@@ -56,6 +56,38 @@ def _import_attr_with_default(obj, attr_name, cell_value, db=None, defines_dict=
     return stripped if is_default else None
 
 
+def initialize_excel_attribute_defines(db):
+    # type: (canmatrix.CanMatrix) -> None
+    # ---- Interaction Layer attributes ----
+    db.add_frame_defines("GenMsgDelayTime", 'INT 0 65535')
+    db.add_frame_defines("GenMsgCycleTimeActive", 'INT 0 65535')
+    db.add_frame_defines("GenMsgNrOfRepetitions", 'INT 0 65535')
+
+    # ---- Diagnostics attributes ----
+    db.add_frame_defines("DiagRequest", 'STRING')
+    db.add_frame_defines("DiagResponse", 'STRING')
+    db.add_frame_defines("DiagState", 'STRING')
+
+    # ---- Net Management attributes ----
+    db.add_frame_defines("NmMessage", 'STRING')
+
+    # ---- Interaction Layer attributes ----
+    db.add_frame_defines("GenMsgILSupport", 'STRING')
+    db.add_frame_defines("GenMsgCycleTimeFast", 'INT 0 65535')
+    db.add_frame_defines("GenMsgNoOfRepetitions", 'INT 0 65535')
+
+    # ---- CAN FD attributes ----
+    db.add_frame_defines("CANFD_BRS", 'STRING')
+
+    # ---- Signal attributes ----
+    db.add_signal_defines("GenSigSNA", 'STRING')
+    db.add_signal_defines("GenSigInactiveValue", 'STRING')
+    db.add_signal_defines("EventCommandSignal", 'STRING')
+    db.add_signal_defines("GatewayedSignals", 'STRING')
+    db.add_signal_defines("GenSigInvalidValue", 'STRING')
+    db.add_signal_defines("GenSigTimeoutValue", 'STRING')
+
+
 def get_frame_info(db, frame):
     # type: (canmatrix.CanMatrix, canmatrix.Frame) -> typing.List[str]
     ret_array = []  # type: typing.List[str]
