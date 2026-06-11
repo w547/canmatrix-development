@@ -1297,6 +1297,46 @@ DbcTool.Compare = (function() {
         }
     }
 
+    function _parseNodeList(val) {
+        if (!val) return [];
+        var parts = val.split(/[、,，]+/);
+        var result = [];
+        for (var i = 0; i < parts.length; i++) {
+            var p = parts[i].trim();
+            if (p) result.push(p);
+        }
+        return result;
+    }
+
+    function _getReceiverDiffDesc(oldVal, newVal) {
+        var oldNodes = _parseNodeList(oldVal || '');
+        var newNodes = _parseNodeList(newVal || '');
+
+        var oldSet = {};
+        for (var i = 0; i < oldNodes.length; i++) oldSet[oldNodes[i]] = true;
+        var newSet = {};
+        for (var i = 0; i < newNodes.length; i++) newSet[newNodes[i]] = true;
+
+        var added = [];
+        var removed = [];
+        for (var i = 0; i < newNodes.length; i++) {
+            if (!oldSet[newNodes[i]]) added.push(newNodes[i]);
+        }
+        for (var i = 0; i < oldNodes.length; i++) {
+            if (!newSet[oldNodes[i]]) removed.push(oldNodes[i]);
+        }
+
+        if (added.length === 0 && removed.length === 0) return '';
+
+        if (added.length > 0 && removed.length > 0) {
+            return '节点变更，';
+        }
+        if (added.length > 0) {
+            return '节点新增' + added.join('、') + '，';
+        }
+        return '节点删除' + removed.join('、') + '，';
+    }
+
     function _buildSummaryData() {
         summaryData = [];
         if (!diffMap) return;
@@ -1400,7 +1440,12 @@ DbcTool.Compare = (function() {
                     } else if (d.result === 'deleted' || d.result === 'removed') {
                         dDesc = '删除' + (d.label || nodeName);
                     } else {
-                        dDesc = (d.label || '') + ': ' + (d.old || '') + ' → ' + (d.new || '');
+                        if (d.type === 'receivers') {
+                            var diffDesc = _getReceiverDiffDesc(d.old, d.new);
+                            dDesc = (d.label || '') + ': ' + diffDesc + (d.old || '') + ' → ' + (d.new || '');
+                        } else {
+                            dDesc = (d.label || '') + ': ' + (d.old || '') + ' → ' + (d.new || '');
+                        }
                     }
                     summaryData.push({
                         parent: parent,
@@ -1876,42 +1921,9 @@ DbcTool.Compare = (function() {
             return;
         }
         _downloadExcel();
-        _downloadWord();
     }
 
     function _downloadExcel() {
-        var BOM = '\uFEFF';
-        var header = [];
-        for (var ci = 0; ci < SUMMARY_COLUMNS.length; ci++) {
-            header.push(SUMMARY_COLUMNS[ci].header);
-        }
-        var csvRows = [header.join('\t')];
-        var flatData = _flattenExportData();
-        for (var i = 0; i < flatData.length; i++) {
-            var item = flatData[i];
-            var row = [];
-            for (var cj = 0; cj < SUMMARY_COLUMNS.length; cj++) {
-                var col = SUMMARY_COLUMNS[cj];
-                row.push(col.render(item, i));
-            }
-            csvRows.push(row.join('\t'));
-        }
-        var csvContent = BOM + csvRows.join('\n');
-        var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url;
-        var now = new Date();
-        var ts = now.getFullYear() + ('0' + (now.getMonth() + 1)).slice(-2) + ('0' + now.getDate()).slice(-2) + '_' +
-                 ('0' + now.getHours()).slice(-2) + ('0' + now.getMinutes()).slice(-2) + ('0' + now.getSeconds()).slice(-2);
-        a.download = 'DBC变更明细_' + ts + '.xls';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
-
-    function _downloadWord() {
         var resultColors = { 'added': '#22c55e', 'deleted': '#ef4444', 'removed': '#ef4444', 'changed': '#eab308' };
         var flatData = _flattenExportData();
         var rowsHtml = '';
@@ -1930,8 +1942,9 @@ DbcTool.Compare = (function() {
             }
             rowsHtml += '</tr>';
         }
-        var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">';
+        var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
         html += '<head><meta charset="UTF-8"><title>DBC变更明细报告</title>';
+        html += '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>变更明细</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
         html += '<style>table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:6px 10px;font-size:12px}th{background:#f1f5f9;font-weight:bold;text-align:left}tr:nth-child(even){background:#f8fafc}</style>';
         html += '</head><body>';
         html += '<h2>DBC变更明细报告</h2>';
@@ -1943,19 +1956,19 @@ DbcTool.Compare = (function() {
         }
         html += '</tr></thead><tbody>' + rowsHtml + '</tbody></table>';
         html += '</body></html>';
-        var blob = new Blob(['\uFEFF' + html], { type: 'application/msword;charset=utf-8;' });
+        var blob = new Blob(['\uFEFF' + html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a');
         a.href = url;
         var now = new Date();
         var ts = now.getFullYear() + ('0' + (now.getMonth() + 1)).slice(-2) + ('0' + now.getDate()).slice(-2) + '_' +
                  ('0' + now.getHours()).slice(-2) + ('0' + now.getMinutes()).slice(-2) + ('0' + now.getSeconds()).slice(-2);
-        a.download = 'DBC变更明细_' + ts + '.doc';
+        a.download = 'DBC变更明细_' + ts + '.xls';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        DbcTool.msg('ok', '变更明细已导出 (Excel + Word)');
+        DbcTool.msg('ok', '变更明细已导出 (Excel)');
     }
 
     function _flattenExportData() {
