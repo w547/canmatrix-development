@@ -28,8 +28,8 @@ DbcTool.Compare = (function() {
         }},
         { header: '子级', key: 'child', render: function(item) { return item.child; } },
         { header: '属性', key: 'label', render: function(item) { return item.label || '-'; } },
-        { header: '旧值', key: 'old', render: function(item) { return item.old || '-'; } },
-        { header: '新值', key: 'new', render: function(item) { return item.new || '-'; } },
+        { header: '旧值', key: 'old', render: function(item) { return _highlightListChanges(item.old, item.new).oldHtml; } },
+        { header: '新值', key: 'new', render: function(item) { return _highlightListChanges(item.old, item.new).newHtml; } },
         { header: '变更描述', key: 'description', render: function(item) { return item.description; } }
     ];
 
@@ -1308,33 +1308,54 @@ DbcTool.Compare = (function() {
         return result;
     }
 
-    function _getReceiverDiffDesc(oldVal, newVal) {
-        var oldNodes = _parseNodeList(oldVal || '');
-        var newNodes = _parseNodeList(newVal || '');
+    function _highlightListChanges(oldVal, newVal) {
+        if (!oldVal && !newVal) return { oldHtml: '-', newHtml: '-' };
+        if (!oldVal) return { oldHtml: '-', newHtml: DbcTool.escapeHtml(newVal) };
+        if (!newVal) return { oldHtml: DbcTool.escapeHtml(oldVal), newHtml: '-' };
+
+        var hasSeparator = /[、,，]/.test(oldVal) || /[、,，]/.test(newVal);
+        if (!hasSeparator) {
+            return { oldHtml: DbcTool.escapeHtml(oldVal), newHtml: DbcTool.escapeHtml(newVal) };
+        }
+
+        var oldNodes = _parseNodeList(oldVal);
+        var newNodes = _parseNodeList(newVal);
 
         var oldSet = {};
         for (var i = 0; i < oldNodes.length; i++) oldSet[oldNodes[i]] = true;
         var newSet = {};
         for (var i = 0; i < newNodes.length; i++) newSet[newNodes[i]] = true;
 
-        var added = [];
-        var removed = [];
-        for (var i = 0; i < newNodes.length; i++) {
-            if (!oldSet[newNodes[i]]) added.push(newNodes[i]);
-        }
+        var oldHtml = '';
         for (var i = 0; i < oldNodes.length; i++) {
-            if (!newSet[oldNodes[i]]) removed.push(oldNodes[i]);
+            var node = oldNodes[i];
+            if (i > 0) oldHtml += '、';
+            if (!newSet[node]) {
+                oldHtml += '<span class="s-highlight">' + DbcTool.escapeHtml(node) + '</span>';
+            } else {
+                oldHtml += DbcTool.escapeHtml(node);
+            }
         }
 
-        if (added.length === 0 && removed.length === 0) return '';
+        var newHtml = '';
+        for (var i = 0; i < newNodes.length; i++) {
+            var node = newNodes[i];
+            if (i > 0) newHtml += '、';
+            if (!oldSet[node]) {
+                newHtml += '<span class="s-highlight">' + DbcTool.escapeHtml(node) + '</span>';
+            } else {
+                newHtml += DbcTool.escapeHtml(node);
+            }
+        }
 
-        if (added.length > 0 && removed.length > 0) {
-            return '节点变更，';
-        }
-        if (added.length > 0) {
-            return '节点新增' + added.join('、') + '，';
-        }
-        return '节点删除' + removed.join('、') + '，';
+        return { oldHtml: oldHtml || '-', newHtml: newHtml || '-' };
+    }
+
+    function _stripHtml(html) {
+        if (!html) return '';
+        var div = document.createElement('div');
+        div.innerHTML = html;
+        return div.textContent || div.innerText || '';
     }
 
     function _buildSummaryData() {
@@ -1440,12 +1461,7 @@ DbcTool.Compare = (function() {
                     } else if (d.result === 'deleted' || d.result === 'removed') {
                         dDesc = '删除' + (d.label || nodeName);
                     } else {
-                        if (d.type === 'receivers') {
-                            var diffDesc = _getReceiverDiffDesc(d.old, d.new);
-                            dDesc = (d.label || '') + ': ' + diffDesc + (d.old || '') + ' → ' + (d.new || '');
-                        } else {
-                            dDesc = (d.label || '') + ': ' + (d.old || '') + ' → ' + (d.new || '');
-                        }
+                        dDesc = (d.label || '') + ': ' + (d.old || '') + ' → ' + (d.new || '');
                     }
                     summaryData.push({
                         parent: parent,
@@ -1761,7 +1777,9 @@ DbcTool.Compare = (function() {
             if (typeFilter !== 'all' && item.result !== typeFilter) continue;
             if (nodeFilter !== 'all' && item.child !== nodeFilter) continue;
             if (searchText) {
-                var searchTarget = (item.parent + ' ' + item.child + ' ' + item.label + ' ' + item.old + ' ' + item.new + ' ' + item.description).toLowerCase();
+                var oldText = _stripHtml(_highlightListChanges(item.old, item.new).oldHtml);
+                var newText = _stripHtml(_highlightListChanges(item.old, item.new).newHtml);
+                var searchTarget = (item.parent + ' ' + item.child + ' ' + item.label + ' ' + oldText + ' ' + newText + ' ' + item.description).toLowerCase();
                 if (searchTarget.indexOf(searchText) < 0) continue;
             }
             summaryFilteredData.push(item);
@@ -1863,9 +1881,9 @@ DbcTool.Compare = (function() {
             } else if (col.key === 'label') {
                 html += '<td>' + DbcTool.escapeHtml(cellValue) + '</td>';
             } else if (col.key === 'old') {
-                html += '<td class="s-old">' + (cellValue && cellValue !== '-' ? DbcTool.escapeHtml(cellValue) : '<span class="s-empty">-</span>') + '</td>';
+                html += '<td class="s-old">' + (cellValue && cellValue !== '-' ? cellValue : '<span class="s-empty">-</span>') + '</td>';
             } else if (col.key === 'new') {
-                html += '<td class="s-new">' + (cellValue && cellValue !== '-' ? DbcTool.escapeHtml(cellValue) : '<span class="s-empty">-</span>') + '</td>';
+                html += '<td class="s-new">' + (cellValue && cellValue !== '-' ? cellValue : '<span class="s-empty">-</span>') + '</td>';
             } else if (col.key === 'description') {
                 html += '<td class="s-detail">' + DbcTool.escapeHtml(cellValue) + '</td>';
             } else {
@@ -1921,9 +1939,46 @@ DbcTool.Compare = (function() {
             return;
         }
         _downloadExcel();
+        _downloadWord();
     }
 
     function _downloadExcel() {
+        var BOM = '\uFEFF';
+        var header = [];
+        for (var ci = 0; ci < SUMMARY_COLUMNS.length; ci++) {
+            header.push(SUMMARY_COLUMNS[ci].header);
+        }
+        var csvRows = [header.join('\t')];
+        var flatData = _flattenExportData();
+        for (var i = 0; i < flatData.length; i++) {
+            var item = flatData[i];
+            var row = [];
+            for (var cj = 0; cj < SUMMARY_COLUMNS.length; cj++) {
+                var col = SUMMARY_COLUMNS[cj];
+                var val = col.render(item, i);
+                if (col.key === 'old' || col.key === 'new') {
+                    val = _stripHtml(val);
+                }
+                row.push(val);
+            }
+            csvRows.push(row.join('\t'));
+        }
+        var csvContent = BOM + csvRows.join('\n');
+        var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        var now = new Date();
+        var ts = now.getFullYear() + ('0' + (now.getMonth() + 1)).slice(-2) + ('0' + now.getDate()).slice(-2) + '_' +
+                 ('0' + now.getHours()).slice(-2) + ('0' + now.getMinutes()).slice(-2) + ('0' + now.getSeconds()).slice(-2);
+        a.download = 'DBC变更明细_' + ts + '.xls';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function _downloadWord() {
         var resultColors = { 'added': '#22c55e', 'deleted': '#ef4444', 'removed': '#ef4444', 'changed': '#eab308' };
         var flatData = _flattenExportData();
         var rowsHtml = '';
@@ -1936,15 +1991,16 @@ DbcTool.Compare = (function() {
                 var cellValue = col.render(item, i);
                 if (col.key === 'result') {
                     rowsHtml += '<td style="color:' + color + ';font-weight:bold">' + DbcTool.escapeHtml(cellValue) + '</td>';
+                } else if (col.key === 'old' || col.key === 'new') {
+                    rowsHtml += '<td>' + cellValue + '</td>';
                 } else {
                     rowsHtml += '<td>' + DbcTool.escapeHtml(cellValue) + '</td>';
                 }
             }
             rowsHtml += '</tr>';
         }
-        var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
+        var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">';
         html += '<head><meta charset="UTF-8"><title>DBC变更明细报告</title>';
-        html += '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>变更明细</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
         html += '<style>table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:6px 10px;font-size:12px}th{background:#f1f5f9;font-weight:bold;text-align:left}tr:nth-child(even){background:#f8fafc}</style>';
         html += '</head><body>';
         html += '<h2>DBC变更明细报告</h2>';
@@ -1956,19 +2012,19 @@ DbcTool.Compare = (function() {
         }
         html += '</tr></thead><tbody>' + rowsHtml + '</tbody></table>';
         html += '</body></html>';
-        var blob = new Blob(['\uFEFF' + html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+        var blob = new Blob(['\uFEFF' + html], { type: 'application/msword;charset=utf-8;' });
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a');
         a.href = url;
         var now = new Date();
         var ts = now.getFullYear() + ('0' + (now.getMonth() + 1)).slice(-2) + ('0' + now.getDate()).slice(-2) + '_' +
                  ('0' + now.getHours()).slice(-2) + ('0' + now.getMinutes()).slice(-2) + ('0' + now.getSeconds()).slice(-2);
-        a.download = 'DBC变更明细_' + ts + '.xls';
+        a.download = 'DBC变更明细_' + ts + '.doc';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        DbcTool.msg('ok', '变更明细已导出 (Excel)');
+        DbcTool.msg('ok', '变更明细已导出 (Excel + Word)');
     }
 
     function _flattenExportData() {
