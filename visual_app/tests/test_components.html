@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>DbcTool 组件单元测试</title>
+    <style>
+        :root{--bg:#0f172a;--surface:#1e293b;--text:#e2e8f0;--text2:#94a3b8;--green:#4ade80;--red:#f87171;--accent:#38bdf8}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);padding:24px;line-height:1.6}
+        h1{color:var(--accent);margin-bottom:8px}
+        h2{color:var(--accent);margin:24px 0 12px;font-size:1.1rem;border-bottom:1px solid #334155;padding-bottom:6px}
+        .suite{margin-bottom:8px}
+        .test{padding:6px 12px;margin:2px 0;border-radius:6px;font-size:.85rem;font-family:'SF Mono','Fira Code',monospace}
+        .test.pass{background:rgba(74,222,128,.1);color:var(--green)}
+        .test.fail{background:rgba(248,113,113,.1);color:var(--red)}
+        .summary{background:var(--surface);border-radius:8px;padding:16px;margin-top:20px;display:flex;gap:24px;flex-wrap:wrap}
+        .summary .stat{text-align:center}
+        .summary .stat-val{font-size:1.5rem;font-weight:700}
+        .summary .stat-val.pass{color:var(--green)}.summary .stat-val.fail{color:var(--red)}
+        .summary .stat-lbl{font-size:.72rem;color:var(--text2)}
+    </style>
+</head>
+<body>
+<h1>DbcTool 组件单元测试</h1>
+<p style="color:var(--text2);font-size:.82rem">测试文件: utils.js, convert.js, compare.js, app.js</p>
+
+<div id="results"></div>
+<div id="summary"></div>
+
+<script src="../static/js/utils.js"></script>
+<script src="../static/js/convert.js"></script>
+<script src="../static/js/compare.js"></script>
+<script src="../static/js/app.js"></script>
+<script>
+(function() {
+    var results = [];
+    var passed = 0;
+    var failed = 0;
+
+    function assert(condition, name) {
+        if (condition) {
+            results.push({ name: name, pass: true });
+            passed++;
+        } else {
+            results.push({ name: name, pass: false });
+            failed++;
+        }
+    }
+
+    function assertEqual(actual, expected, name) {
+        var ok = actual === expected;
+        if (!ok) {
+            name = name + ' (期望: ' + JSON.stringify(expected) + ', 实际: ' + JSON.stringify(actual) + ')';
+        }
+        assert(ok, name);
+    }
+
+    function assertDefined(val, name) {
+        assert(val !== undefined && val !== null, name + ' 已定义');
+    }
+
+    function assertType(val, type, name) {
+        assert(typeof val === type, name + ' 类型为 ' + type);
+    }
+
+    // ==================== utils.js 测试 ====================
+    (function testUtils() {
+        var s = 'utils.js';
+
+        assertDefined(DbcTool, s + ': DbcTool 命名空间');
+        assertDefined(DbcTool.escapeHtml, s + ': escapeHtml');
+        assertDefined(DbcTool.getExt, s + ': getExt');
+        assertDefined(DbcTool.fmtFromExt, s + ': fmtFromExt');
+        assertDefined(DbcTool.findFmtKey, s + ': findFmtKey');
+        assertDefined(DbcTool.formatFileSize, s + ': formatFileSize');
+        assertDefined(DbcTool.setupUpload, s + ': setupUpload');
+        assertDefined(DbcTool.toggleAdv, s + ': toggleAdv');
+        assertDefined(DbcTool.ICONS, s + ': ICONS');
+
+        assertEqual(DbcTool.escapeHtml('<script>'), '&lt;script&gt;', s + ': escapeHtml 转义 <');
+        assertEqual(DbcTool.escapeHtml('a&b'), 'a&amp;b', s + ': escapeHtml 转义 &');
+        assertEqual(DbcTool.escapeHtml('"test"'), '&quot;test&quot;', s + ': escapeHtml 转义 "');
+        assertEqual(DbcTool.escapeHtml(''), '', s + ': escapeHtml 空字符串');
+        assertEqual(DbcTool.escapeHtml(null), '', s + ': escapeHtml null');
+        assertEqual(DbcTool.escapeHtml(undefined), '', s + ': escapeHtml undefined');
+
+        assertEqual(DbcTool.getExt('test.dbc'), 'dbc', s + ': getExt .dbc');
+        assertEqual(DbcTool.getExt('path/to/file.xlsx'), 'xlsx', s + ': getExt .xlsx');
+        assertEqual(DbcTool.getExt('noext'), '', s + ': getExt 无扩展名');
+        assertEqual(DbcTool.getExt('.hidden'), 'hidden', s + ': getExt 隐藏文件');
+        assertEqual(DbcTool.getExt('a.b.c.dbc'), 'dbc', s + ': getExt 多点');
+
+        assertEqual(DbcTool.fmtFromExt('dbc'), 'dbc', s + ': fmtFromExt dbc');
+        assertEqual(DbcTool.fmtFromExt('xlsx'), 'xlsx', s + ': fmtFromExt xlsx');
+        assertEqual(DbcTool.fmtFromExt('yml'), 'yaml', s + ': fmtFromExt yml');
+        assertEqual(DbcTool.fmtFromExt('xml'), 'arxml', s + ': fmtFromExt xml→arxml');
+        assertEqual(DbcTool.fmtFromExt('unknown'), '', s + ': fmtFromExt 未知');
+
+        assertEqual(DbcTool.formatFileSize(500), '500 B', s + ': formatFileSize B');
+        assertEqual(DbcTool.formatFileSize(2048), '2.0 KB', s + ': formatFileSize KB');
+        assertEqual(DbcTool.formatFileSize(2097152), '2.0 MB', s + ': formatFileSize MB');
+
+        var mockFmtMap = [{key:'dbc'},{key:'xlsx'},{key:'arxml'}];
+        assertEqual(DbcTool.findFmtKey('dbc', mockFmtMap), 'dbc', s + ': findFmtKey 找到');
+        assertEqual(DbcTool.findFmtKey('unknown', mockFmtMap), '', s + ': findFmtKey 未找到');
+        assertEqual(DbcTool.findFmtKey('', mockFmtMap), '', s + ': findFmtKey 空');
+
+        assertDefined(DbcTool.ICONS.db, s + ': ICONS.db');
+        assertDefined(DbcTool.ICONS.frame, s + ': ICONS.frame');
+        assertDefined(DbcTool.ICONS.signal, s + ': ICONS.signal');
+        assertDefined(DbcTool.ICONS.ecu, s + ': ICONS.ecu');
+        assertDefined(DbcTool.ICONS.valuetable, s + ': ICONS.valuetable');
+        assertDefined(DbcTool.ICONS.define, s + ': ICONS.define');
+        assertDefined(DbcTool.ICONS.signalgroup, s + ': ICONS.signalgroup');
+        assertDefined(DbcTool.ICONS.category, s + ': ICONS.category');
+        assertDefined(DbcTool.ICONS.signalgroup_category, s + ': ICONS.signalgroup_category');
+    })();
+
+    // ==================== convert.js 测试 ====================
+    (function testConvert() {
+        var s = 'convert.js';
+
+        assertDefined(DbcTool.Convert, s + ': Convert 命名空间');
+        assertType(DbcTool.Convert.init, 'function', s + ': init');
+        assertType(DbcTool.Convert.fileInCvt, 'function', s + ': fileInCvt');
+        assertType(DbcTool.Convert.updBtnCvt, 'function', s + ': updBtnCvt');
+        assertType(DbcTool.Convert.doConvert, 'function', s + ': doConvert');
+        assertType(DbcTool.Convert.hideResCvt, 'function', s + ': hideResCvt');
+
+        DbcTool.Convert.init([{key:'dbc'},{key:'xlsx'}]);
+
+        var pass = true;
+        try { DbcTool.Convert.init([{key:'dbc'}]); } catch(e) { pass = false; }
+        assert(pass, s + ': init 不抛异常');
+    })();
+
+    // ==================== compare.js 测试 ====================
+    (function testCompare() {
+        var s = 'compare.js';
+
+        assertDefined(DbcTool.Compare, s + ': Compare 命名空间');
+        assertType(DbcTool.Compare.init, 'function', s + ': init');
+        assertType(DbcTool.Compare.fileInCmp1, 'function', s + ': fileInCmp1');
+        assertType(DbcTool.Compare.fileInCmp2, 'function', s + ': fileInCmp2');
+        assertType(DbcTool.Compare.updBtnCmp, 'function', s + ': updBtnCmp');
+        assertType(DbcTool.Compare.doCompare, 'function', s + ': doCompare');
+        assertType(DbcTool.Compare.hideResCmp, 'function', s + ': hideResCmp');
+        assertType(DbcTool.Compare.toggleDiffOnly, 'function', s + ': toggleDiffOnly');
+        assertType(DbcTool.Compare.toggleTreeNode, 'function', s + ': toggleTreeNode');
+
+        var pass = true;
+        try { DbcTool.Compare.init(); } catch(e) { pass = false; }
+        assert(pass, s + ': init 不抛异常');
+
+        var tooltipEl = document.getElementById('chtTooltip');
+        assert(tooltipEl !== null, s + ': init 创建 tooltip DOM');
+    })();
+
+    // ==================== app.js 测试 ====================
+    (function testApp() {
+        var s = 'app.js';
+
+        assertDefined(DbcTool.App, s + ': App 命名空间');
+        assertType(DbcTool.App.init, 'function', s + ': init');
+        assertType(DbcTool.App.switchModule, 'function', s + ': switchModule');
+    })();
+
+    // ==================== 渲染结果 ====================
+    var resultsHtml = '';
+    var currentSuite = '';
+    for (var i = 0; i < results.length; i++) {
+        var r = results[i];
+        var suiteName = r.name.split(':')[0];
+        if (suiteName !== currentSuite) {
+            currentSuite = suiteName;
+            resultsHtml += '<h2>' + currentSuite + '</h2><div class="suite">';
+        }
+        resultsHtml += '<div class="test ' + (r.pass ? 'pass' : 'fail') + '">' +
+            (r.pass ? '✓' : '✗') + ' ' + r.name + '</div>';
+    }
+    document.getElementById('results').innerHTML = resultsHtml;
+
+    document.getElementById('summary').innerHTML =
+        '<div class="summary">' +
+        '<div class="stat"><div class="stat-val" style="color:var(--accent)">' + results.length + '</div><div class="stat-lbl">总测试数</div></div>' +
+        '<div class="stat"><div class="stat-val pass">' + passed + '</div><div class="stat-lbl">通过</div></div>' +
+        '<div class="stat"><div class="stat-val fail">' + failed + '</div><div class="stat-lbl">失败</div></div>' +
+        '</div>';
+})();
+</script>
+</body>
+</html>
