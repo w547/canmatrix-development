@@ -178,6 +178,8 @@
             <select class="summary-filter" id="summaryNodeFilter" onchange="DbcTool.Compare.filterSummary()">
                 <option value="all">全部节点</option>
             </select>
+            <button class="summary-toolbar-btn" id="btnExpandAll" onclick="DbcTool.Compare.expandAllSummary()" title="展开所有节点">全部展开</button>
+            <button class="summary-toolbar-btn" id="btnCollapseAll" onclick="DbcTool.Compare.collapseAllSummary()" title="收起所有节点">全部收起</button>
         </div>
         <div class="summary-body" id="summaryBody"></div>
         <div class="summary-pagination" id="summaryPagination"></div>
