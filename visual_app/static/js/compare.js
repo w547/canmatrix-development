@@ -1312,9 +1312,9 @@ DbcTool.Compare = (function() {
                 currentParent = node.name;
             }
 
-            if (node.type !== 'category' && node.type !== 'db' && node.type !== 'signalgroup_category') {
+            if (node.type !== 'category' && node.type !== 'db' && node.type !== 'signalgroup_category' && node.type !== 'signal') {
                 var typeMap = {
-                    'ecu': 'ECU', 'frame': 'FRAME', 'signal': 'SIGNAL',
+                    'ecu': 'ECU', 'frame': 'FRAME',
                     'valuetable': 'VALUETABLE', 'define': 'DEFINE',
                     'signalgroup': 'SIGNALGROUP'
                 };
@@ -1349,9 +1349,9 @@ DbcTool.Compare = (function() {
                 currentParent = node.name;
             }
 
-            if (node.type !== 'category' && node.type !== 'db' && node.type !== 'signalgroup_category') {
+            if (node.type !== 'category' && node.type !== 'db' && node.type !== 'signalgroup_category' && node.type !== 'signal') {
                 var typeMap = {
-                    'ecu': 'ECU', 'frame': 'FRAME', 'signal': 'SIGNAL',
+                    'ecu': 'ECU', 'frame': 'FRAME',
                     'valuetable': 'VALUETABLE', 'define': 'DEFINE',
                     'signalgroup': 'SIGNALGROUP'
                 };
