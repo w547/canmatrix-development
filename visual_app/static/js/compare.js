@@ -1529,10 +1529,11 @@ DbcTool.Compare = (function() {
             return;
         }
 
+        var lastParentItem = null;
         for (var k = 0; k < frameAttrChanges.length; k++) {
             var fc = frameAttrChanges[k];
             var fcDesc = fc.label + ': ' + (fc.old || '') + ' → ' + (fc.new || '');
-            var isFirstAttr = (k === 0);
+            var isLastAttr = (k === frameAttrChanges.length - 1);
             var parentItem = {
                 parent: parent,
                 result: 'changed',
@@ -1541,15 +1542,16 @@ DbcTool.Compare = (function() {
                 old: fc.old || '',
                 new: fc.new || '',
                 description: fcDesc,
-                _isParent: isFirstAttr && hasChildren,
+                _isParent: isLastAttr && hasChildren,
                 _parentId: parentId,
                 _children: [],
                 _expanded: false
             };
             summaryData.push(parentItem);
 
-            if (isFirstAttr && hasChildren) {
+            if (isLastAttr && hasChildren) {
                 _addSignalChildren(signalChanges, frameName, parentId, parentItem);
+                lastParentItem = parentItem;
             }
         }
 
@@ -1888,39 +1890,24 @@ DbcTool.Compare = (function() {
     }
 
     function _downloadExcel() {
-        var resultColors = { 'added': '#22c55e', 'deleted': '#ef4444', 'removed': '#ef4444', 'changed': '#eab308' };
+        var BOM = '\uFEFF';
+        var header = [];
+        for (var ci = 0; ci < SUMMARY_COLUMNS.length; ci++) {
+            header.push(SUMMARY_COLUMNS[ci].header);
+        }
+        var csvRows = [header.join('\t')];
         var flatData = _flattenExportData();
-        var rowsHtml = '';
         for (var i = 0; i < flatData.length; i++) {
             var item = flatData[i];
-            var color = resultColors[item.result] || '#94a3b8';
-            rowsHtml += '<tr>';
+            var row = [];
             for (var cj = 0; cj < SUMMARY_COLUMNS.length; cj++) {
                 var col = SUMMARY_COLUMNS[cj];
-                var cellValue = col.render(item, i);
-                if (col.key === 'result') {
-                    rowsHtml += '<td style="color:' + color + ';font-weight:bold">' + DbcTool.escapeHtml(cellValue) + '</td>';
-                } else {
-                    rowsHtml += '<td>' + DbcTool.escapeHtml(cellValue) + '</td>';
-                }
+                row.push(col.render(item, i));
             }
-            rowsHtml += '</tr>';
+            csvRows.push(row.join('\t'));
         }
-        var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
-        html += '<head><meta charset="UTF-8"><title>DBC变更明细报告</title>';
-        html += '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>变更明细</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
-        html += '<style>table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:6px 10px;font-size:12px}th{background:#f1f5f9;font-weight:bold;text-align:left}tr:nth-child(even){background:#f8fafc}</style>';
-        html += '</head><body>';
-        html += '<h2>DBC变更明细报告</h2>';
-        html += '<p>生成时间: ' + new Date().toLocaleString('zh-CN') + '</p>';
-        html += '<p>总记录数: ' + flatData.length + '</p>';
-        html += '<table><thead><tr>';
-        for (var hi = 0; hi < SUMMARY_COLUMNS.length; hi++) {
-            html += '<th>' + SUMMARY_COLUMNS[hi].header + '</th>';
-        }
-        html += '</tr></thead><tbody>' + rowsHtml + '</tbody></table>';
-        html += '</body></html>';
-        var blob = new Blob(['\uFEFF' + html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+        var csvContent = BOM + csvRows.join('\n');
+        var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a');
         a.href = url;
