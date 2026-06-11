@@ -1529,12 +1529,10 @@ DbcTool.Compare = (function() {
             return;
         }
 
-        var lastParentItem = null;
         for (var k = 0; k < frameAttrChanges.length; k++) {
             var fc = frameAttrChanges[k];
             var fcDesc = fc.label + ': ' + (fc.old || '') + ' → ' + (fc.new || '');
-            var isLastAttr = (k === frameAttrChanges.length - 1);
-            var parentItem = {
+            summaryData.push({
                 parent: parent,
                 result: 'changed',
                 child: frameName,
@@ -1542,20 +1540,12 @@ DbcTool.Compare = (function() {
                 old: fc.old || '',
                 new: fc.new || '',
                 description: fcDesc,
-                _isParent: isLastAttr && hasChildren,
-                _parentId: parentId,
-                _children: [],
-                _expanded: false
-            };
-            summaryData.push(parentItem);
-
-            if (isLastAttr && hasChildren) {
-                _addSignalChildren(signalChanges, frameName, parentId, parentItem);
-                lastParentItem = parentItem;
-            }
+                _isParent: false,
+                _parentId: parentId
+            });
         }
 
-        if (frameAttrChanges.length === 0 && hasChildren) {
+        if (hasChildren) {
             var parentItem = {
                 parent: parent,
                 result: 'changed',
