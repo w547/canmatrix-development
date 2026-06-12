@@ -175,6 +175,7 @@ def dump(db, filename, **options):
 
     sty_first_frame = NamedStyle(name="sty_first_frame")
     sty_first_frame.font = Font(bold=True, size=8, name='Verdana', color='ff000000')
+    sty_first_frame.fill = PatternFill(patternType='solid', fgColor='DCE6F1')
     sty_first_frame.border = Border(top=Side(border_style='thin'))
 
     sty_white = NamedStyle(name="sty_white")
@@ -189,21 +190,21 @@ def dump(db, filename, **options):
     # sty_green = workbook.add_format({'pattern': 1, 'fg_color': '#CCFFCC'})
 
     sty_green_first_frame = NamedStyle(name="sty_green_first_frame")
-    sty_green_first_frame.fill = PatternFill(patternType='solid', fgColor='CCFFCC')
+    sty_green_first_frame.fill = PatternFill(patternType='solid', fgColor='DCE6F1')
     sty_green_first_frame.border = Border(top=Side(border_style='thin'))
 
     sty_sender = NamedStyle(name="sty_sender")
     sty_sender.fill = PatternFill(patternType='lightGrid', fgColor='C0C0C0')
 
     sty_sender_first_frame = NamedStyle(name="sty_sender_first_frame")
-    sty_sender_first_frame.fill = PatternFill(patternType='lightGrid', fgColor='C0C0C0')
+    sty_sender_first_frame.fill = PatternFill(patternType='solid', fgColor='DCE6F1')
     sty_sender_first_frame.border = Border(top=Side(border_style='thin'))
 
     sty_sender_green = NamedStyle(name="sty_sender_green")
     sty_sender_green.fill = PatternFill(patternType='lightGrid', fgColor='C0C0C0', bgColor='CCFFCC')
 
     sty_sender_green_first_frame = NamedStyle(name="sty_sender_green_first_frame")
-    sty_sender_green_first_frame.fill = PatternFill(patternType='lightGrid', fgColor='C0C0C0', bgColor='CCFFCC')
+    sty_sender_green_first_frame.fill = PatternFill(patternType='solid', fgColor='DCE6F1')
     sty_sender_green_first_frame.border = Border(top=Side(border_style='thin'))
 
     row_array = head_top
@@ -249,11 +250,12 @@ def dump(db, filename, **options):
     # set row to first Frame (row = 0 is header)
     row = 1
 
+    frame_col_count = len(canmatrix.formats.xls_common.get_frame_info(db, db.frames[0]) if db.frames else 16)
+
     # iterate over the frames
     for idx in sorted(frame_hash.keys()):
 
         frame = frame_hash[idx]
-        frame_style = sty_first_frame
 
         # sort signals:
         sig_hash = {}
@@ -265,52 +267,48 @@ def dump(db, filename, **options):
             else:  # motorolaBitFormat == "lsb"
                 sig_hash["%03d" % int(sig.get_startbit(bit_numbering=1, start_little=True)) + sig.name] = sig
 
-        # set style for first line with border
-        signal_style = sty_first_frame
-
         additional_frame_info = [frame.attribute(additional, default="") for additional in additional_frame_columns]
 
-        row_array = []
+        # === Write frame row (frame-level columns only) ===
+        frame_row = canmatrix.formats.xls_common.get_frame_info(db, frame)
+        frame_row += ["" for _ in range(head_start - len(frame_row))]
+        front_col = write_excel_line(worksheet, row, 0, frame_row, sty_first_frame)
+
+        col = head_start
+        col = write_ecu_matrix(ecu_list, None, frame, worksheet, row, col, sty_first_frame)
+
+        tail_row = ["" for _ in range(len(head_tail))]
+        tail_row += additional_frame_info
+        tail_row += ["" for _ in additional_signal_columns]
+        write_excel_line(worksheet, row, col, tail_row, sty_first_frame)
+        row += 1
+
         if len(sig_hash) == 0:
-            row_array += canmatrix.formats.xls_common.get_frame_info(db, frame)
-            for _ in range(7, head_start):
-                row_array.append("")
-            temp_col = write_excel_line(worksheet, row, 0, row_array, frame_style)
-            temp_col = write_ecu_matrix(ecu_list, None, frame, worksheet, row, temp_col, frame_style)
+            continue
 
-            row_array = ["" for _ in range(temp_col, additional_frame_start)]
-            row_array += additional_frame_info
-            row_array += ["" for _ in additional_signal_columns]
-            write_excel_line(worksheet, row, temp_col, row_array, frame_style)
-            row += 1
+        # === Write signal rows (signal-level columns only) ===
+        empty_frame = ["" for _ in range(frame_col_count)]
+        signal_style = sty_norm
 
-        first_fold_row = row+1
-        # iterate over signals
         for sig_idx in sorted(sig_hash.keys()):
             sig = sig_hash[sig_idx]
 
-            # if not first Signal in Frame, set style
-            if signal_style != sty_first_frame:
-                signal_style = sty_norm
+            worksheet.row_dimensions[row+1].outline_level = 1
 
             # valuetable available?
             if len(sig.values) > 0 and not values_in_seperate_lines:
                 value_style = signal_style
                 # iterate over values in valuetable
                 for val in sorted(sig.values.keys()):
-                    row_array = canmatrix.formats.xls_common.get_frame_info(db, frame)
-                    front_col = write_excel_line(worksheet, row, 0, row_array, frame_style)
-
-                    if row >= first_fold_row:    
-                        worksheet.row_dimensions[row+1].outline_level = 1
+                    write_excel_line(worksheet, row, 0, empty_frame, signal_style)
 
                     col = head_start
-                    col = write_ecu_matrix(ecu_list, sig, frame, worksheet, row, col, frame_style)
+                    col = write_ecu_matrix(ecu_list, sig, frame, worksheet, row, col, signal_style)
 
                     # write Value
                     (frontRow, back_row) = canmatrix.formats.xls_common.get_signal(db, frame, sig, motorola_bit_format)
-                    write_excel_line(worksheet, row, front_col, frontRow, signal_style)
-                    back_row += additional_frame_info
+                    write_excel_line(worksheet, row, frame_col_count, frontRow, signal_style)
+                    back_row += ["" for _ in additional_frame_columns]
                     for item in additional_signal_columns:
                         temp = getattr(sig, item, "")
                         back_row.append(temp)
@@ -321,23 +319,18 @@ def dump(db, filename, **options):
                     # no min/max here, because min/max has same col as values...
                     # next row
                     row += 1
-                    # set style to normal - without border
-                    signal_style = sty_white
-                    frame_style = sty_norm
+                    signal_style = sty_norm
                     value_style = sty_norm
                 # loop over values ends here
 
             # no valuetable available
             else:
-                row_array = canmatrix.formats.xls_common.get_frame_info(db, frame)
-                front_col = write_excel_line(worksheet, row, 0, row_array, frame_style)
-                if row >= first_fold_row:    
-                    worksheet.row_dimensions[row+1].outline_level = 1
+                write_excel_line(worksheet, row, 0, empty_frame, signal_style)
 
                 col = head_start
-                col = write_ecu_matrix(ecu_list, sig, frame, worksheet, row, col, frame_style)
+                col = write_ecu_matrix(ecu_list, sig, frame, worksheet, row, col, signal_style)
                 (frontRow, back_row) = canmatrix.formats.xls_common.get_signal(db, frame, sig, motorola_bit_format)
-                write_excel_line(worksheet, row, front_col, frontRow, signal_style)
+                write_excel_line(worksheet, row, frame_col_count, frontRow, signal_style)
 
                 if float(sig.min) != 0 or float(sig.max) != 1.0:
                     back_row.insert(0, str(sig.min) + ".." + str(sig.max))  # type: ignore
@@ -345,7 +338,7 @@ def dump(db, filename, **options):
                     back_row.insert(0, "")
                 back_row.insert(0, "")
 
-                back_row += additional_frame_info
+                back_row += ["" for _ in additional_frame_columns]
                 for item in additional_signal_columns:
                     temp = getattr(sig, item, "")
                     back_row.append(temp)
@@ -355,9 +348,7 @@ def dump(db, filename, **options):
                     write_excel_line(worksheet, row, col, ["\n".join(["{}: {}".format(a,b) for (a,b) in sig.values.items()])], signal_style)
                 # next row
                 row += 1
-                # set style to normal - without border
-                signal_style = sty_white
-                frame_style = sty_norm
+                signal_style = sty_norm
         # loop over signals ends here
     # loop over frames ends here
 
@@ -413,90 +404,91 @@ def load(file, **options):
         else:
             return default
 
+    def _is_frame_row(row):
+        id_val = row[column_heads.index('ID')].value
+        return id_val is not None and str(id_val).strip() != '' and id_val != 'ID'
+
+    def _is_signal_row(row):
+        sig_name = get_if_possible(row, 'Signal Name')
+        return sig_name is not None and str(sig_name).strip() != '' and str(sig_name).strip() != 'Signal Name'
+
     for row in sheet.rows:
-        # ignore empty row
-        if row[column_heads.index('ID')].value is None or row[column_heads.index('ID')].value == 'ID':
+        if not _is_frame_row(row) and not _is_signal_row(row):
             continue
 
-            # new frame detected
-        if row[column_heads.index('ID')].value != frame_id:
-            # new Frame
-            frame_id = row[column_heads.index('ID')].value
-            frame_name = row[column_heads.index('Frame Name')].value
-            cycle_time = get_if_possible(row, 'Cycle Time [ms]', '0')
-            launch_type = get_if_possible(row, 'Launch Type')
-            dlc = int(get_if_possible(row, 'DLC', '8'))
-                    
-            # launch_param = get_if_possible(row, 'Launch Parameter', '0')
-            # launch_param = str(int(launch_param))
+        is_new_format_frame_row = _is_frame_row(row) and not _is_signal_row(row)
 
-            if frame_id.endswith("xh"):
-                new_frame = canmatrix.Frame(frame_name, canmatrix.ArbitrationId(int(frame_id[:-2], 16), extended=True), size=dlc)
-            else:
-                new_frame = canmatrix.Frame(frame_name, arbitration_id=int(frame_id[:-1], 16), size=dlc)
+        if _is_frame_row(row):
+            row_frame_id = row[column_heads.index('ID')].value
+            if row_frame_id != frame_id:
+                frame_id = row_frame_id
+                frame_name = row[column_heads.index('Frame Name')].value
+                cycle_time = get_if_possible(row, 'Cycle Time [ms]', '0')
+                launch_type = get_if_possible(row, 'Launch Type')
+                dlc = int(get_if_possible(row, 'DLC', '8'))
 
-            if 'frame.comment' in column_heads:
-                comment_val = row[column_heads.index('frame.comment')].value
-                if comment_val is not None:
-                    new_frame.add_comment(str(comment_val))
+                if frame_id.endswith("xh"):
+                    new_frame = canmatrix.Frame(frame_name, canmatrix.ArbitrationId(int(frame_id[:-2], 16), extended=True), size=dlc)
+                else:
+                    new_frame = canmatrix.Frame(frame_name, arbitration_id=int(frame_id[:-1], 16), size=dlc)
 
-            for col_head in column_heads:
-                if col_head is not None and col_head.startswith("frame.") and col_head != "frame.comment":
-                    command_str = col_head.replace("frame", "new_frame")
-                    command_str += "=" + str(row[column_heads.index(col_head)].value)
-                    exec(command_str)
-                    
-            db.add_frame(new_frame)
+                if 'frame.comment' in column_heads:
+                    comment_val = row[column_heads.index('frame.comment')].value
+                    if comment_val is not None:
+                        new_frame.add_comment(str(comment_val))
 
-            # eval launch_type
-            if launch_type is not None:
-                stripped, is_default = canmatrix.formats.xls_common._strip_default_mark(launch_type)
-                if not is_default:
-                    new_frame.add_attribute("GenMsgSendType", stripped)
-                if stripped not in launch_types:
-                    launch_types.append(stripped)
+                for col_head in column_heads:
+                    if col_head is not None and col_head.startswith("frame.") and col_head != "frame.comment":
+                        command_str = col_head.replace("frame", "new_frame")
+                        command_str += "=" + str(row[column_heads.index(col_head)].value)
+                        exec(command_str)
 
-            # ---- Interaction Layer attributes ----
-            # eval launch parameter (GenMsgDelayTime)
-            canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgDelayTime", get_if_possible(row, 'Launch Parameter'), db=db, defines_dict=db.frame_defines)
+                db.add_frame(new_frame)
 
-            # ---- Diagnostics attributes ----
-            # eval DiagRequest
-            canmatrix.formats.xls_common._import_attr_with_default(new_frame, "DiagRequest", get_if_possible(row, 'DiagRequest'), db=db, defines_dict=db.frame_defines)
+                if launch_type is not None:
+                    stripped, is_default = canmatrix.formats.xls_common._strip_default_mark(launch_type)
+                    if not is_default:
+                        new_frame.add_attribute("GenMsgSendType", stripped)
+                    if stripped not in launch_types:
+                        launch_types.append(stripped)
 
-            # eval DiagResponse
-            canmatrix.formats.xls_common._import_attr_with_default(new_frame, "DiagResponse", get_if_possible(row, 'DiagResponse'), db=db, defines_dict=db.frame_defines)
+                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgDelayTime", get_if_possible(row, 'Launch Parameter'), db=db, defines_dict=db.frame_defines)
 
-            # eval DiagState
-            canmatrix.formats.xls_common._import_attr_with_default(new_frame, "DiagState", get_if_possible(row, 'DiagState'), db=db, defines_dict=db.frame_defines)
+                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "DiagRequest", get_if_possible(row, 'DiagRequest'), db=db, defines_dict=db.frame_defines)
 
-            # ---- Net Management attributes ----
-            # eval NmMessage
-            canmatrix.formats.xls_common._import_attr_with_default(new_frame, "NmMessage", get_if_possible(row, 'NmMessage'), db=db, defines_dict=db.frame_defines)
+                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "DiagResponse", get_if_possible(row, 'DiagResponse'), db=db, defines_dict=db.frame_defines)
 
-            # ---- Interaction Layer attributes ----
-            # eval GenMsgILSupport
-            canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgILSupport", get_if_possible(row, 'GenMsgILSupport'), db=db, defines_dict=db.frame_defines)
+                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "DiagState", get_if_possible(row, 'DiagState'), db=db, defines_dict=db.frame_defines)
 
-            # eval GenMsgCycleTimeFast
-            canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgCycleTimeFast", get_if_possible(row, 'GenMsgCycleTimeFast'), db=db, defines_dict=db.frame_defines)
+                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "NmMessage", get_if_possible(row, 'NmMessage'), db=db, defines_dict=db.frame_defines)
 
-            # eval GenMsgNoOfRepetitions
-            canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgNoOfRepetitions", get_if_possible(row, 'GenMsgNoOfRepetitions'), db=db, defines_dict=db.frame_defines)
+                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgILSupport", get_if_possible(row, 'GenMsgILSupport'), db=db, defines_dict=db.frame_defines)
 
-            # ---- CAN FD attributes ----
-            # eval CANFD_BRS
-            canmatrix.formats.xls_common._import_attr_with_default(new_frame, "CANFD_BRS", get_if_possible(row, 'CANFD_BRS'), db=db, defines_dict=db.frame_defines)
+                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgCycleTimeFast", get_if_possible(row, 'GenMsgCycleTimeFast'), db=db, defines_dict=db.frame_defines)
 
-            # eval ID-Format (VFrameFormat)
-            id_format = get_if_possible(row, 'ID-Format')
-            if id_format is not None and str(id_format).strip() != '':
-                id_format_str = str(id_format).strip()
-                if '_FD' in id_format_str:
-                    new_frame.is_fd = True
-                new_frame.add_attribute("VFrameFormat", id_format_str)
+                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgNoOfRepetitions", get_if_possible(row, 'GenMsgNoOfRepetitions'), db=db, defines_dict=db.frame_defines)
 
-            new_frame.cycle_time = cycle_time
+                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "CANFD_BRS", get_if_possible(row, 'CANFD_BRS'), db=db, defines_dict=db.frame_defines)
+
+                id_format = get_if_possible(row, 'ID-Format')
+                if id_format is not None and str(id_format).strip() != '':
+                    id_format_str = str(id_format).strip()
+                    if '_FD' in id_format_str:
+                        new_frame.is_fd = True
+                    new_frame.add_attribute("VFrameFormat", id_format_str)
+
+                new_frame.cycle_time = cycle_time
+
+            if is_new_format_frame_row:
+                for x in range(ecu_start, ecu_end):
+                    cell_val = row[x].value
+                    if cell_val is not None and 's' in str(cell_val):
+                        new_frame.add_transmitter(column_heads[x])
+                signal_name = ""
+                continue
+
+        if not _is_signal_row(row):
+            continue
 
         # new signal detected
         if get_if_possible(row, 'Signal Name') != signal_name:

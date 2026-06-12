@@ -26,11 +26,22 @@ import canmatrix
 
 
 def _get_attr_with_default_mark(obj, attr_name, db, defines_dict):
+    if attr_name in obj.attributes:
+        return str(obj.attributes[attr_name])
     if attr_name in defines_dict:
-        if attr_name in obj.attributes:
-            return str(obj.attributes[attr_name])
-        else:
-            default_val = obj.attribute(attr_name, db=db)
+        default_val = obj.attribute(attr_name, db=db)
+        if default_val is not None and str(default_val).strip() != '':
+            return str(default_val) + "*"
+    return ""
+
+
+def _get_attr_with_fallback(obj, attr_names, db, defines_dict):
+    for name in attr_names:
+        if name in obj.attributes:
+            return str(obj.attributes[name])
+    for name in attr_names:
+        if name in defines_dict:
+            default_val = obj.attribute(name, db=db)
             if default_val is not None and str(default_val).strip() != '':
                 return str(default_val) + "*"
     return ""
@@ -75,6 +86,8 @@ def initialize_excel_attribute_defines(db):
     db.add_frame_defines("GenMsgILSupport", 'STRING')
     db.add_frame_defines("GenMsgCycleTimeFast", 'INT 0 65535')
     db.add_frame_defines("GenMsgNoOfRepetitions", 'INT 0 65535')
+    db.add_frame_defines("GenMsgNrOfRepetitions", 'INT 0 65535')
+    db.add_frame_defines("GenMsgNrOfRepetition", 'INT 0 65535')
 
     # ---- CAN FD attributes ----
     db.add_frame_defines("CANFD_BRS", 'STRING')
@@ -140,8 +153,8 @@ def get_frame_info(db, frame):
     # GenMsgCycleTimeFast
     ret_array.append(_get_attr_with_default_mark(frame, "GenMsgCycleTimeFast", db, db.frame_defines))
 
-    # GenMsgNoOfRepetitions
-    ret_array.append(_get_attr_with_default_mark(frame, "GenMsgNoOfRepetitions", db, db.frame_defines))
+    # GenMsgNoOfRepetitions (supports both "No" and "Nr" naming variants)
+    ret_array.append(_get_attr_with_fallback(frame, ["GenMsgNoOfRepetitions", "GenMsgNrOfRepetitions", "GenMsgNrOfRepetition"], db, db.frame_defines))
 
     # ---- CAN FD attributes ----
     # CANFD_BRS
