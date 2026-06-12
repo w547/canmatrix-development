@@ -89,6 +89,10 @@ def write_ecu_matrix(ecus, sig, frame, worksheet, row, col, first_frame):
             worksheet.write(row, col, label="r/s", style=loc_style_sender)
         elif sig and ecu_name in sig.receivers:
             worksheet.write(row, col, label="r", style=loc_style)
+        elif ecu_name in frame.receivers and ecu_name in frame.transmitters:
+            worksheet.write(row, col, label="r/s", style=loc_style_sender)
+        elif ecu_name in frame.receivers:
+            worksheet.write(row, col, label="r", style=loc_style)
         elif ecu_name in frame.transmitters:
             worksheet.write(row, col, label="s", style=loc_style_sender)
         else:
@@ -556,8 +560,12 @@ def load(file, **options):
             if is_new_format_frame_row:
                 for x in range(index['ECUstart'], index['ECUend']):
                     ecu_val = _cell(row_num, x)
-                    if ecu_val is not None and 's' in str(ecu_val):
-                        new_frame.add_transmitter(sh.cell(0, x).value.strip())
+                    if ecu_val is not None:
+                        ecu_str = str(ecu_val)
+                        if 's' in ecu_str:
+                            new_frame.add_transmitter(sh.cell(0, x).value.strip())
+                        if 'r' in ecu_str:
+                            new_frame.add_receiver(sh.cell(0, x).value.strip())
                 signal_name = ""
                 continue
 
