@@ -62,6 +62,11 @@ def _import_attr_with_default(obj, attr_name, cell_value, db=None, defines_dict=
     else:
         if db is not None and defines_dict is not None and attr_name in defines_dict:
             defines_dict[attr_name].defaultValue = stripped
+        # else:
+        #     # Fallback: when the define is not yet registered (e.g. GenMsgSendType
+        #     # is only created at the end of import), preserve the value as an
+        #     # explicit attribute on the object.
+        #     obj.add_attribute(attr_name, stripped)
     if collect_list is not None and stripped not in collect_list:
         collect_list.append(stripped)
     return stripped if is_default else None
@@ -72,7 +77,6 @@ def initialize_excel_attribute_defines(db):
     # ---- Interaction Layer attributes ----
     db.add_frame_defines("GenMsgDelayTime", 'INT 0 65535')
     db.add_frame_defines("GenMsgCycleTimeActive", 'INT 0 65535')
-    db.add_frame_defines("GenMsgNrOfRepetitions", 'INT 0 65535')
 
     # ---- Diagnostics attributes ----
     db.add_frame_defines("DiagRequest", 'STRING')
@@ -86,8 +90,6 @@ def initialize_excel_attribute_defines(db):
     db.add_frame_defines("GenMsgILSupport", 'STRING')
     db.add_frame_defines("GenMsgCycleTimeFast", 'INT 0 65535')
     db.add_frame_defines("GenMsgNoOfRepetitions", 'INT 0 65535')
-    db.add_frame_defines("GenMsgNrOfRepetitions", 'INT 0 65535')
-    db.add_frame_defines("GenMsgNrOfRepetition", 'INT 0 65535')
 
     # ---- CAN FD attributes ----
     db.add_frame_defines("CANFD_BRS", 'STRING')
