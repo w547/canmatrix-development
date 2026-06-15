@@ -112,7 +112,7 @@ def write_excel_line(worksheet, row, col, row_array, style):
 
 def dump(db, file, **options):
     # type: (canmatrix.CanMatrix, typing.IO, **typing.Any) -> None
-    head_top = ['ID', 'Frame Name', 'DLC', 'frame.comment', 'Cycle Time [ms]', 'Launch Type', 'Launch Parameter',
+    head_top = ['ID', 'Frame Name', 'DLC', 'frame.comment', 'Cycle Time [ms]', 'Launch Type', 'GenMsgDelayTime',
                 'DiagRequest', 'DiagResponse', 'DiagState', 'NmMessage', 'GenMsgILSupport',
                 'GenMsgCycleTimeFast', 'GenMsgNoOfRepetitions', 'CANFD_BRS', 'ID-Format',
                 'Signal Byte No.', 'Signal Bit No.', 'Signal Name', 'Signal Function', 'Signal Length [Bit]',
@@ -358,6 +358,7 @@ def load(file, **options):
     canmatrix.formats.xls_common.initialize_excel_attribute_defines(db)
 
     launch_types = []  # type: typing.List[str]
+    launch_type_default = None  # type: typing.Optional[str]
     sig_send_types = []  # type: typing.List[str]
     sig_send_type_default = None  # type: typing.Optional[str]
 
@@ -377,7 +378,7 @@ def load(file, **options):
             index['cycle'] = i
         elif "Launch Type" in value:
             index['launchType'] = i
-        elif "Launch Parameter" in value:
+        elif "GenMsgDelayTime" in value:
             index['launchParam'] = i
         elif "DiagRequest" in value:
             index['diagRequest'] = i
@@ -496,13 +497,12 @@ def load(file, **options):
                     new_frame.arbitration_id = canmatrix.ArbitrationId(int(frame_id[:-1], 16), extended=False)
                 db.add_frame(new_frame)
 
-                if launch_type is not None:
-                    if len(launch_type) > 0:
-                        stripped, is_default = canmatrix.formats.xls_common._strip_default_mark(launch_type)
-                        if not is_default:
-                            new_frame.add_attribute("GenMsgSendType", stripped)
-                        if stripped not in launch_types:
-                            launch_types.append(stripped)
+                if 'launchType' in index:
+                    result = canmatrix.formats.xls_common._import_attr_with_default(
+                        new_frame, "GenMsgSendType", launch_type,
+                        db=db, defines_dict=db.frame_defines, collect_list=launch_types)
+                    if result is not None and launch_type_default is None:
+                        launch_type_default = result
 
                 if 'launchParam' in index:
                     canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgDelayTime", _cell(row_num, index['launchParam']), db=db, defines_dict=db.frame_defines)
@@ -748,6 +748,8 @@ def load(file, **options):
     launch_type_enum = "ENUM"
     launch_type_enum += ",".join([' "{}"'.format(launch_type) for launch_type in launch_types if launch_type])
     db.add_frame_defines("GenMsgSendType", launch_type_enum)
+    if launch_type_default is not None:
+        db.add_define_default("GenMsgSendType", launch_type_default)
 
     sig_send_type_enum = "ENUM"
     sig_send_type_enum += ",".join([' "{}"'.format(sig_send_type) for sig_send_type in sig_send_types if sig_send_type])

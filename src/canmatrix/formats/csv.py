@@ -100,7 +100,7 @@ def dump(db, file_object, delimiter=',', **options):
         'Frame Name',
         'Cycle Time [ms]',
         'Launch Type',
-        'Launch Parameter',
+        'GenMsgDelayTime',
         'Signal Byte No.',
         'Signal Bit No.',
         'Signal Name',

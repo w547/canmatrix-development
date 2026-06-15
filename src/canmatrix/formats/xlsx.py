@@ -128,7 +128,7 @@ def dump(db, filename, **options):
         'frame.comment',
         'Cycle Time [ms]',
         'Launch Type',
-        'Launch Parameter',
+        'GenMsgDelayTime',
         'DiagRequest',
         'DiagResponse',
         'DiagState',
@@ -379,6 +379,7 @@ def load(file, **options):
     canmatrix.formats.xls_common.initialize_excel_attribute_defines(db)
 
     launch_types = []  # type: typing.List[str]
+    launch_type_default = None  # type: typing.Optional[str]
     sig_send_types = []  # type: typing.List[str]
     sig_send_type_default = None  # type: typing.Optional[str]
 
@@ -452,13 +453,13 @@ def load(file, **options):
                 db.add_frame(new_frame)
 
                 if launch_type is not None:
-                    stripped, is_default = canmatrix.formats.xls_common._strip_default_mark(launch_type)
-                    if not is_default:
-                        new_frame.add_attribute("GenMsgSendType", stripped)
-                    if stripped not in launch_types:
-                        launch_types.append(stripped)
+                    result = canmatrix.formats.xls_common._import_attr_with_default(
+                        new_frame, "GenMsgSendType", launch_type,
+                        db=db, defines_dict=db.frame_defines, collect_list=launch_types)
+                    if result is not None and launch_type_default is None:
+                        launch_type_default = result
 
-                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgDelayTime", get_if_possible(row, 'Launch Parameter'), db=db, defines_dict=db.frame_defines)
+                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgDelayTime", get_if_possible(row, 'GenMsgDelayTime'), db=db, defines_dict=db.frame_defines)
 
                 canmatrix.formats.xls_common._import_attr_with_default(new_frame, "DiagRequest", get_if_possible(row, 'DiagRequest'), db=db, defines_dict=db.frame_defines)
 
@@ -707,6 +708,8 @@ def load(file, **options):
         if len(launch_type) > 0:
             launch_type_enum += ' "' + launch_type + '",'
     db.add_frame_defines("GenMsgSendType", launch_type_enum[:-1])
+    if launch_type_default is not None:
+        db.add_define_default("GenMsgSendType", launch_type_default)
 
     sig_send_type_enum = "ENUM"
     for sig_send_type in sig_send_types:

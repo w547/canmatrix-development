@@ -37,28 +37,6 @@ import canmatrix.utils
 logger = logging.getLogger(__name__)
 
 
-def _contains_cjk(db):
-    for frame in db.frames:
-        if frame.comment and any('\u4e00' <= c <= '\u9fff' or '\u3000' <= c <= '\u303f' or '\uff00' <= c <= '\uffef' for c in frame.comment):
-            return True
-        for sig in frame.signals:
-            if sig.comment and any('\u4e00' <= c <= '\u9fff' or '\u3000' <= c <= '\u303f' or '\uff00' <= c <= '\uffef' for c in sig.comment):
-                return True
-            if sig.unit and any('\u4e00' <= c <= '\u9fff' or '\u3000' <= c <= '\u303f' or '\uff00' <= c <= '\uffef' for c in sig.unit):
-                return True
-            for val in sig.values.values():
-                if isinstance(val, str) and any('\u4e00' <= c <= '\u9fff' or '\u3000' <= c <= '\u303f' or '\uff00' <= c <= '\uffef' for c in val):
-                    return True
-    for ecu in db.ecus:
-        if ecu.comment and any('\u4e00' <= c <= '\u9fff' or '\u3000' <= c <= '\u303f' or '\uff00' <= c <= '\uffef' for c in ecu.comment):
-            return True
-    for table in db.value_tables.values():
-        for val in table.values():
-            if isinstance(val, str) and any('\u4e00' <= c <= '\u9fff' or '\u3000' <= c <= '\u303f' or '\uff00' <= c <= '\uffef' for c in val):
-                return True
-    return False
-
-
 def normalize_name(name, whitespace_replacement):  # type: (str, str) -> str
     name = re.sub(r'\s+', whitespace_replacement, name)
 
@@ -134,19 +112,12 @@ def dump(in_db, f, **options):
     # create copy because export changes database
     db = copy.deepcopy(in_db)
 
-    dbc_export_encoding = options.get("dbcExportEncoding") or 'gb2312'
-    dbc_export_comment_encoding = options.get("dbcExportCommentEncoding") or dbc_export_encoding
+    dbc_export_encoding = options.get("dbcExportEncoding", 'utf-8')
+    dbc_export_comment_encoding = options.get("dbcExportCommentEncoding",  dbc_export_encoding)
     compatibility = options.get('compatibility', True)
     dbc_unique_signal_names_per_frame = options.get("dbcUniqueSignalNames", compatibility)
     ignore_encoding_errors= options.get("ignoreEncodingErrors",  "replace")
     write_val_table = options.get("writeValTable", True)
-
-    user_specified_export_encoding = options.get("dbcExportEncoding") is not None
-    if not user_specified_export_encoding and _contains_cjk(db):
-        dbc_export_encoding = 'gb2312'
-        if options.get("dbcExportCommentEncoding") is None:
-            dbc_export_comment_encoding = 'gb2312'
-        logger.info("Auto-detected CJK characters, switching DBC export encoding to gb2312")
 
     whitespace_replacement = options.get("whitespaceReplacement", '_')
     if whitespace_replacement in ['', None] or {' ', '\t'}.intersection(whitespace_replacement):
@@ -168,12 +139,6 @@ def dump(in_db, f, **options):
 
     if db.contains_fd or db.contains_j1939:
         for frame in db.frames:
-            existing_vff = frame.attributes.get("VFrameFormat", "")
-            if existing_vff:
-                if "_FD" in str(existing_vff):
-                    frame.is_fd = True
-                if "J1939" in str(existing_vff):
-                    frame.is_j1939 = True
             if frame.is_fd:
                 if frame.arbitration_id.extended:
                     frame.add_attribute("VFrameFormat", "ExtendedCAN_FD")
@@ -258,7 +223,7 @@ def dump(in_db, f, **options):
 
         # remove "-" from frame names
         if compatibility:
-            frame.name = re.sub("[^A-Za-z0-9\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af\u3130-\u318f]", whitespace_replacement, frame.name)
+            frame.name = re.sub("[^A-Za-z0-9]", whitespace_replacement, frame.name)
             if frame.name[0].isdigit():
                 frame.name = "_" + frame.name
 
@@ -273,21 +238,22 @@ def dump(in_db, f, **options):
         for signal in frame.signals:
             if signal.cycle_time != 0:
                 signal.add_attribute("GenSigCycleTime", signal.cycle_time)
-            raw_val = signal.float_factory(
-                (signal.float_factory(signal.initial_value) - signal.float_factory(signal.offset))
-                / signal.float_factory(signal.factor))
-            if not signal.is_float:
-                raw_val = int(round(raw_val))
             if signal.initial_value != 0 and "GenSigStartValue" not in db.signal_defines:
                 db.add_signal_defines("GenSigStartValue", 'FLOAT 0 100000000000')
                 
             if "GenSigStartValue" in db.signal_defines:
                 if signal.initial_value != 0:
-                    signal.add_attribute("GenSigStartValue", raw_val)
+                    if db.signal_defines["GenSigStartValue"].defaultValue is None:
+                        raw_val = signal.float_factory(
+                            (signal.float_factory(signal.initial_value) - signal.float_factory(signal.offset))
+                            / signal.float_factory(signal.factor))
+                        if not signal.is_float:
+                            raw_val = int(round(raw_val))
+                        signal.add_attribute("GenSigStartValue", raw_val)
                         
             name = normalized_names[signal]
             if compatibility:
-                name = re.sub("[^A-Za-z0-9\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af\u3130-\u318f]", whitespace_replacement, name)
+                name = re.sub("[^A-Za-z0-9]", whitespace_replacement, name)
                 if name[0].isdigit():
                     name = whitespace_replacement + name
             duplicate_signal_counter[name] += 1
@@ -437,8 +403,6 @@ def dump(in_db, f, **options):
     # messages-attributes:
     for frame in db.frames:
         for attrib, val in sorted(frame.attributes.items()):
-            if attrib not in db.frame_defines:
-                continue
             f.write(create_attribute_string(attrib, "BO_", str(frame.arbitration_id.to_compound_integer()), val, db.frame_defines[attrib].type == "STRING").encode(dbc_export_encoding, ignore_encoding_errors))
     f.write("\n".encode(dbc_export_encoding, ignore_encoding_errors))
 
@@ -539,7 +503,7 @@ def _decode_fallback(raw_bytes, primary_encoding, fallback_encodings=('gb2312', 
 
 
 def load(f, **options):  # type: (typing.IO, **typing.Any) -> canmatrix.CanMatrix
-    dbc_import_encoding = options.get("dbcImportEncoding", 'gb2312')
+    dbc_import_encoding = options.get("dbcImportEncoding", 'utf-8')
     dbc_comment_encoding = options.get("dbcImportCommentEncoding", dbc_import_encoding)
     float_factory = canmatrix.utils.FloatFactory.get_float_factory()
 
@@ -1041,31 +1005,23 @@ def load(f, **options):  # type: (typing.IO, **typing.Any) -> canmatrix.CanMatri
     for define in db.global_defines:
         if db.global_defines[define].type == "STRING":
             if define in db.attributes:
-                val = db.attributes[define]
-                if val.startswith('"') and val.endswith('"'):
-                    db.attributes[define] = val[1:-1]
+                db.attributes[define] = db.attributes[define][1:-1]
     for define in db.ecu_defines:
         if db.ecu_defines[define].type == "STRING":
             for ecu in db.ecus:
                 if define in ecu.attributes:
-                    val = ecu.attributes[define]
-                    if val.startswith('"') and val.endswith('"'):
-                        ecu.attributes[define] = val[1:-1]
+                    ecu.attributes[define] = ecu.attributes[define][1:-1]
     for define in db.frame_defines:
         if db.frame_defines[define].type == "STRING":
             for frame in db.frames:
                 if define in frame.attributes:
-                    val = frame.attributes[define]
-                    if val.startswith('"') and val.endswith('"'):
-                        frame.attributes[define] = val[1:-1]
+                    frame.attributes[define] = frame.attributes[define][1:-1]
     for define in db.signal_defines:
         if db.signal_defines[define].type == "STRING":
             for frame in db.frames:
                 for signal in frame.signals:
                     if define in signal.attributes:
-                        val = signal.attributes[define]
-                        if val.startswith('"') and val.endswith('"'):
-                            signal.attributes[define] = val[1:-1]
+                        signal.attributes[define] = signal.attributes[define][1:-1]
 
     db.enum_attribs_to_values()
     for frame in db.frames:

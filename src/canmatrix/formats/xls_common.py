@@ -129,7 +129,7 @@ def get_frame_info(db, frame):
     # Launch Type (GenMsgSendType)
     ret_array.append(_get_attr_with_default_mark(frame, "GenMsgSendType", db, db.frame_defines))
 
-    # Launch Parameter (GenMsgDelayTime)
+    # GenMsgDelayTime
     ret_array.append(_get_attr_with_default_mark(frame, "GenMsgDelayTime", db, db.frame_defines))
 
     # ---- Diagnostics attributes ----
