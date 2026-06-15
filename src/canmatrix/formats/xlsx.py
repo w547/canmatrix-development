@@ -135,7 +135,7 @@ def dump(db, filename, **options):
         'NmMessage',
         'GenMsgILSupport',
         'GenMsgCycleTimeFast',
-        'GenMsgNoOfRepetitions',
+        'GenMsgNrOfRepetition',
         'CANFD_BRS',
         'ID-Format',
         'Signal Byte No.',
@@ -473,7 +473,7 @@ def load(file, **options):
 
                 canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgCycleTimeFast", get_if_possible(row, 'GenMsgCycleTimeFast'), db=db, defines_dict=db.frame_defines)
 
-                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgNoOfRepetitions", get_if_possible(row, 'GenMsgNoOfRepetitions'), db=db, defines_dict=db.frame_defines)
+                canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgNrOfRepetition", get_if_possible(row, 'GenMsgNrOfRepetition'), db=db, defines_dict=db.frame_defines)
 
                 canmatrix.formats.xls_common._import_attr_with_default(new_frame, "CANFD_BRS", get_if_possible(row, 'CANFD_BRS'), db=db, defines_dict=db.frame_defines)
 
@@ -573,7 +573,9 @@ def load(file, **options):
                             pass
                     gen_sig_start_value = get_if_possible(row, 'GenSigStartValue')
                     if gen_sig_start_value is not None and str(gen_sig_start_value).strip() != '':
-                        new_signal.add_attribute("GenSigStartValue", str(gen_sig_start_value).strip())
+                        stripped, is_default = canmatrix.formats.xls_common._strip_default_mark(str(gen_sig_start_value).strip())
+                        if not is_default:
+                            new_signal.add_attribute("GenSigStartValue", stripped)
 
                     gen_sig_inactive_value = get_if_possible(row, 'GenSigInactiveValue')
                     if gen_sig_inactive_value is not None and str(gen_sig_inactive_value).strip() != '':

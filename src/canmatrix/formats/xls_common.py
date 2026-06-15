@@ -89,7 +89,7 @@ def initialize_excel_attribute_defines(db):
     # ---- Interaction Layer attributes ----
     db.add_frame_defines("GenMsgILSupport", 'STRING')
     db.add_frame_defines("GenMsgCycleTimeFast", 'INT 0 65535')
-    db.add_frame_defines("GenMsgNoOfRepetitions", 'INT 0 65535')
+    db.add_frame_defines("GenMsgNrOfRepetition", 'INT 0 65535')
 
     # ---- CAN FD attributes ----
     db.add_frame_defines("CANFD_BRS", 'STRING')
@@ -155,8 +155,8 @@ def get_frame_info(db, frame):
     # GenMsgCycleTimeFast
     ret_array.append(_get_attr_with_default_mark(frame, "GenMsgCycleTimeFast", db, db.frame_defines))
 
-    # GenMsgNoOfRepetitions (supports both "No" and "Nr" naming variants)
-    ret_array.append(_get_attr_with_fallback(frame, ["GenMsgNoOfRepetitions", "GenMsgNrOfRepetitions", "GenMsgNrOfRepetition"], db, db.frame_defines))
+    # GenMsgNrOfRepetition
+    ret_array.append(_get_attr_with_fallback(frame, ["GenMsgNrOfRepetition", "GenMsgNoOfRepetitions"], db, db.frame_defines))
 
     # ---- CAN FD attributes ----
     # CANFD_BRS
@@ -217,8 +217,7 @@ def get_signal(db, frame, sig, motorola_bit_format):
     front_array.append(sig.initial_value)
 
     # GenSigStartValue from attributes
-    gen_sig_start_value = sig.attributes.get("GenSigStartValue", "")
-    front_array.append(gen_sig_start_value)
+    front_array.append(_get_attr_with_default_mark(sig, "GenSigStartValue", db, db.signal_defines))
 
     # ---- Interaction Layer signal attributes ----
     gen_sig_inactive_value = sig.attributes.get("GenSigInactiveValue", "")

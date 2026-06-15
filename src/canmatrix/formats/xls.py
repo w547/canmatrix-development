@@ -114,7 +114,7 @@ def dump(db, file, **options):
     # type: (canmatrix.CanMatrix, typing.IO, **typing.Any) -> None
     head_top = ['ID', 'Frame Name', 'DLC', 'frame.comment', 'Cycle Time [ms]', 'Launch Type', 'GenMsgDelayTime',
                 'DiagRequest', 'DiagResponse', 'DiagState', 'NmMessage', 'GenMsgILSupport',
-                'GenMsgCycleTimeFast', 'GenMsgNoOfRepetitions', 'CANFD_BRS', 'ID-Format',
+                'GenMsgCycleTimeFast', 'GenMsgNrOfRepetition', 'CANFD_BRS', 'ID-Format',
                 'Signal Byte No.', 'Signal Bit No.', 'Signal Name', 'Signal Function', 'Signal Length [Bit]',
                 'Signal Default', 'GenSigStartValue', 'GenSigInactiveValue', 'GenSigSendType',
                 'EventCommandSignal', 'GatewayedSignals', 'GenSigInvalidValue', 'GenSigTimeoutValue',
@@ -392,8 +392,8 @@ def load(file, **options):
             index['genMsgILSupport'] = i
         elif "GenMsgCycleTimeFast" in value:
             index['genMsgCycleTimeFast'] = i
-        elif "GenMsgNoOfRepetitions" in value:
-            index['genMsgNoOfRepetitions'] = i
+        elif "GenMsgNrOfRepetition" in value:
+            index['genMsgNrOfRepetition'] = i
         elif "CANFD_BRS" in value:
             index['canfdBrs'] = i
         elif "ID-Format" in value:
@@ -525,8 +525,8 @@ def load(file, **options):
                 if 'genMsgCycleTimeFast' in index:
                     canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgCycleTimeFast", _cell(row_num, index['genMsgCycleTimeFast']), db=db, defines_dict=db.frame_defines)
 
-                if 'genMsgNoOfRepetitions' in index:
-                    canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgNoOfRepetitions", _cell(row_num, index['genMsgNoOfRepetitions']), db=db, defines_dict=db.frame_defines)
+                if 'genMsgNrOfRepetition' in index:
+                    canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgNrOfRepetition", _cell(row_num, index['genMsgNrOfRepetition']), db=db, defines_dict=db.frame_defines)
 
                 if 'canfdBrs' in index:
                     canmatrix.formats.xls_common._import_attr_with_default(new_frame, "CANFD_BRS", _cell(row_num, index['canfdBrs']), db=db, defines_dict=db.frame_defines)
@@ -648,7 +648,9 @@ def load(file, **options):
                 if 'genSigStartValue' in index:
                     gen_sig_start_value = _cell(row_num, index['genSigStartValue'])
                     if gen_sig_start_value is not None and str(gen_sig_start_value).strip() != '':
-                        new_signal.add_attribute("GenSigStartValue", str(gen_sig_start_value).strip())
+                        stripped, is_default = canmatrix.formats.xls_common._strip_default_mark(str(gen_sig_start_value).strip())
+                        if not is_default:
+                            new_signal.add_attribute("GenSigStartValue", stripped)
 
                 if 'genSigInactiveValue' in index:
                     gen_sig_inactive_value = _cell(row_num, index['genSigInactiveValue'])
