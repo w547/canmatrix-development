@@ -89,6 +89,13 @@ def write_ecu_matrix(ecus, sig, frame, worksheet, row, col, first_frame):
             worksheet.write(row, col, label="r/s", style=loc_style_sender)
         elif sig and ecu_name in sig.receivers:
             worksheet.write(row, col, label="r", style=loc_style)
+        elif sig:
+            # For signal rows: don't fall through to frame receivers,
+            # only check frame transmitters (to show "s" for sender ECU)
+            if ecu_name in frame.transmitters:
+                worksheet.write(row, col, label="s", style=loc_style_sender)
+            else:
+                worksheet.write(row, col, label="", style=loc_style)
         elif ecu_name in frame.receivers and ecu_name in frame.transmitters:
             worksheet.write(row, col, label="r/s", style=loc_style_sender)
         elif ecu_name in frame.receivers:

@@ -87,6 +87,15 @@ def write_ecu_matrix(ecu_list, signal, frame, worksheet, row, col, first_frame):
         elif signal is not None and ecu in signal.receivers:
             worksheet.cell(row=row+1, column=col+1).value = "r"
             worksheet.cell(row=row+1, column=col+1).style = loc_style
+        elif signal is not None:
+            # For signal rows: don't fall through to frame receivers,
+            # only check frame transmitters (to show "s" for sender ECU)
+            if ecu in frame.transmitters:
+                worksheet.cell(row=row+1, column=col+1).value = "s"
+                worksheet.cell(row=row+1, column=col+1).style = loc_style_sender
+            else:
+                worksheet.cell(row=row+1, column=col+1).value = ""
+                worksheet.cell(row=row+1, column=col+1).style = loc_style
         elif ecu in frame.receivers and ecu in frame.transmitters:
             worksheet.cell(row=row+1, column=col+1).value = "r/s"
             worksheet.cell(row=row+1, column=col+1).style = loc_style_sender
