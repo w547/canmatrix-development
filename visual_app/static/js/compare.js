@@ -1942,43 +1942,7 @@ DbcTool.Compare = (function() {
         _downloadWord();
     }
 
-    function _downloadExcel() {
-        var BOM = '\uFEFF';
-        var header = [];
-        for (var ci = 0; ci < SUMMARY_COLUMNS.length; ci++) {
-            header.push(SUMMARY_COLUMNS[ci].header);
-        }
-        var csvRows = [header.join('\t')];
-        var flatData = _flattenExportData();
-        for (var i = 0; i < flatData.length; i++) {
-            var item = flatData[i];
-            var row = [];
-            for (var cj = 0; cj < SUMMARY_COLUMNS.length; cj++) {
-                var col = SUMMARY_COLUMNS[cj];
-                var val = col.render(item, i);
-                if (col.key === 'old' || col.key === 'new') {
-                    val = _stripHtml(val);
-                }
-                row.push(val);
-            }
-            csvRows.push(row.join('\t'));
-        }
-        var csvContent = BOM + csvRows.join('\n');
-        var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url;
-        var now = new Date();
-        var ts = now.getFullYear() + ('0' + (now.getMonth() + 1)).slice(-2) + ('0' + now.getDate()).slice(-2) + '_' +
-                 ('0' + now.getHours()).slice(-2) + ('0' + now.getMinutes()).slice(-2) + ('0' + now.getSeconds()).slice(-2);
-        a.download = 'DBC变更明细_' + ts + '.xls';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
-
-    function _downloadWord() {
+    function _buildExportHtml() {
         var resultColors = { 'added': '#22c55e', 'deleted': '#ef4444', 'removed': '#ef4444', 'changed': '#eab308' };
         var flatData = _flattenExportData();
         var rowsHtml = '';
@@ -1999,7 +1963,7 @@ DbcTool.Compare = (function() {
             }
             rowsHtml += '</tr>';
         }
-        var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">';
+        var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
         html += '<head><meta charset="UTF-8"><title>DBC变更明细报告</title>';
         html += '<style>table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:6px 10px;font-size:12px}th{background:#f1f5f9;font-weight:bold;text-align:left}tr:nth-child(even){background:#f8fafc}</style>';
         html += '</head><body>';
@@ -2012,18 +1976,32 @@ DbcTool.Compare = (function() {
         }
         html += '</tr></thead><tbody>' + rowsHtml + '</tbody></table>';
         html += '</body></html>';
-        var blob = new Blob(['\uFEFF' + html], { type: 'application/msword;charset=utf-8;' });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url;
+        return html;
+    }
+
+    function _downloadFile(html, mimeType, ext) {
         var now = new Date();
         var ts = now.getFullYear() + ('0' + (now.getMonth() + 1)).slice(-2) + ('0' + now.getDate()).slice(-2) + '_' +
                  ('0' + now.getHours()).slice(-2) + ('0' + now.getMinutes()).slice(-2) + ('0' + now.getSeconds()).slice(-2);
-        a.download = 'DBC变更明细_' + ts + '.doc';
+        var blob = new Blob(['\uFEFF' + html], { type: mimeType + ';charset=utf-8;' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'DBC变更明细_' + ts + '.' + ext;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    }
+
+    function _downloadExcel() {
+        var html = _buildExportHtml();
+        _downloadFile(html, 'application/vnd.ms-excel', 'xls');
+    }
+
+    function _downloadWord() {
+        var html = _buildExportHtml();
+        _downloadFile(html, 'application/msword', 'doc');
         DbcTool.msg('ok', '变更明细已导出 (Excel + Word)');
     }
 

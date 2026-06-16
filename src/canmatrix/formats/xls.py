@@ -119,14 +119,18 @@ def write_excel_line(worksheet, row, col, row_array, style):
 
 def dump(db, file, **options):
     # type: (canmatrix.CanMatrix, typing.IO, **typing.Any) -> None
-    head_top = ['ID', 'Frame Name', 'DLC', 'frame.comment', 'Cycle Time [ms]', 'Launch Type', 'GenMsgDelayTime',
+    head_top = ['ID', 'Frame Name', 'Signal Name', 'Signal Byte No.', 'Signal Bit No.',
+                'Signal Function', 'Signal Length [Bit]', 'Signal Default', 'GenSigStartValue',
+                'GenSigInactiveValue', 'GenSigSendType', 'EventCommandSignal', 'GatewayedSignals',
+                'GenSigInvalidValue', 'GenSigTimeoutValue', 'Factor', 'Offset', 'Signal Not Available',
+                'Byteorder', 'DLC', 'frame.comment', 'Cycle Time [ms]', 'Launch Type', 'GenMsgDelayTime',
                 'DiagRequest', 'DiagResponse', 'DiagState', 'NmMessage', 'GenMsgILSupport',
-                'GenMsgCycleTimeFast', 'GenMsgNrOfRepetition', 'CANFD_BRS', 'ID-Format',
-                'Signal Byte No.', 'Signal Bit No.', 'Signal Name', 'Signal Function', 'Signal Length [Bit]',
-                'Signal Default', 'GenSigStartValue', 'GenSigInactiveValue', 'GenSigSendType',
-                'EventCommandSignal', 'GatewayedSignals', 'GenSigInvalidValue', 'GenSigTimeoutValue',
-                'Factor', 'Offset', 'Signal Not Available', 'Byteorder']
+                'GenMsgCycleTimeFast', 'GenMsgNrOfRepetition', 'CANFD_BRS', 'ID-Format']
     head_tail = ['Value',   'Name / Phys. Range', 'Function / Increment Unit']
+
+    FRAME_PREFIX_COUNT = 2
+    SIGNAL_COL_COUNT = 17
+    FRAME_SUFFIX_COUNT = 14
 
     if len(options.get("additionalSignalAttributes", "")) > 0:
         additional_signal_columns = options.get("additionalSignalAttributes").split(",")  # type: typing.List[str]
@@ -199,9 +203,6 @@ def dump(db, file, **options):
     # set row to first Frame (row = 0 is header)
     row = 1
 
-    frame_col_count = len(canmatrix.formats.xls_common.get_frame_info(db, db.frames[0]) if db.frames else 16)
-
-
     # iterate over the frames
     for idx in sorted(frame_hash.keys()):
 
@@ -214,8 +215,13 @@ def dump(db, file, **options):
 
         # === Write frame row (frame-level columns only) ===
         frame_row = canmatrix.formats.xls_common.get_frame_info(db, frame)
-        frame_row += ["" for _ in range(head_start - len(frame_row))]
-        front_col = write_excel_line(worksheet, row, 0, frame_row, sty_first_frame)
+        frame_prefix = frame_row[:FRAME_PREFIX_COUNT]
+        frame_suffix = frame_row[FRAME_PREFIX_COUNT:]
+        frame_suffix += ["" for _ in range(FRAME_SUFFIX_COUNT - len(frame_suffix))]
+
+        write_excel_line(worksheet, row, 0, frame_prefix, sty_first_frame)
+        write_excel_line(worksheet, row, FRAME_PREFIX_COUNT, ["" for _ in range(SIGNAL_COL_COUNT)], sty_first_frame)
+        write_excel_line(worksheet, row, FRAME_PREFIX_COUNT + SIGNAL_COL_COUNT, frame_suffix, sty_first_frame)
 
         col = head_start
         col = write_ecu_matrix(ecu_list, None, frame, worksheet, row, col, sty_first_frame)
@@ -230,7 +236,8 @@ def dump(db, file, **options):
             continue
 
         # === Write signal rows (signal-level columns only) ===
-        empty_frame = ["" for _ in range(frame_col_count)]
+        empty_prefix = ["" for _ in range(FRAME_PREFIX_COUNT)]
+        empty_suffix = ["" for _ in range(FRAME_SUFFIX_COUNT)]
         sig_style = sty_norm
 
         # iterate over signals
@@ -243,14 +250,16 @@ def dump(db, file, **options):
                 val_style = sig_style
                 # iterate over values in value table
                 for val in sorted(sig.values.keys()):
-                    write_excel_line(worksheet, row, 0, empty_frame, sig_style)
+                    write_excel_line(worksheet, row, 0, empty_prefix, sig_style)
+                    write_excel_line(worksheet, row, FRAME_PREFIX_COUNT + SIGNAL_COL_COUNT, empty_suffix, sig_style)
 
                     col = head_start
                     col = write_ecu_matrix(ecu_list, sig, frame, worksheet, row, col, sig_style)
 
                     # write Value
                     (frontRow, backRow) = canmatrix.formats.xls_common.get_signal(db, frame, sig, motorola_bit_format)
-                    write_excel_line(worksheet, row, frame_col_count, frontRow, sig_style)
+                    frontRow = [frontRow[2], frontRow[0], frontRow[1]] + frontRow[3:]
+                    write_excel_line(worksheet, row, FRAME_PREFIX_COUNT, frontRow, sig_style)
                     backRow += ["" for _ in additional_frame_columns]
                     for item in additional_signal_columns:
                         temp = getattr(sig, item, "")
@@ -267,13 +276,15 @@ def dump(db, file, **options):
                 # loop over values ends here
             # no value table available
             else:
-                write_excel_line(worksheet, row, 0, empty_frame, sig_style)
+                write_excel_line(worksheet, row, 0, empty_prefix, sig_style)
+                write_excel_line(worksheet, row, FRAME_PREFIX_COUNT + SIGNAL_COL_COUNT, empty_suffix, sig_style)
 
                 col = head_start
                 col = write_ecu_matrix(
                     ecu_list, sig, frame, worksheet, row, col, sig_style)
                 (frontRow, backRow) = canmatrix.formats.xls_common.get_signal(db, frame, sig, motorola_bit_format)
-                write_excel_line(worksheet, row, frame_col_count, frontRow, sig_style)
+                frontRow = [frontRow[2], frontRow[0], frontRow[1]] + frontRow[3:]
+                write_excel_line(worksheet, row, FRAME_PREFIX_COUNT, frontRow, sig_style)
 
                 if float(sig.min) != 0 or float(sig.max) != 1.0:
                     backRow.insert(0, str(sig.min) + ".." + str(sig.max))  # type: ignore
@@ -449,7 +460,9 @@ def load(file, **options):
             if 'Value' in index and i > index['Value']:
                 additional_inputs[i] = value
 
-    if "byteorder" in index:
+    if "idFormat" in index:
+        index['ECUstart'] = index['idFormat'] + 1
+    elif "byteorder" in index:
         index['ECUstart'] = index['byteorder'] + 1
     else:
         index['ECUstart'] = index['signalSNA'] + 1

@@ -130,9 +130,9 @@ def dump(db, filename, **options):
     additional_signal_columns = [x for x in options.get("additionalSignalAttributes", "").split(",") if x]
     additional_frame_columns = [x for x in options.get("additionalFrameAttributes", "").split(",") if x]
 
-    head_top = [
-        'ID',
-        'Frame Name',
+    head_top = ['ID', 'Frame Name', 'Signal Name']
+
+    frame_columns = [
         'DLC',
         'frame.comment',
         'Cycle Time [ms]',
@@ -146,10 +146,11 @@ def dump(db, filename, **options):
         'GenMsgCycleTimeFast',
         'GenMsgNrOfRepetition',
         'CANFD_BRS',
-        'ID-Format',
+        'ID-Format']
+
+    signal_columns = [
         'Signal Byte No.',
         'Signal Bit No.',
-        'Signal Name',
         'Signal Function',
         'Signal Length [Bit]',
         'Signal Default',
@@ -164,11 +165,14 @@ def dump(db, filename, **options):
         'Offset',
         'Signal Not Available',
         'Byteorder']
+
     head_tail = ['Value', 'Name / Phys. Range', 'Function / Increment Unit']
 
+    PREFIX_COUNT = len(head_top)
+    FRAME_ATTR_COUNT = len(frame_columns)
+    SIGNAL_ATTR_COUNT = len(signal_columns)
+
     workbook = openpyxl.Workbook()
-    # ws_name = os.path.basename(filename).replace('.xlsx', '')
-    # worksheet = workbook.add_worksheet('K-Matrix ' + ws_name[0:22])
     worksheet = workbook.active
     worksheet.title = 'K-Matrix '
     worksheet.sheet_properties.outlinePr.summaryBelow = False
@@ -186,63 +190,67 @@ def dump(db, filename, **options):
 
     sty_header = NamedStyle(name="sty_header")
     sty_header.font = Font(bold=True, size=8, name='Verdana')
-    sty_header.alignment = Alignment(text_rotation=90, vertical='center', horizontal='center')
+    sty_header.alignment = Alignment(horizontal='center', vertical='center')
+
+    sty_header_frame = NamedStyle(name="sty_header_frame")
+    sty_header_frame.font = Font(bold=True, size=8, name='Verdana', color='FFFFFF')
+    sty_header_frame.fill = PatternFill(patternType='solid', fgColor='366092')
+    sty_header_frame.alignment = Alignment(horizontal='center', vertical='center')
+
+    sty_header_ecu = NamedStyle(name="sty_header_ecu")
+    sty_header_ecu.font = Font(bold=True, size=8, name='Verdana', color='FFFFFF')
+    sty_header_ecu.fill = PatternFill(patternType='solid', fgColor='76933C')
+    sty_header_ecu.alignment = Alignment(horizontal='center', vertical='center')
+
+    sty_header_signal = NamedStyle(name="sty_header_signal")
+    sty_header_signal.font = Font(bold=True, size=8, name='Verdana', color='FFFFFF')
+    sty_header_signal.fill = PatternFill(patternType='solid', fgColor='E26B0A')
+    sty_header_signal.alignment = Alignment(horizontal='center', vertical='center')
 
     sty_first_frame = NamedStyle(name="sty_first_frame")
     sty_first_frame.font = Font(bold=True, size=8, name='Verdana', color='ff000000')
     sty_first_frame.fill = PatternFill(patternType='solid', fgColor='DCE6F1')
     sty_first_frame.border = Border(top=Side(border_style='thin'))
+    sty_first_frame.alignment = Alignment(horizontal='center', vertical='center')
 
     sty_white = NamedStyle(name="sty_white")
     sty_white.font = Font(bold=True, size=8, name='Verdana', color='00ffffff')
 
     sty_norm = NamedStyle(name="sty_norm")
     sty_norm.font = Font(bold=True, size=8, name='Verdana', color='ff000000')
+    sty_norm.alignment = Alignment(horizontal='center', vertical='center')
 
-    # ECUMatrix-Styles
     sty_green = NamedStyle(name="sty_green")
     sty_green.fill = PatternFill(patternType='solid', fgColor='CCFFCC')
-    # sty_green = workbook.add_format({'pattern': 1, 'fg_color': '#CCFFCC'})
+    sty_green.alignment = Alignment(horizontal='center', vertical='center')
 
     sty_green_first_frame = NamedStyle(name="sty_green_first_frame")
     sty_green_first_frame.fill = PatternFill(patternType='solid', fgColor='DCE6F1')
     sty_green_first_frame.border = Border(top=Side(border_style='thin'))
+    sty_green_first_frame.alignment = Alignment(horizontal='center', vertical='center')
 
     sty_sender = NamedStyle(name="sty_sender")
     sty_sender.fill = PatternFill(patternType='lightGrid', fgColor='C0C0C0')
+    sty_sender.alignment = Alignment(horizontal='center', vertical='center')
 
     sty_sender_first_frame = NamedStyle(name="sty_sender_first_frame")
     sty_sender_first_frame.fill = PatternFill(patternType='solid', fgColor='DCE6F1')
     sty_sender_first_frame.border = Border(top=Side(border_style='thin'))
+    sty_sender_first_frame.alignment = Alignment(horizontal='center', vertical='center')
 
     sty_sender_green = NamedStyle(name="sty_sender_green")
     sty_sender_green.fill = PatternFill(patternType='lightGrid', fgColor='C0C0C0', bgColor='CCFFCC')
+    sty_sender_green.alignment = Alignment(horizontal='center', vertical='center')
 
     sty_sender_green_first_frame = NamedStyle(name="sty_sender_green_first_frame")
     sty_sender_green_first_frame.fill = PatternFill(patternType='solid', fgColor='DCE6F1')
     sty_sender_green_first_frame.border = Border(top=Side(border_style='thin'))
+    sty_sender_green_first_frame.alignment = Alignment(horizontal='center', vertical='center')
 
-    row_array = head_top
-    head_start = len(row_array)
-
-    # write ECUs in first row:
     ecu_list = [ecu.name for ecu in db.ecus]
-    row_array += ecu_list
+    ecu_count = len(ecu_list)
 
-    for col in range(0, len(row_array)):
-        worksheet.column_dimensions[openpyxl.utils.get_column_letter(col+1)] = ColumnDimension(worksheet, customWidth=True)
-        worksheet.column_dimensions[openpyxl.utils.get_column_letter(col + 1)].width = 2
-
-    row_array += head_tail
-
-    additional_frame_start = len(row_array)
-
-    # set width of selected Cols
-    worksheet.column_dimensions[openpyxl.utils.get_column_letter(1)].width = 3.57
-    worksheet.column_dimensions[openpyxl.utils.get_column_letter(2)].width = 21
-    worksheet.column_dimensions[openpyxl.utils.get_column_letter(3)].width = 12.29
-    worksheet.column_dimensions[openpyxl.utils.get_column_letter(4)].width = 21
-    worksheet.column_dimensions[openpyxl.utils.get_column_letter(5)].width = 30
+    row_array = head_top + ecu_list + frame_columns + signal_columns + head_tail
 
     for additional_col in additional_frame_columns:
         row_array.append("frame." + additional_col)
@@ -250,7 +258,35 @@ def dump(db, filename, **options):
     for additional_col in additional_signal_columns:
         row_array.append("signal." + additional_col)
 
-    write_excel_line(worksheet, 0, 0, row_array, sty_header)
+    total_cols = len(row_array)
+
+    ecu_start = PREFIX_COUNT + 1
+    ecu_end = ecu_start + ecu_count - 1
+    frame_start = ecu_end + 1
+    frame_end = frame_start + FRAME_ATTR_COUNT - 1
+    signal_start = frame_end + 1
+    signal_end = signal_start + SIGNAL_ATTR_COUNT - 1
+
+    for col_idx in range(1, total_cols + 1):
+        col_letter = openpyxl.utils.get_column_letter(col_idx)
+        worksheet.column_dimensions[col_letter] = ColumnDimension(worksheet, customWidth=True)
+        worksheet.column_dimensions[col_letter].width = 2
+
+    for col_idx in range(1, total_cols + 1):
+        cell = worksheet.cell(row=1, column=col_idx)
+        cell.value = row_array[col_idx - 1]
+        if col_idx <= 2:
+            cell.style = sty_header_frame
+        elif col_idx == 3:
+            cell.style = sty_header_signal
+        elif ecu_start <= col_idx <= ecu_end:
+            cell.style = sty_header_ecu
+        elif frame_start <= col_idx <= frame_end:
+            cell.style = sty_header_frame
+        elif signal_start <= col_idx <= signal_end:
+            cell.style = sty_header_signal
+        else:
+            cell.style = sty_header
 
     if db.type == canmatrix.matrix_class.CAN:
         frame_hash = {}
@@ -262,35 +298,35 @@ def dump(db, filename, **options):
     else:
         frame_hash = {a.name:a for a in db.frames}
 
-    # set row to first Frame (row = 0 is header)
     row = 1
 
-    frame_col_count = len(canmatrix.formats.xls_common.get_frame_info(db, db.frames[0]) if db.frames else 16)
-
-    # iterate over the frames
     for idx in sorted(frame_hash.keys()):
 
         frame = frame_hash[idx]
 
-        # sort signals:
         sig_hash = {}
         for sig in frame.signals:
             if motorola_bit_format == "msb":
                 sig_hash["%03d" % int(sig.get_startbit(bit_numbering=1)) + sig.name] = sig
             elif motorola_bit_format == "msbreverse":
                 sig_hash["%03d" % int(sig.get_startbit()) + sig.name] = sig
-            else:  # motorolaBitFormat == "lsb"
+            else:
                 sig_hash["%03d" % int(sig.get_startbit(bit_numbering=1, start_little=True)) + sig.name] = sig
 
         additional_frame_info = [frame.attribute(additional, default="") for additional in additional_frame_columns]
 
-        # === Write frame row (frame-level columns only) ===
-        frame_row = canmatrix.formats.xls_common.get_frame_info(db, frame)
-        frame_row += ["" for _ in range(head_start - len(frame_row))]
-        front_col = write_excel_line(worksheet, row, 0, frame_row, sty_first_frame)
+        frame_info = canmatrix.formats.xls_common.get_frame_info(db, frame)
 
-        col = head_start
+        write_excel_line(worksheet, row, 0, [frame_info[0], frame_info[1], ""], sty_first_frame)
+
+        col = PREFIX_COUNT
         col = write_ecu_matrix(ecu_list, None, frame, worksheet, row, col, sty_first_frame)
+
+        write_excel_line(worksheet, row, col, frame_info[2:], sty_first_frame)
+        col += FRAME_ATTR_COUNT
+
+        write_excel_line(worksheet, row, col, ["" for _ in range(SIGNAL_ATTR_COUNT)], sty_first_frame)
+        col += SIGNAL_ATTR_COUNT
 
         tail_row = ["" for _ in range(len(head_tail))]
         tail_row += additional_frame_info
@@ -301,8 +337,6 @@ def dump(db, filename, **options):
         if len(sig_hash) == 0:
             continue
 
-        # === Write signal rows (signal-level columns only) ===
-        empty_frame = ["" for _ in range(frame_col_count)]
         signal_style = sty_norm
 
         for sig_idx in sorted(sig_hash.keys()):
@@ -310,45 +344,51 @@ def dump(db, filename, **options):
 
             worksheet.row_dimensions[row+1].outline_level = 1
 
-            # valuetable available?
+            (frontRow, back_row) = canmatrix.formats.xls_common.get_signal(db, frame, sig, motorola_bit_format)
+            signal_name = frontRow[2]
+            signal_data = frontRow[0:2] + frontRow[3:]
+
             if len(sig.values) > 0 and not values_in_seperate_lines:
                 value_style = signal_style
-                # iterate over values in valuetable
                 for val in sorted(sig.values.keys()):
-                    write_excel_line(worksheet, row, 0, empty_frame, signal_style)
+                    write_excel_line(worksheet, row, 0, ["", "", signal_name], signal_style)
 
-                    col = head_start
+                    col = PREFIX_COUNT
                     col = write_ecu_matrix(ecu_list, sig, frame, worksheet, row, col, signal_style)
 
-                    # write Value
-                    (frontRow, back_row) = canmatrix.formats.xls_common.get_signal(db, frame, sig, motorola_bit_format)
-                    write_excel_line(worksheet, row, frame_col_count, frontRow, signal_style)
-                    back_row += ["" for _ in additional_frame_columns]
+                    write_excel_line(worksheet, row, col, ["" for _ in range(FRAME_ATTR_COUNT)], signal_style)
+                    col += FRAME_ATTR_COUNT
+
+                    write_excel_line(worksheet, row, col, signal_data, signal_style)
+                    col += SIGNAL_ATTR_COUNT
+
+                    back_row_copy = list(back_row)
+                    back_row_copy += ["" for _ in additional_frame_columns]
                     for item in additional_signal_columns:
                         temp = getattr(sig, item, "")
-                        back_row.append(temp)
+                        back_row_copy.append(temp)
 
-                    write_excel_line(worksheet, row, col + 2, back_row, signal_style)
+                    write_excel_line(worksheet, row, col + 2, back_row_copy, signal_style)
                     write_excel_line(worksheet, row, col, [val, sig.values[val]], value_style)
 
-                    # no min/max here, because min/max has same col as values...
-                    # next row
                     row += 1
                     signal_style = sty_norm
                     value_style = sty_norm
-                # loop over values ends here
 
-            # no valuetable available
             else:
-                write_excel_line(worksheet, row, 0, empty_frame, signal_style)
+                write_excel_line(worksheet, row, 0, ["", "", signal_name], signal_style)
 
-                col = head_start
+                col = PREFIX_COUNT
                 col = write_ecu_matrix(ecu_list, sig, frame, worksheet, row, col, signal_style)
-                (frontRow, back_row) = canmatrix.formats.xls_common.get_signal(db, frame, sig, motorola_bit_format)
-                write_excel_line(worksheet, row, frame_col_count, frontRow, signal_style)
+
+                write_excel_line(worksheet, row, col, ["" for _ in range(FRAME_ATTR_COUNT)], signal_style)
+                col += FRAME_ATTR_COUNT
+
+                write_excel_line(worksheet, row, col, signal_data, signal_style)
+                col += SIGNAL_ATTR_COUNT
 
                 if float(sig.min) != 0 or float(sig.max) != 1.0:
-                    back_row.insert(0, str(sig.min) + ".." + str(sig.max))  # type: ignore
+                    back_row.insert(0, str(sig.min) + ".." + str(sig.max))
                 else:
                     back_row.insert(0, "")
                 back_row.insert(0, "")
@@ -361,15 +401,28 @@ def dump(db, filename, **options):
                 write_excel_line(worksheet, row, col, back_row, signal_style)
                 if len(sig.values) > 0:
                     write_excel_line(worksheet, row, col, ["\n".join(["{}: {}".format(a,b) for (a,b) in sig.values.items()])], signal_style)
-                # next row
                 row += 1
                 signal_style = sty_norm
-        # loop over signals ends here
-    # loop over frames ends here
+
+    for col_idx in range(1, total_cols + 1):
+        col_letter = openpyxl.utils.get_column_letter(col_idx)
+        max_width = 0
+        for row_idx in range(1, worksheet.max_row + 1):
+            cell = worksheet.cell(row=row_idx, column=col_idx)
+            if cell.value is not None:
+                lines = str(cell.value).split('\n')
+                for line in lines:
+                    max_width = max(max_width, len(line))
+        adjusted_width = min(max_width + 4, 60)
+        worksheet.column_dimensions[col_letter].width = max(adjusted_width, 4)
+
+    frame_comment_col = frame_start + 1
+    signal_function_col = frame_start + FRAME_ATTR_COUNT + 2
+    worksheet.column_dimensions[openpyxl.utils.get_column_letter(frame_comment_col)].width = 30
+    worksheet.column_dimensions[openpyxl.utils.get_column_letter(signal_function_col)].width = 30
 
     worksheet.auto_filter.ref = worksheet.dimensions
-    worksheet.freeze_panes = worksheet['B2']
-    # save file
+    worksheet.freeze_panes = worksheet['D2']
     workbook.save(filename=filename)
 
 
@@ -396,12 +449,18 @@ def load(file, **options):
 
     column_heads = [sheet.cell(1,a).value for a in range(1, sheet.max_column+1)]
 
-    if 'Byteorder' in column_heads:
+    if 'Signal Name' in column_heads and 'DLC' in column_heads:
+        ecu_start = column_heads.index('Signal Name') + 1
+        ecu_end = column_heads.index('DLC')
+    elif 'ID-Format' in column_heads:
+        ecu_start = column_heads.index('ID-Format') + 1
+        ecu_end = column_heads.index('Value')
+    elif 'Byteorder' in column_heads:
         ecu_start = column_heads.index('Byteorder') + 1
+        ecu_end = column_heads.index('Value')
     else:
         ecu_start = column_heads.index('Signal Not Available') + 1
-
-    ecu_end = column_heads.index('Value')
+        ecu_end = column_heads.index('Value')
 
     # ECUs:
     for x in range(ecu_start, ecu_end):
