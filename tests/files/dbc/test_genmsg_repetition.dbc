@@ -1,0 +1,25 @@
+VERSION "created by canmatrix"
+
+
+
+NS_ : 
+
+BS_:
+
+BU_: NodeA NodeB NodeC 
+
+
+BO_ 768 InteractionFrame: 8 NodeC
+ SG_ ILSig1 : 0|16@0+ (0.1,0) [0|6553.5] "V" NodeA,NodeB
+ SG_ ILSig2 : 16|16@0+ (0.1,0) [0|6553.5] "V" NodeA,NodeB
+
+
+BA_DEF_ BO_ "GenMsgNrOfRepetition" INT 0 65535;
+BA_DEF_ BO_ "GenMsgCycleTimeFast" INT 0 65535;
+BA_DEF_ BO_ "GenMsgCycleTime" INT 0 65535;
+
+BA_DEF_DEF_ "GenMsgNrOfRepetition" 0;
+BA_DEF_DEF_ "GenMsgCycleTimeFast" 0;
+
+BA_ "GenMsgNrOfRepetition" BO_ 768 3;
+BA_ "GenMsgCycleTimeFast" BO_ 768 20;
