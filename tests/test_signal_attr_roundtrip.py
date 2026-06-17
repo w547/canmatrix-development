@@ -205,7 +205,7 @@ def test_xlsx_export_contains_columns():
         wb = openpyxl.open(xlsx_path)
         sh = wb._sheets[0]
 
-        headers = [sh.cell(1, i).value for i in range(1, sh.max_column + 1)]
+        headers = [sh.cell(2, i).value for i in range(1, sh.max_column + 1)]
 
         expected_headers = [
             "GenSigStartValue",

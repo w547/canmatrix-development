@@ -207,6 +207,11 @@ def dump(db, filename, **options):
     sty_header_signal.fill = PatternFill(patternType='solid', fgColor='E26B0A')
     sty_header_signal.alignment = Alignment(horizontal='center', vertical='center')
 
+    sty_remark = NamedStyle(name="sty_remark")
+    sty_remark.font = Font(bold=False, size=8, name='Verdana', color='000000')
+    sty_remark.fill = PatternFill(patternType='solid', fgColor='D9D9D9')
+    sty_remark.alignment = Alignment(horizontal='left', vertical='center', wrap_text=False)
+
     sty_first_frame = NamedStyle(name="sty_first_frame")
     sty_first_frame.font = Font(bold=True, size=8, name='Verdana', color='ff000000')
     sty_first_frame.fill = PatternFill(patternType='solid', fgColor='DCE6F1')
@@ -273,7 +278,7 @@ def dump(db, filename, **options):
         worksheet.column_dimensions[col_letter].width = 2
 
     for col_idx in range(1, total_cols + 1):
-        cell = worksheet.cell(row=1, column=col_idx)
+        cell = worksheet.cell(row=2, column=col_idx)
         cell.value = row_array[col_idx - 1]
         if col_idx <= 2:
             cell.style = sty_header_frame
@@ -288,6 +293,12 @@ def dump(db, filename, **options):
         else:
             cell.style = sty_header
 
+    remark_text = "备注：1、蓝色表头为报文及其属性；2、橙色表头为信号及其属性；3、绿色表头为ECU矩阵；4、点击最左侧，表格外的\"1\"，可以收起二级菜单，仅展示【报文行】"
+    remark_cell = worksheet.cell(row=1, column=1)
+    remark_cell.value = remark_text
+    remark_cell.style = sty_remark
+    worksheet.merge_cells(start_row=1, start_column=1, end_row=1, end_column=total_cols)
+
     if db.type == canmatrix.matrix_class.CAN:
         frame_hash = {}
         logger.debug("DEBUG: Length of db.frames is %d", len(db.frames))
@@ -298,7 +309,7 @@ def dump(db, filename, **options):
     else:
         frame_hash = {a.name:a for a in db.frames}
 
-    row = 1
+    row = 2
 
     for idx in sorted(frame_hash.keys()):
 
@@ -407,7 +418,7 @@ def dump(db, filename, **options):
     for col_idx in range(1, total_cols + 1):
         col_letter = openpyxl.utils.get_column_letter(col_idx)
         max_width = 0
-        for row_idx in range(1, worksheet.max_row + 1):
+        for row_idx in range(2, worksheet.max_row + 1):
             cell = worksheet.cell(row=row_idx, column=col_idx)
             if cell.value is not None:
                 lines = str(cell.value).split('\n')
@@ -421,8 +432,19 @@ def dump(db, filename, **options):
     worksheet.column_dimensions[openpyxl.utils.get_column_letter(frame_comment_col)].width = 30
     worksheet.column_dimensions[openpyxl.utils.get_column_letter(signal_function_col)].width = 30
 
+    for col_idx in range(1, total_cols + 1):
+        col_letter = openpyxl.utils.get_column_letter(col_idx)
+        is_empty = True
+        for row_idx in range(3, worksheet.max_row + 1):
+            cell = worksheet.cell(row=row_idx, column=col_idx)
+            if cell.value is not None and str(cell.value).strip() != '':
+                is_empty = False
+                break
+        if is_empty:
+            worksheet.column_dimensions[col_letter].hidden = True
+
     worksheet.auto_filter.ref = worksheet.dimensions
-    worksheet.freeze_panes = worksheet['D2']
+    worksheet.freeze_panes = worksheet['D3']
     workbook.save(filename=filename)
 
 
@@ -448,6 +470,11 @@ def load(file, **options):
     ecu_start = ecu_end = 0
 
     column_heads = [sheet.cell(1,a).value for a in range(1, sheet.max_column+1)]
+
+    header_row = 1
+    if column_heads and column_heads[0] is not None and '备注' in str(column_heads[0]):
+        header_row = 2
+        column_heads = [sheet.cell(2, a).value for a in range(1, sheet.max_column + 1)]
 
     if 'Signal Name' in column_heads and 'DLC' in column_heads:
         ecu_start = column_heads.index('Signal Name') + 1
@@ -488,6 +515,8 @@ def load(file, **options):
         return sig_name is not None and str(sig_name).strip() != '' and str(sig_name).strip() != 'Signal Name'
 
     for row in sheet.rows:
+        if row[0].row < header_row + 1:
+            continue
         if not _is_frame_row(row) and not _is_signal_row(row):
             continue
 

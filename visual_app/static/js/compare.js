@@ -336,6 +336,46 @@ DbcTool.Compare = (function() {
         }
     }
 
+    function expandAll() {
+        var left = document.getElementById('cmpBodyLeft');
+        var right = document.getElementById('cmpBodyRight');
+        _expandAllNodes(left);
+        _expandAllNodes(right);
+        updateSyncThumbAfterToggle();
+    }
+
+    function _expandAllNodes(container) {
+        if (!container) return;
+        var nodes = container.querySelectorAll('.tnode:not(.tn-hidden)');
+        for (var i = 0; i < nodes.length; i++) {
+            var childrenContainer = nodes[i].querySelector(':scope > .tn-children');
+            if (!childrenContainer || childrenContainer.querySelectorAll(':scope > .tnode').length === 0) continue;
+            if (nodes[i].classList.contains('tn-diff-expanded')) continue;
+            nodes[i].classList.add('expanded');
+            var arrow = nodes[i].querySelector(':scope > .tn-row > .tn-arrow');
+            if (arrow) arrow.classList.add('open');
+        }
+    }
+
+    function collapseAll() {
+        var left = document.getElementById('cmpBodyLeft');
+        var right = document.getElementById('cmpBodyRight');
+        _collapseAllNodes(left);
+        _collapseAllNodes(right);
+        updateSyncThumbAfterToggle();
+    }
+
+    function _collapseAllNodes(container) {
+        if (!container) return;
+        var nodes = container.querySelectorAll('.tnode');
+        for (var i = 0; i < nodes.length; i++) {
+            nodes[i].classList.remove('expanded');
+            nodes[i].classList.remove('tn-diff-expanded');
+            var arrow = nodes[i].querySelector(':scope > .tn-row > .tn-arrow');
+            if (arrow) arrow.classList.remove('open');
+        }
+    }
+
     function updateSyncThumbAfterToggle() {
         var syncBar = document.getElementById('cmpSyncScrollbar');
         if (!syncBar) return;
@@ -1939,7 +1979,6 @@ DbcTool.Compare = (function() {
             return;
         }
         _downloadExcel();
-        _downloadWord();
     }
 
     function _buildExportHtml() {
@@ -1997,6 +2036,7 @@ DbcTool.Compare = (function() {
     function _downloadExcel() {
         var html = _buildExportHtml();
         _downloadFile(html, 'application/vnd.ms-excel', 'xls');
+        DbcTool.msg('ok', '变更明细已导出 (Excel)');
     }
 
     function _downloadWord() {
@@ -2027,6 +2067,8 @@ DbcTool.Compare = (function() {
         doCompare: doCompare,
         hideResCmp: hideResCmp,
         toggleDiffOnly: toggleDiffOnly,
+        expandAll: expandAll,
+        collapseAll: collapseAll,
         toggleTreeNode: toggleTreeNode,
         clearPersistedData: clearPersistedData,
         openSummary: openSummary,
