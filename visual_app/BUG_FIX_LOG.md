@@ -1,6 +1,54 @@
 # Bug 修复日志
 
-> 项目: canmatrix DBC ↔ Excel 双向转换 | 日期: 2026-05-20
+> 项目: canmatrix DBC ↔ Excel 双向转换
+
+---
+
+## Bug #6: Excel 转 DBC 时，无 CAN FD 帧情况下报 KeyError: 'VFrameFormat'
+
+**严重程度**: 高 | **状态**: ✅ 已修复 | **日期**: 2026-06-22
+
+### 问题描述
+
+Excel 转 DBC 时，间歇性报错 `KeyError: 'VFrameFormat'`。当 Excel 中包含 CAN FD 帧时转换正常，不包含时失败。
+
+### 触发条件
+
+| 场景 | 是否报错 | 原因 |
+|------|:-------:|------|
+| Excel **包含**至少一个 CAN FD 帧（`ID-Format` 含 `_FD` 或 DLC > 8） | ❌ 不报错 | `dbc.py` 导出时 `contains_fd = True`，注册了 `VFrameFormat` 属性定义，写入正常 |
+| Excel **不包含**任何 CAN FD 帧 | ✅ 报错 | `contains_fd = False`，`dbc.py` 不会注册 `VFrameFormat` 属性定义，但 Excel 导入时已给每个帧添加了 `VFrameFormat` 属性，写入 DBC 时直接访问 `db.frame_defines["VFrameFormat"]` → KeyError |
+
+### 根因
+
+`dbc.py` 写入帧属性时（L406），无条件访问 `db.frame_defines[attrib]`，未检查属性是否已注册。而信号属性写入处（L416）已有 `if attrib in db.signal_defines` 保护。
+
+```python
+# 帧属性写入（修复前）—— 缺少保护
+for frame in db.frames:
+    for attrib, val in sorted(frame.attributes.items()):
+        f.write(create_attribute_string(attrib, "BO_", ..., val,
+            db.frame_defines[attrib].type == "STRING"))  # ← KeyError
+
+# 信号属性写入 —— 已有保护
+for frame in db.frames:
+    for signal in frame.signals:
+        for attrib, val in sorted(signal.attributes.items()):
+            if attrib in db.signal_defines:  # ← 有保护
+                f.write(...)
+```
+
+### 修复内容
+
+| 文件 | 修改 |
+|------|------|
+| [dbc.py](src/canmatrix/formats/dbc.py#L405-L407) | 帧属性写入处新增 `if attrib in db.frame_defines` 保护，跳过未注册的属性，与信号属性写入逻辑保持一致 |
+
+### 验证
+
+| 测试文件 | 修复前 | 修复后 |
+|----------|--------|--------|
+| `test_20260622_144647.xlsx`（2 帧，0 FD） | `KeyError: 'VFrameFormat'` | 转换成功，输出大小 1305 字节 |
 
 ---
 
@@ -150,15 +198,15 @@ Excel 导出时，同一 Frame 的第 2 个信号行开始，Frame 信息列（I
 
 ## 修改文件汇总
 
-| 文件 | Bug #1 | Bug #2 | Bug #3 | Bug #4 | Bug #5 | 分类更新 |
-|------|:---:|:---:|:---:|:---:|:---:|:---:|
-| `src/canmatrix/formats/xls_common.py` | ✅ | | | | | ✅ |
-| `src/canmatrix/formats/xls.py` | ✅ | | ✅ | ✅ | ✅ | ✅ |
-| `src/canmatrix/formats/xlsx.py` | ✅ | | ✅ | | ✅ | ✅ |
-| `src/canmatrix/formats/dbc.py` | | ✅ | | | | |
-| `visual_app/PRD_DBC_Excel_字段映射规范.md` | ✅ | | | ✅ | ✅ | ✅ |
-| `tests/files/dbc/test_frame_attributes.dbc` | ✅ | | | | | |
-| `tests/test_frame_attr_roundtrip.py` | ✅ | | | | | |
+| 文件 | Bug #1 | Bug #2 | Bug #3 | Bug #4 | Bug #5 | Bug #6 | 分类更新 |
+|------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| `src/canmatrix/formats/xls_common.py` | ✅ | | | | | | ✅ |
+| `src/canmatrix/formats/xls.py` | ✅ | | ✅ | ✅ | ✅ | | ✅ |
+| `src/canmatrix/formats/xlsx.py` | ✅ | | ✅ | | ✅ | | ✅ |
+| `src/canmatrix/formats/dbc.py` | | ✅ | | | | ✅ | |
+| `visual_app/PRD_DBC_Excel_字段映射规范.md` | ✅ | | | ✅ | ✅ | | ✅ |
+| `tests/files/dbc/test_frame_attributes.dbc` | ✅ | | | | | | |
+| `tests/test_frame_attr_roundtrip.py` | ✅ | | | | | | |
 
 ---
 
@@ -171,3 +219,4 @@ Excel 导出时，同一 Frame 的第 2 个信号行开始，Frame 信息列（I
 | `test_dbc.py` | 65 | 64 | 1 (预存: kcd) |
 | `test_cli_convert.py` | — | 全部 | 0 |
 | `test_formats.py` | — | 全部 | 0 |
+| Bug #6 手动验证 | 1 | 1 | 0 |

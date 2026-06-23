@@ -238,6 +238,9 @@ def api_convert():
             for frame in db.frames:
                 total_signals += len(frame.signals)
 
+        if total_frames == 0 and total_signals == 0:
+            return jsonify({'success': False, 'error': '无法读取DBC文件：未能解析到任何报文或信号数据，请检查文件格式是否正确'}), 400
+
         canmatrix.convert.convert(input_path, output_path, **convert_options)
 
         if not os.path.exists(output_path):
@@ -311,6 +314,16 @@ def api_compare():
         if db2 is None:
             return jsonify({'success': False, 'error': f'无法解析文件: {name2}'}), 400
 
+        db1_frames = len(db1.frames)
+        db1_signals = sum(len(f.signals) for f in db1.frames)
+        db2_frames = len(db2.frames)
+        db2_signals = sum(len(f.signals) for f in db2.frames)
+
+        if db1_frames == 0 and db1_signals == 0:
+            return jsonify({'success': False, 'error': f'无法读取DBC文件 "{name1}"：未能解析到任何报文或信号数据，请检查文件格式是否正确'}), 400
+        if db2_frames == 0 and db2_signals == 0:
+            return jsonify({'success': False, 'error': f'无法读取DBC文件 "{name2}"：未能解析到任何报文或信号数据，请检查文件格式是否正确'}), 400
+
         ignore = {}
         if request.form.get('check_comments') != 'true':
             ignore['comment'] = '*'
@@ -331,10 +344,10 @@ def api_compare():
         stats = {
             'db1_name': name1,
             'db2_name': name2,
-            'db1_frames': len(db1.frames),
-            'db2_frames': len(db2.frames),
-            'db1_signals': sum(len(f.signals) for f in db1.frames),
-            'db2_signals': sum(len(f.signals) for f in db2.frames),
+            'db1_frames': db1_frames,
+            'db2_frames': db2_frames,
+            'db1_signals': db1_signals,
+            'db2_signals': db2_signals,
             'db1_ecus': len(db1.ecus),
             'db2_ecus': len(db2.ecus),
         }

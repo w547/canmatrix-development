@@ -403,7 +403,8 @@ def dump(in_db, f, **options):
     # messages-attributes:
     for frame in db.frames:
         for attrib, val in sorted(frame.attributes.items()):
-            f.write(create_attribute_string(attrib, "BO_", str(frame.arbitration_id.to_compound_integer()), val, db.frame_defines[attrib].type == "STRING").encode(dbc_export_encoding, ignore_encoding_errors))
+            if attrib in db.frame_defines:
+                f.write(create_attribute_string(attrib, "BO_", str(frame.arbitration_id.to_compound_integer()), val, db.frame_defines[attrib].type == "STRING").encode(dbc_export_encoding, ignore_encoding_errors))
     f.write("\n".encode(dbc_export_encoding, ignore_encoding_errors))
 
     # signal-attributes:
@@ -529,7 +530,13 @@ def load(f, **options):  # type: (typing.IO, **typing.Any) -> canmatrix.CanMatri
     def add_frame_by_id(new_frame):  # type: (canmatrix.Frame) -> None
         frames_by_id[hash_arbitration_id(new_frame.arbitration_id)] = new_frame
 
-    for line in f:
+    # Normalize line endings: handle CR-only (\r) and CRLF (\r\n) files
+    content = f.read()
+    # Normalize: \r\n → \n, then \r → \n (handles old Mac-style CR-only line endings)
+    content = content.replace(b'\r\n', b'\n').replace(b'\r', b'\n')
+    lines = content.split(b'\n')
+
+    for line in lines:
         i = i + 1
         l = line.strip()
         if len(l) == 0:

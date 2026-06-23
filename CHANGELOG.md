@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-06-22 — 修复无 CAN FD 帧时 Excel 转 DBC 报 VFrameFormat KeyError
+
+### 问题描述
+
+Excel 转 DBC 时，有时候报错 `KeyError: 'VFrameFormat'`，有时候转换正常。**原因**：Excel 中没有 CAN FD 帧时触发，有 CAN FD 帧时不触发。
+
+### 根因分析
+
+| 场景 | 是否触发 | 原因 |
+|------|:-------:|------|
+| Excel **包含**至少一个 CAN FD 帧 | ❌ 不报错 | `dbc.py` 导出时因为 `contains_fd = True`，注册了 `VFrameFormat` 属性定义 → 写入正常 |
+| Excel **不包含**任何 CAN FD 帧 | ✅ 报错 | `contains_fd = False` → `dbc.py` 不会注册 `VFrameFormat` 属性定义，但是 Excel 导入时已经给每个帧添加了 `VFrameFormat` 属性，写入 DBC 时遍历帧属性直接访问 `db.frame_defines[attrib]` → KeyError |
+
+### 修复方案
+
+| 文件 | 修改 |
+|------|------|
+| `src/canmatrix/formats/dbc.py` | 在写入帧属性处（L405-407）新增 `if attrib in db.frame_defines` 保护，跳过未注册的属性，和信号属性写入逻辑保持一致 |
+
+### 验证
+
+| 测试文件 | 修复前 | 修复后 |
+|----------|--------|--------|
+| `test_20260622_144647.xlsx`（2 帧，0 FD）| `KeyError: 'VFrameFormat'` | 转换成功，输出大小 1305 字节 |
+
 ## 2026-06-09 — 修复 CAN FD 帧类型在 DBC/Excel 互转中的丢失问题
 
 ### 问题描述
