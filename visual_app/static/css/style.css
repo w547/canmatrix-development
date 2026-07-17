@@ -285,6 +285,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .summary-pagination .sp-info{font-size:.7rem;color:var(--text2);margin:0 8px}
 .summary-empty{text-align:center;padding:40px 20px;color:var(--text2);font-size:.85rem}
 
+.watermark{position:fixed;top:20px;right:20px;font-size:.8rem;color:rgba(255,255,255,.7);z-index:9999;pointer-events:none}
+
 @media(max-width:640px){
     .navbar .tabs{margin-left:8px}.navbar .tab{padding:8px 12px;font-size:.8rem}
     .fmt-row{flex-direction:column}.arrow{display:none}
