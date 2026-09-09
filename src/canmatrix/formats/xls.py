@@ -310,6 +310,18 @@ def dump(db, file, **options):
     # in general, freeze after last heading row
     worksheet.set_horz_split_pos(1)
     worksheet.set_remove_splits(True)
+
+    # ==== ENUM attribute definitions sheet ====
+    # A dedicated sheet records every ENUM define (name, full value list and
+    # default value) so that the DBC -> Excel -> DBC round-trip restores the
+    # exact ENUM type instead of degrading it to STRING.
+    enum_sheet = workbook.add_sheet(canmatrix.formats.xls_common.ENUM_SHEET_NAME)
+    write_excel_line(enum_sheet, 0, 0, canmatrix.formats.xls_common.ENUM_SHEET_HEADER, sty_header)
+    enum_row = 1
+    for level, name, values, default, definition in canmatrix.formats.xls_common.iter_enum_defines(db):
+        write_excel_line(enum_sheet, enum_row, 0, [level, name, values, default, definition], sty_norm)
+        enum_row += 1
+
     # save file
     workbook.save(file)
 
@@ -375,10 +387,35 @@ def load(file, **options):
 
     canmatrix.formats.xls_common.initialize_excel_attribute_defines(db)
 
+    # Restore every ENUM define (full value list + default) from the dedicated
+    # sheet, so the DBC -> Excel -> DBC round-trip keeps the ENUM type.
+    if canmatrix.formats.xls_common.ENUM_SHEET_NAME in wb.sheet_names():
+        enum_sh = wb.sheet_by_name(canmatrix.formats.xls_common.ENUM_SHEET_NAME)
+        for r in range(1, enum_sh.nrows):
+            row_vals = [enum_sh.cell_value(r, c) for c in range(min(5, enum_sh.ncols))]
+            while len(row_vals) < 5:
+                row_vals.append("")
+            level = "" if row_vals[0] is None else str(row_vals[0]).strip()
+            name = "" if row_vals[1] is None else str(row_vals[1]).strip()
+            default = row_vals[3]
+            definition = "" if row_vals[4] is None else str(row_vals[4]).strip()
+            canmatrix.formats.xls_common.add_enum_define(db, level, name, definition, default)
+
     launch_types = []  # type: typing.List[str]
     launch_type_default = None  # type: typing.Optional[str]
     sig_send_types = []  # type: typing.List[str]
     sig_send_type_default = None  # type: typing.Optional[str]
+
+    # Vector-standard ENUM attributes: collect their values to rebuild ENUM
+    # definitions at the end of import (preserves type across round-trip).
+    diag_request_values = []
+    diag_response_values = []
+    diag_state_values = []
+    nm_message_values = []
+    gen_msg_il_support_values = []
+    canfd_brs_values = []
+    event_command_signal_values = []
+    gatewayed_signals_values = []
 
     # eval search for correct columns:
     index = {}
@@ -528,19 +565,19 @@ def load(file, **options):
                     canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgDelayTime", _cell(row_num, index['launchParam']), db=db, defines_dict=db.frame_defines)
 
                 if 'diagRequest' in index:
-                    canmatrix.formats.xls_common._import_attr_with_default(new_frame, "DiagRequest", _cell(row_num, index['diagRequest']), db=db, defines_dict=db.frame_defines)
+                    canmatrix.formats.xls_common._import_attr_with_default(new_frame, "DiagRequest", _cell(row_num, index['diagRequest']), db=db, defines_dict=db.frame_defines, collect_list=diag_request_values)
 
                 if 'diagResponse' in index:
-                    canmatrix.formats.xls_common._import_attr_with_default(new_frame, "DiagResponse", _cell(row_num, index['diagResponse']), db=db, defines_dict=db.frame_defines)
+                    canmatrix.formats.xls_common._import_attr_with_default(new_frame, "DiagResponse", _cell(row_num, index['diagResponse']), db=db, defines_dict=db.frame_defines, collect_list=diag_response_values)
 
                 if 'diagState' in index:
-                    canmatrix.formats.xls_common._import_attr_with_default(new_frame, "DiagState", _cell(row_num, index['diagState']), db=db, defines_dict=db.frame_defines)
+                    canmatrix.formats.xls_common._import_attr_with_default(new_frame, "DiagState", _cell(row_num, index['diagState']), db=db, defines_dict=db.frame_defines, collect_list=diag_state_values)
 
                 if 'nmMessage' in index:
-                    canmatrix.formats.xls_common._import_attr_with_default(new_frame, "NmMessage", _cell(row_num, index['nmMessage']), db=db, defines_dict=db.frame_defines)
+                    canmatrix.formats.xls_common._import_attr_with_default(new_frame, "NmMessage", _cell(row_num, index['nmMessage']), db=db, defines_dict=db.frame_defines, collect_list=nm_message_values)
 
                 if 'genMsgILSupport' in index:
-                    canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgILSupport", _cell(row_num, index['genMsgILSupport']), db=db, defines_dict=db.frame_defines)
+                    canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgILSupport", _cell(row_num, index['genMsgILSupport']), db=db, defines_dict=db.frame_defines, collect_list=gen_msg_il_support_values)
 
                 if 'genMsgCycleTimeFast' in index:
                     canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgCycleTimeFast", _cell(row_num, index['genMsgCycleTimeFast']), db=db, defines_dict=db.frame_defines)
@@ -549,7 +586,7 @@ def load(file, **options):
                     canmatrix.formats.xls_common._import_attr_with_default(new_frame, "GenMsgNrOfRepetition", _cell(row_num, index['genMsgNrOfRepetition']), db=db, defines_dict=db.frame_defines)
 
                 if 'canfdBrs' in index:
-                    canmatrix.formats.xls_common._import_attr_with_default(new_frame, "CANFD_BRS", _cell(row_num, index['canfdBrs']), db=db, defines_dict=db.frame_defines)
+                    canmatrix.formats.xls_common._import_attr_with_default(new_frame, "CANFD_BRS", _cell(row_num, index['canfdBrs']), db=db, defines_dict=db.frame_defines, collect_list=canfd_brs_values)
 
                 if 'idFormat' in index:
                     id_format = _cell(row_num, index['idFormat'])
@@ -685,12 +722,18 @@ def load(file, **options):
                 if 'eventCommandSignal' in index:
                     event_command_signal = _cell(row_num, index['eventCommandSignal'])
                     if event_command_signal is not None and str(event_command_signal).strip() != '':
-                        new_signal.add_attribute("EventCommandSignal", str(event_command_signal).strip())
+                        event_command_value = str(event_command_signal).strip()
+                        new_signal.add_attribute("EventCommandSignal", event_command_value)
+                        if event_command_value not in event_command_signal_values:
+                            event_command_signal_values.append(event_command_value)
 
                 if 'gatewayedSignals' in index:
                     gatewayed_signals = _cell(row_num, index['gatewayedSignals'])
                     if gatewayed_signals is not None and str(gatewayed_signals).strip() != '':
-                        new_signal.add_attribute("GatewayedSignals", str(gatewayed_signals).strip())
+                        gatewayed_value = str(gatewayed_signals).strip()
+                        new_signal.add_attribute("GatewayedSignals", gatewayed_value)
+                        if gatewayed_value not in gatewayed_signals_values:
+                            gatewayed_signals_values.append(gatewayed_value)
 
                 if 'genSigInvalidValue' in index:
                     gen_sig_invalid_value = _cell(row_num, index['genSigInvalidValue'])
@@ -778,6 +821,29 @@ def load(file, **options):
     db.add_signal_defines("GenSigSendType", sig_send_type_enum)
     if sig_send_type_default is not None:
         db.add_define_default("GenSigSendType", sig_send_type_default)
+
+    # Rebuild Vector-standard ENUM definitions from the collected values. This
+    # keeps their ENUM type across the DBC -> Excel -> DBC round-trip (otherwise
+    # they would be exported as STRING).
+    for attr_name, values in [
+        ("DiagRequest", diag_request_values),
+        ("DiagResponse", diag_response_values),
+        ("DiagState", diag_state_values),
+        ("NmMessage", nm_message_values),
+        ("GenMsgILSupport", gen_msg_il_support_values),
+        ("CANFD_BRS", canfd_brs_values),
+    ]:
+        enum_def = canmatrix.formats.xls_common.build_enum_define(values)
+        if enum_def is not None:
+            db.add_frame_defines(attr_name, enum_def)
+
+    for attr_name, values in [
+        ("EventCommandSignal", event_command_signal_values),
+        ("GatewayedSignals", gatewayed_signals_values),
+    ]:
+        enum_def = canmatrix.formats.xls_common.build_enum_define(values)
+        if enum_def is not None:
+            db.add_signal_defines(attr_name, enum_def)
 
     db.set_fd_type()
     return db

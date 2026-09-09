@@ -72,35 +72,109 @@ def _import_attr_with_default(obj, attr_name, cell_value, db=None, defines_dict=
     return stripped if is_default else None
 
 
+def build_enum_define(values):
+    # type: (typing.Sequence[str]) -> typing.Optional[str]
+    """Build a DBC ENUM definition string from a list of enum values.
+
+    Values are deduplicated and sorted so that boolean-style enums ("no"/"yes",
+    "No"/"Yes", "0"/"1") keep their canonical (negative/zero first) index order.
+    Returns None when there are no usable values.
+    """
+    filtered = []
+    for value in values:
+        if value is not None and str(value).strip() != "":
+            trimmed = str(value).strip()
+            if trimmed not in filtered:
+                filtered.append(trimmed)
+    if not filtered:
+        return None
+    return "ENUM " + ",".join(' "{}"'.format(v) for v in sorted(filtered))
+
+
+ENUM_SHEET_NAME = "EnumAttributes"
+ENUM_SHEET_HEADER = ["Level", "Attribute Name", "Enum Values", "Default Value", "Definition"]
+
+
+def iter_enum_defines(db):
+    # type: (canmatrix.CanMatrix) -> typing.Iterator[typing.Tuple[str, str, str, str, str]]
+    """Yield (level, name, values, default, definition) for every ENUM-type attribute define.
+
+    The level is the DBC attribute class: "BO_" (frame), "SG_" (signal),
+    "BU_" (ecu), "EV_" (environment variable) or "GLOBAL".
+    """
+    for level, defines in [
+        ("BO_", db.frame_defines),
+        ("SG_", db.signal_defines),
+        ("BU_", db.ecu_defines),
+        ("EV_", db.env_defines),
+        ("GLOBAL", db.global_defines),
+    ]:
+        for name in sorted(defines.keys()):
+            define = defines[name]
+            if getattr(define, "type", None) != "ENUM":
+                continue
+            if define.definition and define.definition.strip():
+                definition = define.definition.strip()
+            else:
+                definition = "ENUM " + ",".join('"{}"'.format(v) for v in define.values)
+            values = ", ".join(str(v) for v in define.values)
+            if define.defaultValue is None:
+                default = ""
+            elif str(define.defaultValue) == "":
+                # Distinguish an explicit empty-string default ("") from "no
+                # default at all" so round-trip stays faithful.
+                default = '""'
+            else:
+                default = str(define.defaultValue)
+            yield level, name, values, default, definition
+
+
+def add_enum_define(db, level, name, definition, default):
+    # type: (canmatrix.CanMatrix, str, str, str, typing.Any) -> None
+    """Register an ENUM define (plus its default) restored from the Excel sheet."""
+    name = "" if name is None else str(name).strip()
+    definition = "" if definition is None else str(definition).strip()
+    if not name or not definition:
+        return
+    if level == "BO_":
+        db.add_frame_defines(name, definition)
+    elif level == "SG_":
+        db.add_signal_defines(name, definition)
+    elif level == "BU_":
+        db.add_ecu_defines(name, definition)
+    elif level == "EV_":
+        db.add_env_defines(name, definition)
+    else:  # GLOBAL (or empty level)
+        db.add_global_defines(name, definition)
+    if default is not None and str(default).strip() != "":
+        default_str = str(default).strip()
+        if default_str == '""':
+            db.add_define_default(name, "")
+        else:
+            db.add_define_default(name, default_str)
+
+
 def initialize_excel_attribute_defines(db):
     # type: (canmatrix.CanMatrix) -> None
     # ---- Interaction Layer attributes ----
     db.add_frame_defines("GenMsgDelayTime", 'INT 0 65535')
     db.add_frame_defines("GenMsgCycleTimeActive", 'INT 0 65535')
 
-    # ---- Diagnostics attributes ----
-    db.add_frame_defines("DiagRequest", 'STRING')
-    db.add_frame_defines("DiagResponse", 'STRING')
-    db.add_frame_defines("DiagState", 'STRING')
-
-    # ---- Net Management attributes ----
-    db.add_frame_defines("NmMessage", 'STRING')
-
-    # ---- Interaction Layer attributes ----
-    db.add_frame_defines("GenMsgILSupport", 'STRING')
+    # ---- Diagnostics / Net Management / CAN FD attributes ----
+    # DiagRequest / DiagResponse / DiagState / NmMessage / GenMsgILSupport /
+    # CANFD_BRS are Vector-standard ENUM attributes. They are rebuilt dynamically
+    # during Excel import (see xls.py / xlsx.py) so the DBC -> Excel -> DBC
+    # round-trip keeps their ENUM type instead of degrading it to STRING.
     db.add_frame_defines("GenMsgCycleTimeFast", 'INT 0 65535')
     db.add_frame_defines("GenMsgNrOfRepetition", 'INT 0 65535')
 
-    # ---- CAN FD attributes ----
-    db.add_frame_defines("CANFD_BRS", 'STRING')
-
     # ---- Signal attributes ----
     db.add_signal_defines("GenSigSNA", 'STRING')
-    db.add_signal_defines("GenSigInactiveValue", 'STRING')
-    db.add_signal_defines("EventCommandSignal", 'STRING')
-    db.add_signal_defines("GatewayedSignals", 'STRING')
-    db.add_signal_defines("GenSigInvalidValue", 'STRING')
-    db.add_signal_defines("GenSigTimeoutValue", 'STRING')
+    db.add_signal_defines("GenSigInactiveValue", 'INT 0 0')
+    # EventCommandSignal / GatewayedSignals are Vector-standard ENUM attributes,
+    # rebuilt dynamically during Excel import.
+    db.add_signal_defines("GenSigInvalidValue", 'INT 0 0')
+    db.add_signal_defines("GenSigTimeoutValue", 'INT 0 65535')
 
 
 def get_frame_info(db, frame):
